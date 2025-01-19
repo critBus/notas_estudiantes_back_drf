@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -73,7 +72,9 @@ def get_permission(clase_modelo, tipo_permiso) -> Permission:
     return permission
 
 
-def create_group_is_necessary_and_set_permissions(nombre_grupo, listaDePermisos):
+def create_group_is_necessary_and_set_permissions(
+    nombre_grupo, listaDePermisos
+):
     new_group, created = Group.objects.get_or_create(name=nombre_grupo)
     # if created:
     for permiso in listaDePermisos:

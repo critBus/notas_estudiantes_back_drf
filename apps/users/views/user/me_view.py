@@ -1,12 +1,9 @@
-from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.authentication import IsTokenValid
-from apps.users.views.user.serializers.user_representation_serializer import (
-    UserRepresentationSerializer,
-)
+from apps.users.views.user.serializers.user_serializer import UserSerializer
 
 
 class UserMeView(generics.GenericAPIView):
@@ -21,11 +18,8 @@ class UserMeView(generics.GenericAPIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    serializer_class = UserRepresentationSerializer
+    serializer_class = UserSerializer
 
-    @extend_schema(
-        responses={200: UserRepresentationSerializer},
-    )
     def get(self, request, *args, **kwargs):
         instance = request.user
         serializer = self.get_serializer(instance)

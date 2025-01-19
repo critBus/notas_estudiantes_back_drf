@@ -1,13 +1,7 @@
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from apps.users.views.auth.serializers.token_custom_refresh.token_custom_refresh_serializer import (
-    CustomTokenRefreshSerializer,
-)
-
 
 class CustomTokenRefreshView(TokenRefreshView):
-    serializer_class = CustomTokenRefreshSerializer
-
     def post(self, request, *args, **kwargs):
         """
         Vista que renueva el token de autenticación de un usuario que ya ha iniciado sesión en la aplicación.

@@ -6,19 +6,17 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.users.authentication import IsTokenValid, get_acces_token, logout_user
-from apps.users.views.auth.serializers.token_logout.token_logout_serializers import (
+from apps.users.authentication import IsTokenValid
+from apps.users.models import BlackListedTokenAccess
+from apps.users.views.auth.serializers.logout.token_acces_blacklist_serializer import (
     TokenAccesBlacklistSerializer,
-)
-from config.utils.utils_exception import (
-    KEY_STATUS_ERROR_CODE,
-    get_first_str_exeption,
 )
 from config.utils.utils_logs import logger
 
 
-class LogoutView(APIView):
+class Logout(APIView):
     permission_classes = (
         IsAuthenticated,
         IsTokenValid,
@@ -34,12 +32,10 @@ class LogoutView(APIView):
         try:
             serializer = TokenAccesBlacklistSerializer(data=request.data)
             if not serializer.is_valid():
-                errors = get_first_str_exeption(serializer.errors)
                 return Response(
                     {
                         "status": "error",
-                        "message": errors,
-                        KEY_STATUS_ERROR_CODE: 400,
+                        "message": serializer.errors,
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -48,20 +44,14 @@ class LogoutView(APIView):
 
             user = request.user
             if user:
-                logout_user(
-                    user=user,
-                    refresh_token=refresh_token,
-                    access_token=get_acces_token(request),
-                )
-
-                # token = RefreshToken(refresh_token)
-                # token.blacklist()
-                # RefreshToken.for_user(user)
-                # token = self.get_acces_token(request)
-                # tokenInBD = BlackListedTokenAccess()
-                # tokenInBD.token = token
-                # tokenInBD.user = user
-                # tokenInBD.save()
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                RefreshToken.for_user(user)
+                token = self.get_acces_token(request)
+                tokenInBD = BlackListedTokenAccess()
+                tokenInBD.token = token
+                tokenInBD.user = user
+                tokenInBD.save()
 
                 return JsonResponse(
                     {
@@ -81,7 +71,6 @@ class LogoutView(APIView):
                 {
                     "status": "error",
                     "message": "Error en servidor",
-                    KEY_STATUS_ERROR_CODE: 500,
                 },
                 status=500,
             )

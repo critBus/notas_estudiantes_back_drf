@@ -1,28 +1,14 @@
 import io
-from io import BytesIO
 
 # Create your views here.
 from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Dict,
     List,
-    NoReturn,
-    Optional,
-    Tuple,
-    Union,
-    cast,
 )
 
-from django.conf import settings
-from django.db.models import Q
-from django.shortcuts import HttpResponse, render
-from django.views.generic import View
+from django.shortcuts import HttpResponse
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape, letter
+from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import cm, mm
-from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
 
 

@@ -6,51 +6,42 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from apps.users.models import RefreshTokenUser
-from apps.users.views.auth.serializers.token_authentication.authentication_response_serializer import (
+from config.utils.utils_logs import logger
+
+from ...models import RefreshTokenUser
+from ..user.serializers.user_serializer import UserSerializer
+from .serializers.credentials_serializer import CredentialsSerializer
+from .serializers.token_authentication_serializer import (
     AuthenticationResponseSerializer,
 )
-from apps.users.views.auth.serializers.token_authentication.token_authentication_serializer import (
-    TokenAuthenticationSerializer,
-)
-from apps.users.views.user.serializers.user_representation_serializer import (
-    UserRepresentationSerializer,
-)
-from config.utils.utils_exception import (
-    KEY_STATUS_ERROR_CODE,
-    get_first_str_exeption,
-)
-from config.utils.utils_logs import logger
 
 User = get_user_model()
 
 
-class CustomTokenObtainByRSAPairView(APIView):
+class CustomTokenObtainPairView(TokenObtainPairView):
     @extend_schema(
-        request=TokenAuthenticationSerializer,
+        request=CredentialsSerializer,
         responses={200: AuthenticationResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         """
         Vista que obtiene un nuevo token de autenticación para un usuario en la aplicación.
 
-        Para obtener un nuevo token de autenticación para un usuario en la aplicación, el usuario debe enviar una solicitud HTTP POST a la ruta `api/token/`. La solicitud debe incluir las credenciales del usuario y la fecha actual en el cuerpo de la solicitud dentro de un token rsa, y el servidor responderá con un nuevo token de autenticación válido (en el campo `access`).
+        Para obtener un nuevo token de autenticación para un usuario en la aplicación, el usuario debe enviar una solicitud HTTP POST a la ruta `api/token/`. La solicitud debe incluir las credenciales del usuario (por ejemplo, su telefono y contraseña) en el cuerpo de la solicitud, y el servidor responderá con un nuevo token de autenticación válido (en el campo `access`).
 
         Es importante tener en cuenta que para utilizar este endpoint, el usuario debe haber proporcionado las credenciales correctas de inicio de sesión. Si las credenciales son incorrectas, entonces el servidor responderá con un error.
 
-
         """
         try:
-            serializador = TokenAuthenticationSerializer(data=request.data)
+            serializador = CredentialsSerializer(data=request.data)
             if not serializador.is_valid():
                 return Response(
                     {
                         "status": "error",
-                        "message": get_first_str_exeption(serializador.errors),
-                        KEY_STATUS_ERROR_CODE: 400,
+                        "message": serializador.errors,
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -61,7 +52,6 @@ class CustomTokenObtainByRSAPairView(APIView):
                     {
                         "status": "error",
                         "message": "Credenciales incorrectas",
-                        KEY_STATUS_ERROR_CODE: 400,
                     },
                     status=400,
                 )
@@ -84,7 +74,7 @@ class CustomTokenObtainByRSAPairView(APIView):
             token_bd.save()
 
             response = {}
-            response["user"] = UserRepresentationSerializer(
+            response["user"] = UserSerializer(
                 user, context={"request": request}
             ).data
             response["status"] = "success"
@@ -97,7 +87,6 @@ class CustomTokenObtainByRSAPairView(APIView):
                 {
                     "status": "error",
                     "message": "Error de en servidor",
-                    KEY_STATUS_ERROR_CODE: 400,
                 },
                 status=500,
             )
