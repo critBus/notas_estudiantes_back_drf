@@ -33,8 +33,10 @@ DEBUG = os.environ.get("DJANGO_DEBUG").lower() == "true"
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST").split(",")
 
+# CSRF_TRUSTED_ORIGINS = ["https://dir"]
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
-# Application definition
 
 # Application definition
 BASE_APPS = [
@@ -59,6 +61,7 @@ THIRD_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "django_reportbroD.apps.ReportbrodConfig",
+    "corsheaders",
 ]
 PRIORITY_THIRD_APPS = [
     "jazzmin",
@@ -74,6 +77,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+# cors
+MIDDLEWARE += ("corsheaders.middleware.CorsMiddleware",)
 # crum
 MIDDLEWARE += ("crum.CurrentRequestUserMiddleware",)
 
