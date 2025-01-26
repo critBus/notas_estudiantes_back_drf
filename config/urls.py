@@ -27,20 +27,27 @@ from drf_spectacular.views import (
 urlpatterns = [
     path("", include("apps.base.urls")),
     path("admin/", admin.site.urls),
-    path("", include("apps.users.urls")),
-    # path("reportbroD/", include("django_reportbroD.urls", namespace="reportbroD")),
-    # YOUR PATTERNS
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    # Optional UI:
     path(
-        "api/schema/swagger/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
-    ),
-    path(
-        "api/schema/redoc/",
-        SpectacularRedocView.as_view(url_name="schema"),
-        name="redoc",
+        "api/",
+        include(
+            [
+                path("", include("apps.users.urls")),
+                # path("reportbroD/", include("django_reportbroD.urls", namespace="reportbroD")),
+                # YOUR PATTERNS
+                path("schema/", SpectacularAPIView.as_view(), name="schema"),
+                # Optional UI:
+                path(
+                    "schema/swagger/",
+                    SpectacularSwaggerView.as_view(url_name="schema"),
+                    name="swagger-ui",
+                ),
+                path(
+                    "schema/redoc/",
+                    SpectacularRedocView.as_view(url_name="schema"),
+                    name="redoc",
+                ),
+            ]
+        ),
     ),
 ]
 anterior = settings.DEBUG

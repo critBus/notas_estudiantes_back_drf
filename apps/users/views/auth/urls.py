@@ -7,19 +7,19 @@ from .loguin_username import CustomTokenObtainPairView
 
 urlpatterns = [
     path(
-        "api/token/",
+        "",
         CustomTokenObtainPairView.as_view(),
         name="token_obtain_pair",
     ),
     path(
-        "api/token/refresh/",
+        "refresh/",
         CustomTokenRefreshView.as_view(),
         name="token_refresh",
     ),
     path(
-        "api/token/verify/",
+        "verify/",
         CustomTokenVerifyView.as_view(),
         name="token_verify",
     ),
-    path("api/token/logout/", Logout.as_view(), name="token_logout"),
+    path("logout/", Logout.as_view(), name="token_logout"),
 ]
