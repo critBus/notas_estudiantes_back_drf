@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.authentication import IsTokenValid
-from apps.users.views.user.serializers.user_serializer import UserSerializer
+from apps.users.views.user.serializers.me_serializer import MeSerializer
 
 
 class UserMeView(generics.GenericAPIView):
@@ -18,7 +18,7 @@ class UserMeView(generics.GenericAPIView):
         IsAuthenticated,
         IsTokenValid,
     )
-    serializer_class = UserSerializer
+    serializer_class = MeSerializer
 
     def get(self, request, *args, **kwargs):
         instance = request.user
