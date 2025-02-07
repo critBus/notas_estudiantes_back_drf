@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class MeSerializer(serializers.ModelSerializer):
-    groups = GroupSerializer(read_only=True)
+    groups = GroupSerializer(read_only=True,many=True)
 
     class Meta:
         model = User
