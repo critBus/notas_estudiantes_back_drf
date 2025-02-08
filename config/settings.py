@@ -50,6 +50,7 @@ BASE_APPS = [
 LOCAL_APPS = [
     "apps.base",
     "apps.users",
+    "apps.project",
 ]
 THIRD_APPS = [
     "django.contrib.postgres",
@@ -62,6 +63,7 @@ THIRD_APPS = [
     "drf_spectacular_sidecar",
     "django_reportbroD.apps.ReportbrodConfig",
     "corsheaders",
+    "automatic_crud",
 ]
 PRIORITY_THIRD_APPS = [
     "jazzmin",
@@ -238,7 +240,7 @@ SPECTACULAR_SETTINGS = {
     "REDOC_DIST": "SIDECAR",
     # OTHER SETTINGS
     "COMPONENT_SPLIT_REQUEST": True,
-    "SCHEMA_PATH_PREFIX": "/api/",
+    # "SCHEMA_PATH_PREFIX": "/api/",
 }
 
 LOGGING = {

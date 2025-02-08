@@ -1,93 +1,174 @@
 from django.db import models
 
 
+class Student(models.Model):
+    ci = models.CharField(max_length=20, verbose_name="Carnet de Identidad")
+    address = models.CharField(max_length=255, verbose_name="Dirección")
+    grade = models.IntegerField(
+        choices=[(7, 7), (8, 8), (9, 9)], verbose_name="Grado"
+    )
+    last_name = models.CharField(max_length=255, verbose_name="Apellidos")
+    first_name = models.CharField(max_length=255, verbose_name="Nombres")
+    registration_number = models.CharField(
+        max_length=255, verbose_name="Número de Registro"
+    )
+    sex = models.CharField(max_length=10, verbose_name="Sexo")
+    is_graduated = models.BooleanField(default=False, verbose_name="Graduado")
+    is_dropped_out = models.BooleanField(verbose_name="Baja")
 
-
-
-
-class Students(models.Model):
-    ci = models.CharField(max_length=20, primary_key=True)
-    address = models.CharField(max_length=255)
-    grade = models.IntegerField(choices=[7, 8, 9])
-    last_name = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=255)
-    reg_number = models.CharField(max_length=255)
-    sex = models.CharField(max_length=10)
-    graduate =models.BooleanField(default=False)
-    baja = models.BooleanField()
-
-
-class AltasBajas(models.Model):
-    baja = models.BooleanField()
-    date = models.DateField()
-    municipality = models.CharField(max_length=255)
-    province = models.CharField(max_length=255)
-    school = models.CharField(max_length=255)
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-
-
-class Careers(models.Model):
-    amount = models.IntegerField()
-    name = models.CharField(max_length=255)
-
-    
-
-class Graduado(models.Model):
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-    no_dematricula = models.CharField(max_length=255, blank=True, null=True)
-    fecha_graduacion = models.DateField(blank=True, null=True)
-    carrera = models.CharField(max_length=255, blank=True, null=True)
-    nota_escalafon = models.FloatField(blank=True, null=True)
-    no_escalafon = models.IntegerField(blank=True, null=True)
-
-    
-
-class NotaGraduado(models.Model):
-    nombreasignatura = models.CharField(max_length=255)
-    as_nota = models.FloatField(blank=True, null=True)
-    tcp1 = models.FloatField(blank=True, null=True)
-    tcp2 = models.FloatField(blank=True, null=True)
-    prueba_final = models.FloatField(blank=True, null=True)
-    nota_final = models.FloatField(blank=True, null=True)
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
     class Meta:
-        db_table = 'notagraduado'
-
-class Subjects(models.Model):
-    id = models.AutoField(primary_key=True)
-    grade = models.IntegerField()
-    name = models.CharField(max_length=255)
-    tcp2 = models.BooleanField()
-
-class Notes(models.Model):
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subjects, on_delete=models.CASCADE)
-    acs = models.FloatField(blank=True, null=True)
-    final_note = models.FloatField(blank=True, null=True)
-    final_exam = models.FloatField(blank=True, null=True)
-    tcp1 = models.FloatField(blank=True, null=True)
-    tcp2 = models.FloatField(blank=True, null=True)
+        verbose_name = "Estudiante"
+        verbose_name_plural = "Estudiantes"
 
 
-class Otorgamiento(models.Model):
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-    year_graduacion = models.IntegerField(blank=True, null=True)
-    carrera = models.CharField(max_length=255, blank=True, null=True)
-    nota_escalafon = models.FloatField(blank=True, null=True)
-    no_escalafon = models.IntegerField(blank=True, null=True)
+class Dropout(models.Model):
+    is_dropped_out = models.BooleanField(verbose_name="Baja")
+    date = models.DateField(verbose_name="Fecha")
+    municipality = models.CharField(max_length=255, verbose_name="Municipio")
+    province = models.CharField(max_length=255, verbose_name="Provincia")
+    school = models.CharField(max_length=255, verbose_name="Escuela")
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
 
-    
+    class Meta:
+        verbose_name = "Baja"
+        verbose_name_plural = "Bajas"
+
+
+class Career(models.Model):
+    amount = models.IntegerField(verbose_name="Monto")
+    name = models.CharField(max_length=255, verbose_name="Nombre")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Carrera"
+        verbose_name_plural = "Carreras"
+
+
+class Graduation(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    graduation_number = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Número de Matrícula",
+    )
+    graduation_date = models.DateField(
+        blank=True, null=True, verbose_name="Fecha de Graduación"
+    )
+    career = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Carrera"
+    )
+    ranking_score = models.FloatField(
+        blank=True, null=True, verbose_name="Nota Escalafón"
+    )
+    ranking_number = models.IntegerField(
+        blank=True, null=True, verbose_name="Número de Escalafón"
+    )
+
+    class Meta:
+        verbose_name = "Graduación"
+        verbose_name_plural = "Graduaciones"
+
+
+class GraduationGrade(models.Model):
+    subject_name = models.CharField(
+        max_length=255, verbose_name="Nombre de Asignatura"
+    )
+    assignment_grade = models.FloatField(
+        blank=True, null=True, verbose_name="Nota de Asignación"
+    )
+    tcp1 = models.FloatField(blank=True, null=True, verbose_name="TCP1")
+    tcp2 = models.FloatField(blank=True, null=True, verbose_name="TCP2")
+    final_exam = models.FloatField(
+        blank=True, null=True, verbose_name="Examen Final"
+    )
+    final_grade = models.FloatField(
+        blank=True, null=True, verbose_name="Nota Final"
+    )
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+
+    class Meta:
+        verbose_name = "Nota de Graduado"
+        verbose_name_plural = "Notas de Graduados"
+
+
+class Subject(models.Model):
+    grade = models.IntegerField(verbose_name="Grado")
+    name = models.CharField(max_length=255, verbose_name="Nombre")
+    tcp2_required = models.BooleanField(verbose_name="Requiere TCP2")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Asignatura"
+        verbose_name_plural = "Asignaturas"
+
+
+class StudentNote(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE, verbose_name="Asignatura"
+    )
+    acs = models.FloatField(blank=True, null=True, verbose_name="ACS")
+    final_grade = models.FloatField(
+        blank=True, null=True, verbose_name="Nota Final"
+    )
+    final_exam = models.FloatField(
+        blank=True, null=True, verbose_name="Examen Final"
+    )
+    tcp1 = models.FloatField(blank=True, null=True, verbose_name="TCP1")
+    tcp2 = models.FloatField(blank=True, null=True, verbose_name="TCP2")
+
+    class Meta:
+        verbose_name = "Nota"
+        verbose_name_plural = "Notas"
+
+
+class Award(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    graduation_year = models.IntegerField(
+        blank=True, null=True, verbose_name="Año de Graduación"
+    )
+    career = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Carrera"
+    )
+    ranking_score = models.FloatField(
+        blank=True, null=True, verbose_name="Nota Escalafón"
+    )
+    ranking_number = models.IntegerField(
+        blank=True, null=True, verbose_name="Número de Escalafón"
+    )
+
+    class Meta:
+        verbose_name = "Otorgamiento"
+        verbose_name_plural = "Otorgamientos"
+
 
 class StudentCareer(models.Model):
-    career = models.ForeignKey(Careers, on_delete=models.CASCADE)
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-    index = models.IntegerField()
+    career = models.ForeignKey(
+        Career, on_delete=models.CASCADE, verbose_name="Carrera"
+    )
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    index = models.IntegerField(verbose_name="Índice")
 
-
-
-
-
-
-    
-
+    class Meta:
+        verbose_name = "Estudiante - Carrera"
+        verbose_name_plural = "Estudiantes - Carreras"
