@@ -1,5 +1,6 @@
-from rest_framework import permissions, viewsets
+from rest_framework import generics, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 # Importa tus modelos
 from .models import (
@@ -37,6 +38,11 @@ class CustomPagination(PageNumberPagination):
 class BaseModelViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]  # Requiere autenticación
     pagination_class = CustomPagination  # Usa la paginación personalizada
+
+
+class BaseGenericAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]  # Requiere autenticación
+    pagination_class = CustomPagination
 
 
 class StudentViewSet(BaseModelViewSet):
@@ -82,3 +88,20 @@ class AwardViewSet(BaseModelViewSet):
 class StudentCareerViewSet(BaseModelViewSet):
     queryset = StudentCareer.objects.all()
     serializer_class = StudentCareerSerializer
+
+
+class Upgrading7and8(generics.GenericAPIView):
+    queryset = Student.objects.filter(
+        is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
+    )
+    serializer_class = StudentSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        Solo para subir 7-8 (no 9)
+        """
+        student: Student = self.get_object()
+        student.grade += 1
+        student.save()
+        serializer = self.get_serializer(student)
+        return Response(serializer.data)

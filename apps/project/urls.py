@@ -11,6 +11,7 @@ from apps.project.views import (
     StudentNoteViewSet,
     StudentViewSet,
     SubjectViewSet,
+    Upgrading7and8,
 )
 
 router = DefaultRouter()
@@ -27,4 +28,9 @@ router.register(r"student_careers", StudentCareerViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "students/upgrading7and8/<int:id>/",
+        Upgrading7and8.as_view(),
+        name="upgrading7and8",
+    ),
 ]
