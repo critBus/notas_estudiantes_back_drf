@@ -63,7 +63,6 @@ THIRD_APPS = [
     "drf_spectacular_sidecar",
     "django_reportbroD.apps.ReportbrodConfig",
     "corsheaders",
-    "automatic_crud",
 ]
 PRIORITY_THIRD_APPS = [
     "jazzmin",
