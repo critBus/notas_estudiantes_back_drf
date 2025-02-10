@@ -1,13 +1,24 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from apps.users.authentication import IsTokenValid
+from apps.users.views.user.serializers.user_representantion_serializer import (
+    UserRepresentationSerializer,
+)
 from apps.users.views.user.serializers.user_serializer import UserSerializer
 
 User = get_user_model()
 
 
+@extend_schema_view(
+    list=extend_schema(responses=UserRepresentationSerializer(many=True)),
+    create=extend_schema(responses=UserRepresentationSerializer),
+    retrieve=extend_schema(responses=UserRepresentationSerializer),
+    update=extend_schema(responses=UserRepresentationSerializer),
+    partial_update=extend_schema(responses=UserRepresentationSerializer),
+)
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
