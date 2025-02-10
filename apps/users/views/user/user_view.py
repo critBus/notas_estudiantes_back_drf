@@ -11,6 +11,10 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsTokenValid,
+    ]
 
     filterset_fields = {
         "id": ["exact"],
@@ -41,21 +45,3 @@ class UserViewSet(viewsets.ModelViewSet):
         "last_name",
     ]
     ordering = ["username"]
-
-    def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that
-        this view requires.
-        """
-        permission_classes = []
-        if self.action in [
-            "retrieve",
-            "update",
-            "partial_update",
-            "destroy",
-        ]:
-            permission_classes = [
-                IsAuthenticated,
-                IsTokenValid,
-            ]
-        return [permission() for permission in permission_classes]
