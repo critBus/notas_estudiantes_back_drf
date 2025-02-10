@@ -1,0 +1,92 @@
+@startuml
+
+class Student {
+    ci : CharField(20) // Carnet de Identidad
+    address : CharField(255) // Dirección
+    grade : IntegerField // Grado
+    last_name : CharField(255) // Apellidos
+    first_name : CharField(255) // Nombres
+    registration_number : CharField(255) // Número de Registro
+    sex : CharField(10) // Sexo
+    is_graduated : BooleanField // Graduado
+    is_dropped_out : BooleanField // Baja
+    __str__()
+}
+
+class Dropout {
+    is_dropped_out : BooleanField // Baja
+    date : DateField // Fecha
+    municipality : CharField(255) // Municipio
+    province : CharField(255) // Provincia
+    school : CharField(255) // Escuela
+}
+
+class Career {
+    amount : IntegerField // Monto
+    name : CharField(255) // Nombre
+    __str__()
+}
+
+class Graduation {
+    graduation_number : CharField(255) // Número de Matrícula
+    graduation_date : DateField // Fecha de Graduación
+    career : CharField(255) // Carrera
+    ranking_score : FloatField // Nota Escalafón
+    ranking_number : IntegerField // Número de Escalafón
+}
+
+class GraduationGrade {
+    subject_name : CharField(255) // Nombre de Asignatura
+    assignment_grade : FloatField // Nota de Asignación
+    tcp1 : FloatField // TCP1
+    tcp2 : FloatField // TCP2
+    final_exam : FloatField // Examen Final
+    final_grade : FloatField // Nota Final
+}
+
+class Subject {
+    grade : IntegerField // Grado
+    name : CharField(255) // Nombre
+    tcp2_required : BooleanField // Requiere TCP2
+    __str__()
+}
+
+class StudentNote {
+    acs : FloatField // ACS
+    final_grade : FloatField // Nota Final
+    final_exam : FloatField // Examen Final
+    tcp1 : FloatField // TCP1
+    tcp2 : FloatField // TCP2
+}
+
+class Award {
+    graduation_year : IntegerField // Año de Graduación
+    career : CharField(255) // Carrera
+    ranking_score : FloatField // Nota Escalafón
+    ranking_number : IntegerField // Número de Escalafón
+}
+
+class StudentCareer {
+    index : IntegerField // Índice
+}
+
+Student --* Dropout : student // Estudiante
+Student --* Graduation : student // Estudiante
+Student --* GraduationGrade : student // Estudiante
+Student --* StudentNote : student // Estudiante
+Student --* Award : student // Estudiante
+Student --* StudentCareer : student // Estudiante
+
+Dropout --* Student
+Graduation --* Student
+GraduationGrade --* Student
+StudentNote --* Student
+Award --* Student
+StudentCareer --* Student
+
+StudentNote --* Subject : subject // Asignatura
+StudentCareer --* Career : career // Carrera
+Graduation --* Career : career // Carrera
+Award --* Career : career // Carrera
+
+@enduml
