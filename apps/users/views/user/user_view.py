@@ -24,27 +24,6 @@ class UserViewSet(viewsets.ModelViewSet):
         "is_staff": ["exact"],
         "groups__id": ["exact"],
         "groups__name": ["contains", "exact", "icontains", "search"],
-        "groups__permissions__id": ["exact"],
-        "groups__permissions__name": [
-            "contains",
-            "exact",
-            "icontains",
-            "search",
-        ],
-        "groups__permissions__codename": [
-            "contains",
-            "exact",
-            "icontains",
-            "search",
-        ],
-        "user_permissions__id": ["exact"],
-        "user_permissions__name": ["contains", "exact", "icontains", "search"],
-        "user_permissions__codename": [
-            "contains",
-            "exact",
-            "icontains",
-            "search",
-        ],
     }
     search_fields = [
         "username",
