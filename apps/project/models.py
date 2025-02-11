@@ -14,6 +14,10 @@ class SchoolYear(models.Model):
     def get_subjects(self):
         return Subject.objects.filter(studentnote__school_year=self)
 
+    @staticmethod
+    def get_current_course():
+        return SchoolYear.objects.order_by("-start_date").first()
+
 
 class Student(models.Model):
     ci = models.CharField(max_length=20, verbose_name="Carnet de Identidad")
@@ -37,19 +41,15 @@ class Student(models.Model):
         verbose_name = "Estudiante"
         verbose_name_plural = "Estudiantes"
 
-    def get_current_course(self) -> SchoolYear:
-        return (
-            SchoolYear.objects.filter(studentnote__student=self)
-            .order_by("-start_date")
-            .first()
-        )
-
-    def their_notes_are_valid(self):
-        curren_course = self.get_current_course()
-        subjects = curren_course.get_subjects()
+    def their_notes_are_valid(self, curse=None):
+        if not curse:
+            curse = SchoolYear.get_current_course()
+        subjects = curse.get_subjects()
+        if not subjects:
+            return False
         for subject in subjects:
             notes = StudentNote.objects.filter(
-                student=self, subject=subject, school_year=curren_course
+                student=self, subject=subject, school_year=curse
             )
             if not StudentNote.are_valid(notes):
                 return False
