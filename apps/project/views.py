@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, permissions, viewsets, serializers
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ..users.authentication import IsTokenValid
 
@@ -32,6 +33,7 @@ from .serializers import (
     StudentNoteSerializer,
     StudentSerializer,
     SubjectSerializer,
+    ErrorSerializer,
 )
 
 
@@ -55,6 +57,13 @@ class BaseGenericAPIView(generics.GenericAPIView):
         IsTokenValid,
     ]  # Requiere autenticación
     pagination_class = CustomPagination
+
+
+class BaseModelAPIView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsTokenValid,
+    ]
 
 
 class SchoolYearViewSet(BaseModelViewSet):
@@ -116,10 +125,7 @@ class Upgrading7and8(generics.GenericAPIView):
     @extend_schema(
         responses={
             200: StudentSerializer,
-            400: inline_serializer(
-                "NotasInvalidasSerializer",
-                fields={"error": serializers.CharField(max_length=256)},
-            ),
+            400: ErrorSerializer,
         },
     )
     def get(self, request, *args, **kwargs):
@@ -135,3 +141,19 @@ class Upgrading7and8(generics.GenericAPIView):
         return JsonResponse(
             {"error": "Tiene notas que no son validas"}, status=400
         )
+
+
+class CurrentCurseView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: SchoolYearSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No hay cursos agregados"}, status=400
+            )
+        return SchoolYearSerializer(course).data

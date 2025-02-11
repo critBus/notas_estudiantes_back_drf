@@ -14,6 +14,10 @@ from .models import (
 )
 
 
+class ErrorSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+
 class SchoolYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolYear

@@ -12,6 +12,8 @@ from apps.project.views import (
     StudentViewSet,
     SubjectViewSet,
     Upgrading7and8,
+    SchoolYearViewSet,
+    CurrentCurseView,
 )
 
 router = DefaultRouter()
@@ -25,12 +27,18 @@ router.register(r"subjects", SubjectViewSet)
 router.register(r"student_note", StudentNoteViewSet)
 router.register(r"awards", AwardViewSet)
 router.register(r"student_careers", StudentCareerViewSet)
+router.register(r"school_year", SchoolYearViewSet)
 
 urlpatterns = [
-    path("", include(router.urls)),
     path(
         "students/upgrading7and8/<int:id>/",
         Upgrading7and8.as_view(),
         name="upgrading7and8",
     ),
+    path(
+        "school_year/current/",
+        CurrentCurseView.as_view(),
+        name="upgrading7and8",
+    ),
+    path("", include(router.urls)),
 ]
