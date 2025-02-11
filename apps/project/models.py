@@ -2,14 +2,17 @@ from django.db import models
 
 
 class SchoolYear(models.Model):
-    startDate = models.DateField(verbose_name="Fecha de inicio")
-    endDate = models.DateField(verbose_name="Fecha de fin")
+    start_date = models.DateField(verbose_name="Fecha de inicio")
+    end_date = models.DateField(verbose_name="Fecha de fin")
     name = models.CharField(
         max_length=255, verbose_name="Nombre", help_text="ejemplo: 2024-2025"
     )
 
     def __str__(self):
         return self.name
+
+    def get_subjects(self):
+        return Subject.objects.filter(studentnote__school_year=self)
 
 
 class Student(models.Model):
@@ -33,6 +36,24 @@ class Student(models.Model):
     class Meta:
         verbose_name = "Estudiante"
         verbose_name_plural = "Estudiantes"
+
+    def get_current_course(self) -> SchoolYear:
+        return (
+            SchoolYear.objects.filter(studentnote__student=self)
+            .order_by("-start_date")
+            .first()
+        )
+
+    def their_notes_are_valid(self):
+        curren_course = self.get_current_course()
+        subjects = curren_course.get_subjects()
+        for subject in subjects:
+            notes = StudentNote.objects.filter(
+                student=self, subject=subject, school_year=curren_course
+            )
+            if not StudentNote.are_valid(notes):
+                return False
+        return True
 
 
 class Dropout(models.Model):
@@ -150,6 +171,13 @@ class StudentNote(models.Model):
     class Meta:
         verbose_name = "Nota"
         verbose_name_plural = "Notas"
+
+    @staticmethod
+    def are_valid(notes):
+        # TODO: este metodo es fake aun
+        if not notes:
+            return False
+        return True
 
 
 class Award(models.Model):

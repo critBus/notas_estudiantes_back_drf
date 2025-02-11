@@ -1,4 +1,6 @@
-from rest_framework import generics, permissions, viewsets
+from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import generics, permissions, viewsets, serializers
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -111,12 +113,25 @@ class Upgrading7and8(generics.GenericAPIView):
     )
     serializer_class = StudentSerializer
 
+    @extend_schema(
+        responses={
+            200: StudentSerializer,
+            400: inline_serializer(
+                "NotasInvalidasSerializer",
+                fields={"error": serializers.CharField(max_length=256)},
+            ),
+        },
+    )
     def get(self, request, *args, **kwargs):
         """
         Solo para subir 7-8 (no 9)
         """
         student: Student = self.get_object()
-        student.grade += 1
-        student.save()
-        serializer = self.get_serializer(student)
-        return Response(serializer.data)
+        if student.their_notes_are_valid():
+            student.grade += 1
+            student.save()
+            serializer = self.get_serializer(student)
+            return Response(serializer.data)
+        return JsonResponse(
+            {"error": "Tiene notas que no son validas"}, status=400
+        )
