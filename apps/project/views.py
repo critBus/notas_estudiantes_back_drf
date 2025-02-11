@@ -1,8 +1,9 @@
-from rest_framework import generics, permissions, viewsets
-from rest_framework.pagination import PageNumberPagination
+from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
+from rest_framework import generics
 from rest_framework.response import Response
 
-from ..users.authentication import IsTokenValid
+from config.utils.utils_view import BaseModelAPIView, BaseModelViewSet
 
 # Importa tus modelos
 from .models import (
@@ -23,6 +24,7 @@ from .serializers import (
     AwardSerializer,
     CareerSerializer,
     DropoutSerializer,
+    ErrorSerializer,
     GraduationGradeSerializer,
     GraduationSerializer,
     SchoolYearSerializer,
@@ -31,28 +33,6 @@ from .serializers import (
     StudentSerializer,
     SubjectSerializer,
 )
-
-
-class CustomPagination(PageNumberPagination):
-    page_size = 10  # Define el tamaño de página predeterminado
-    page_size_query_param = "page_size"  # Permite cambiar el tamaño de página con un parámetro en la URL
-    max_page_size = 100  # Define el tamaño máximo de página
-
-
-class BaseModelViewSet(viewsets.ModelViewSet):
-    permission_classes = [
-        permissions.IsAuthenticated,
-        IsTokenValid,
-    ]  # Requiere autenticación
-    pagination_class = CustomPagination
-
-
-class BaseGenericAPIView(generics.GenericAPIView):
-    permission_classes = [
-        permissions.IsAuthenticated,
-        IsTokenValid,
-    ]  # Requiere autenticación
-    pagination_class = CustomPagination
 
 
 class SchoolYearViewSet(BaseModelViewSet):
@@ -111,12 +91,38 @@ class Upgrading7and8(generics.GenericAPIView):
     )
     serializer_class = StudentSerializer
 
+    @extend_schema(
+        responses={
+            200: StudentSerializer,
+            400: ErrorSerializer,
+        },
+    )
     def get(self, request, *args, **kwargs):
         """
         Solo para subir 7-8 (no 9)
         """
         student: Student = self.get_object()
-        student.grade += 1
-        student.save()
-        serializer = self.get_serializer(student)
-        return Response(serializer.data)
+        if student.their_notes_are_valid():
+            student.grade += 1
+            student.save()
+            serializer = self.get_serializer(student)
+            return Response(serializer.data)
+        return JsonResponse(
+            {"error": "Tiene notas que no son validas"}, status=400
+        )
+
+
+class CurrentCurseView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: SchoolYearSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No hay cursos agregados"}, status=400
+            )
+        return SchoolYearSerializer(course).data
