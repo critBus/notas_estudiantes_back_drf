@@ -6,11 +6,18 @@ from .models import (
     Dropout,
     Graduation,
     GraduationGrade,
+    SchoolYear,
     Student,
     StudentCareer,
     StudentNote,
     Subject,
 )
+
+
+class SchoolYearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchoolYear
+        fields = "__all__"
 
 
 class StudentSerializer(serializers.ModelSerializer):
