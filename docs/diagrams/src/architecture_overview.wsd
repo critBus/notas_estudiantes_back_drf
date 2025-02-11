@@ -51,6 +51,13 @@ class Subject {
     __str__()
 }
 
+entity SchoolYear {
+    id : Integer PK
+    startDate : Date
+    endDate : Date
+    name : Varchar(255)
+}
+
 class StudentNote {
     acs : FloatField // ACS
     final_grade : FloatField // Nota Final
@@ -69,6 +76,8 @@ class Award {
 class StudentCareer {
     index : IntegerField // Índice
 }
+
+StudentNote "1..*" -- "1" SchoolYear : belongs to
 
 Student --* Dropout : student // Estudiante
 Student --* Graduation : student // Estudiante

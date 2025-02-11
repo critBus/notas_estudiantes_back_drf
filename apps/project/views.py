@@ -2,6 +2,8 @@ from rest_framework import generics, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
+from ..users.authentication import IsTokenValid
+
 # Importa tus modelos
 from .models import (
     Award,
@@ -9,6 +11,7 @@ from .models import (
     Dropout,
     Graduation,
     GraduationGrade,
+    SchoolYear,
     Student,
     StudentCareer,
     StudentNote,
@@ -22,6 +25,7 @@ from .serializers import (
     DropoutSerializer,
     GraduationGradeSerializer,
     GraduationSerializer,
+    SchoolYearSerializer,
     StudentCareerSerializer,
     StudentNoteSerializer,
     StudentSerializer,
@@ -36,13 +40,24 @@ class CustomPagination(PageNumberPagination):
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated]  # Requiere autenticación
-    pagination_class = CustomPagination  # Usa la paginación personalizada
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsTokenValid,
+    ]  # Requiere autenticación
+    pagination_class = CustomPagination
 
 
 class BaseGenericAPIView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]  # Requiere autenticación
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsTokenValid,
+    ]  # Requiere autenticación
     pagination_class = CustomPagination
+
+
+class SchoolYearViewSet(BaseModelViewSet):
+    queryset = SchoolYear.objects.all()
+    serializer_class = SchoolYearSerializer
 
 
 class StudentViewSet(BaseModelViewSet):

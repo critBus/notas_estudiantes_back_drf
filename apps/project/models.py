@@ -1,6 +1,17 @@
 from django.db import models
 
 
+class SchoolYear(models.Model):
+    startDate = models.DateField(verbose_name="Fecha de inicio")
+    endDate = models.DateField(verbose_name="Fecha de fin")
+    name = models.CharField(
+        max_length=255, verbose_name="Nombre", help_text="ejemplo: 2024-2025"
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class Student(models.Model):
     ci = models.CharField(max_length=20, verbose_name="Carnet de Identidad")
     address = models.CharField(max_length=255, verbose_name="Dirección")
@@ -132,6 +143,9 @@ class StudentNote(models.Model):
     )
     tcp1 = models.FloatField(blank=True, null=True, verbose_name="TCP1")
     tcp2 = models.FloatField(blank=True, null=True, verbose_name="TCP2")
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
 
     class Meta:
         verbose_name = "Nota"
