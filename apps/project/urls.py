@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.project.views import (
     AwardViewSet,
+    BallotCreateView,
     CareerViewSet,
     CurrentCurseView,
     DropoutViewSet,
@@ -36,9 +37,14 @@ urlpatterns = [
         name="upgrading7and8",
     ),
     path(
+        "students/ballot/<int:id>/",
+        BallotCreateView.as_view(),
+        name="create-ballot",
+    ),
+    path(
         "school_year/current/",
         CurrentCurseView.as_view(),
-        name="upgrading7and8",
+        name="current-course",
     ),
     path("", include(router.urls)),
 ]

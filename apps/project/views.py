@@ -22,12 +22,14 @@ from .models import (
 # Importa tus serializadores (debes crearlos)
 from .serializers import (
     AwardSerializer,
+    BallotCreateSerializer,
     CareerSerializer,
     DropoutSerializer,
     ErrorSerializer,
     GraduationGradeSerializer,
     GraduationSerializer,
     SchoolYearSerializer,
+    StudentBallotSerializer,
     StudentCareerSerializer,
     StudentNoteSerializer,
     StudentSerializer,
@@ -126,3 +128,23 @@ class CurrentCurseView(BaseModelAPIView):
                 {"error": "No hay cursos agregados"}, status=400
             )
         return SchoolYearSerializer(course).data
+
+
+class BallotCreateView(generics.GenericAPIView):
+    queryset = Student.objects.filter(
+        is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
+    )
+    serializer_class = BallotCreateSerializer
+
+    @extend_schema(
+        responses={
+            200: StudentBallotSerializer,
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        student: Student = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        list_career = serializer.validated_data["list_career_name"]
+        student.create_ballot(list_career)
+        return JsonResponse(StudentBallotSerializer(student).data)
