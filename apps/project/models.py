@@ -1,3 +1,5 @@
+from typing import List
+
 from django.db import models
 
 
@@ -54,6 +56,19 @@ class Student(models.Model):
             if not StudentNote.are_valid(notes):
                 return False
         return True
+
+    def create_ballot(self, list_career: List[str]):
+        StudentCareer.objects.filter(student=self).delete()
+        for i, career in enumerate(list_career):
+            StudentCareer.objects.create(student=self, index=i, career=career)
+
+    def get_ballot(self):
+        return [
+            v.name
+            for v in StudentCareer.objects.filter(student=self).order_by(
+                "index"
+            )
+        ]
 
 
 class Dropout(models.Model):
