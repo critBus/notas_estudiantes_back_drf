@@ -14,7 +14,7 @@ from apps.project.views import (
     StudentNoteViewSet,
     StudentViewSet,
     SubjectViewSet,
-    Upgrading7and8,
+    Upgrading7and8, BallotListView,
 )
 
 router = DefaultRouter()
@@ -40,6 +40,11 @@ urlpatterns = [
         "students/ballot/<int:id>/",
         BallotCreateView.as_view(),
         name="create-ballot",
+    ),
+    path(
+        "students/ballot/",
+        BallotListView.as_view(),
+        name="ballot-list",
     ),
     path(
         "school_year/current/",
