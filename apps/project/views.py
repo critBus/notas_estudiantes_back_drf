@@ -1,6 +1,6 @@
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema
-from rest_framework import generics
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import generics, serializers
 from rest_framework.response import Response
 
 from config.utils.utils_view import BaseModelAPIView, BaseModelViewSet
@@ -148,3 +148,20 @@ class BallotCreateView(generics.GenericAPIView):
         list_career = serializer.validated_data["list_career_name"]
         student.create_ballot(list_career)
         return JsonResponse(StudentBallotSerializer(student).data)
+
+    @extend_schema(
+        responses={
+            200: serializers.ListSerializer(child=serializers.CharField())
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        student: Student = self.get_object()
+        return JsonResponse(student.get_ballot(), safe=False)
+
+class BallotListView(generics.GenericAPIView):
+    queryset = Student.objects.filter(
+        is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
+    )
+
+
+
