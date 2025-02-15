@@ -13,8 +13,10 @@ class SchoolYear(models.Model):
     def __str__(self):
         return self.name
 
-    def get_subjects(self):
-        return Subject.objects.filter(studentnote__school_year=self)
+    def get_subjects(self, grade: int):
+        return Subject.objects.filter(
+            studentnote__school_year=self, grade=grade
+        )
 
     @staticmethod
     def get_current_course():
@@ -46,7 +48,7 @@ class Student(models.Model):
     def their_notes_are_valid(self, curse=None):
         if not curse:
             curse = SchoolYear.get_current_course()
-        subjects = curse.get_subjects()
+        subjects = curse.get_subjects(grade=self.grade)
         if not subjects:
             return False
         for subject in subjects:

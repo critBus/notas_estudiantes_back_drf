@@ -44,17 +44,21 @@ class SchoolYearSerializer(serializers.ModelSerializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
+    is_approved = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Student
         fields = "__all__"  # Incluye todos los campos del modelo
 
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_approved(self, obj):
+        if obj:
+            return obj.their_notes_are_valid()
+        return False
 
-class StudentBallotSerializer(serializers.ModelSerializer):
-    ballot = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Student
-        fields = "__all__"
+class StudentBallotSerializer(StudentSerializer):
+    ballot = serializers.SerializerMethodField(read_only=True)
 
     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
     def get_ballot(self, obj):
