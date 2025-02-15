@@ -5,6 +5,8 @@ from rest_framework import serializers
 
 from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
+GRADES_CHOICES = [(7, 7), (8, 8), (9, 9)]
+
 
 class SchoolYear(models.Model):
     start_date = models.DateField(verbose_name="Fecha de inicio")
@@ -27,17 +29,21 @@ class SchoolYear(models.Model):
 
 
 class Student(models.Model):
-    ci = models.CharField(max_length=20, verbose_name="Carnet de Identidad")
-    address = models.CharField(max_length=255, verbose_name="Dirección")
-    grade = models.IntegerField(
-        choices=[(7, 7), (8, 8), (9, 9)], verbose_name="Grado"
+    ci = models.CharField(
+        max_length=20, verbose_name="Carnet de Identidad", unique=True
     )
+    address = models.CharField(max_length=255, verbose_name="Dirección")
+    grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
     last_name = models.CharField(max_length=255, verbose_name="Apellidos")
     first_name = models.CharField(max_length=255, verbose_name="Nombres")
     registration_number = models.CharField(
         max_length=255, verbose_name="Número de Registro"
     )
-    sex = models.CharField(max_length=10, verbose_name="Sexo")
+    sex = models.CharField(
+        max_length=10,
+        verbose_name="Sexo",
+        choices=[("F", "Femenino"), ("M", "Masculino")],
+    )
     is_graduated = models.BooleanField(default=False, verbose_name="Graduado")
     is_dropped_out = models.BooleanField(verbose_name="Baja")
 
@@ -162,7 +168,7 @@ class GraduationGrade(models.Model):
 
 
 class Subject(models.Model):
-    grade = models.IntegerField(verbose_name="Grado")
+    grade = models.IntegerField(verbose_name="Grado", choices=GRADES_CHOICES)
     name = models.CharField(max_length=255, verbose_name="Nombre")
     tcp2_required = models.BooleanField(verbose_name="Requiere TCP2")
 
