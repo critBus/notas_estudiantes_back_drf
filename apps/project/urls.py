@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from apps.project.views import (
     AwardViewSet,
     BallotCreateView,
+    BallotListView,
     CareerViewSet,
     CurrentCurseView,
     DropoutViewSet,
@@ -14,7 +15,7 @@ from apps.project.views import (
     StudentNoteViewSet,
     StudentViewSet,
     SubjectViewSet,
-    Upgrading7and8, BallotListView,
+    Upgrading7and8,
 )
 
 router = DefaultRouter()
