@@ -7,6 +7,7 @@ from apps.project.views import (
     BallotListView,
     CareerViewSet,
     CurrentCurseView,
+    DegreeScaleCalculateView,
     DegreeScaleViewSet,
     DropoutViewSet,
     GraduationGradeViewSet,
@@ -16,7 +17,7 @@ from apps.project.views import (
     StudentNoteViewSet,
     StudentViewSet,
     SubjectViewSet,
-    Upgrading7and8, BallotListView,
+    Upgrading7and8,
 )
 
 router = DefaultRouter()
@@ -53,6 +54,11 @@ urlpatterns = [
         "school_year/current/",
         CurrentCurseView.as_view(),
         name="current-course",
+    ),
+    path(
+        "degree_scale/calculated/",
+        DegreeScaleCalculateView.as_view(),
+        name="degree-scale-calculated",
     ),
     path("", include(router.urls)),
 ]

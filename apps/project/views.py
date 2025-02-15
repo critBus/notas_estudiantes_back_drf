@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics, serializers
 from rest_framework.response import Response
 
@@ -176,3 +176,20 @@ class BallotListView(BaseListAPIView):
         is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
     )
     serializer_class = StudentBallotSerializer
+
+
+class DegreeScaleCalculateView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: DegreeScaleSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            score = DegreeScale.calculate_all_ranking_number()
+            return JsonResponse(
+                DegreeScaleSerializer(score, many=True).data, safe=False
+            )
+        except serializers.ValidationError as e:
+            return JsonResponse({"error": e.detail}, status=400)

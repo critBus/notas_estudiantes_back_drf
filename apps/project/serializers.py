@@ -14,6 +14,7 @@ from .models import (
     StudentNote,
     Subject,
 )
+from .utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
 
 class ErrorSerializer(serializers.Serializer):
@@ -25,9 +26,9 @@ class BallotCreateSerializer(serializers.Serializer):
 
     def validate_list_career_name(self, value):
         list_career = []
-        if len(list(set(value))) != 10:
+        if len(list(set(value))) != AMOUNT_OF_CAREER_ON_BALLOT:
             raise serializers.ValidationError(
-                "La cantidad de carreras debe ser un total de 10"
+                f"La cantidad de carreras debe ser un total de {AMOUNT_OF_CAREER_ON_BALLOT}"
             )
         for career_name in value:
             career = Career.objects.filter(name=career_name).first()
@@ -131,6 +132,9 @@ class StudentCareerSerializer(serializers.ModelSerializer):
 
 
 class DegreeScaleSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+    school_year = SchoolYearSerializer(read_only=True)
+
     class Meta:
         model = DegreeScale
         fields = "__all__"

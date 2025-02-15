@@ -1,6 +1,9 @@
 from typing import List
 
 from django.db import models
+from rest_framework import serializers
+
+from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
 
 class SchoolYear(models.Model):
@@ -71,6 +74,12 @@ class Student(models.Model):
                 "index"
             )
         ]
+
+    def has_ballot(self) -> bool:
+        return (
+            StudentCareer.objects.filter(student=self).count()
+            == AMOUNT_OF_CAREER_ON_BALLOT
+        )
 
 
 class Dropout(models.Model):
@@ -172,7 +181,7 @@ class StudentNote(models.Model):
     subject = models.ForeignKey(
         Subject, on_delete=models.CASCADE, verbose_name="Asignatura"
     )
-    acs = models.FloatField(blank=True, null=True, verbose_name="ACS")
+    asc = models.FloatField(blank=True, null=True, verbose_name="ACS")
     final_grade = models.FloatField(
         blank=True, null=True, verbose_name="Nota Final"
     )
@@ -188,6 +197,23 @@ class StudentNote(models.Model):
     class Meta:
         verbose_name = "Nota"
         verbose_name_plural = "Notas"
+
+    def calculate_final_grade(self):
+        prom_asc = self.asc  # en base a 10
+        prom_tcp = self.tcp1  # * 0.4; //en base a 40
+        if (self.tcp2 is not None) and self.subject.tcp2_required:
+            prom_tcp += self.tcp2  # * 0.4;
+            prom_tcp /= 2
+
+        if self.subject.grade == 9:
+            acumulado_base_50 = prom_asc + prom_tcp
+            pf_base_50 = self.final_exam / 2
+            self.final_grade = acumulado_base_50 + pf_base_50
+        else:
+            acumulado_base_50 = prom_asc + prom_tcp
+            self.final_grade = acumulado_base_50 * 2
+
+        return self.final_grade
 
     @staticmethod
     def are_valid(notes):
@@ -250,3 +276,54 @@ class DegreeScale(models.Model):
     class Meta:
         verbose_name = "Escalafón Estudiantil"
         verbose_name_plural = "Escalafones Estudiantiles"
+
+    def calculate_ranking_score(self) -> float:
+        sume = 0
+        notes = StudentNote.objects.filter(student=self.student)
+        for note in notes:
+            if note.final_grade is None:
+                note.calculate_final_grade()
+            sume += note.final_grade
+        if sume == 0 or notes.count() == 0:
+            return 0
+        self.ranking_score = sume / notes.count()
+        return self.ranking_score
+
+    @staticmethod
+    def calculate_all_ranking_number():
+        school_year = SchoolYear.get_current_course()
+        approved_students_ranking: List[DegreeScale] = []
+        students = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=9
+        )
+
+        # valida que todos tienen boletas
+        for student in students:
+            if student.their_notes_are_valid():
+                if not student.has_ballot():
+                    raise serializers.ValidationError(
+                        f"El estudiante {student.ci} no tiene una boleta"
+                    )
+
+        for student in students:
+            if student.their_notes_are_valid():
+                student_degree_scale = DegreeScale.objects.filter(
+                    student=student
+                ).first()
+                if not student_degree_scale:
+                    student_degree_scale = DegreeScale.objects.create(
+                        student=student, grade=school_year
+                    )
+                student_degree_scale.calculate_ranking_score()
+                student_degree_scale.save()
+                approved_students_ranking.append(student_degree_scale)
+
+        approved_students_ranking = sorted(
+            approved_students_ranking,
+            key=lambda v: v.ranking_score,
+            reverse=True,
+        )
+        for i, ranking in enumerate(approved_students_ranking):
+            ranking.ranking_number = i + 1
+
+        return approved_students_ranking
