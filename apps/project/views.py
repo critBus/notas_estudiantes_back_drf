@@ -14,6 +14,7 @@ from config.utils.utils_view import (
 from .models import (
     Award,
     Career,
+    DegreeScale,
     Dropout,
     Graduation,
     GraduationGrade,
@@ -29,6 +30,7 @@ from .serializers import (
     AwardSerializer,
     BallotCreateSerializer,
     CareerSerializer,
+    DegreeScaleSerializer,
     DropoutSerializer,
     ErrorSerializer,
     GraduationGradeSerializer,
@@ -90,6 +92,11 @@ class AwardViewSet(BaseModelViewSet):
 class StudentCareerViewSet(BaseModelViewSet):
     queryset = StudentCareer.objects.all()
     serializer_class = StudentCareerSerializer
+
+
+class DegreeScaleViewSet(BaseModelViewSet):
+    queryset = DegreeScale.objects.all()
+    serializer_class = DegreeScaleSerializer
 
 
 class Upgrading7and8(generics.GenericAPIView):

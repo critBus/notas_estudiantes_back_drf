@@ -4,6 +4,7 @@ from rest_framework import serializers
 from .models import (
     Award,
     Career,
+    DegreeScale,
     Dropout,
     Graduation,
     GraduationGrade,
@@ -112,4 +113,10 @@ class AwardSerializer(serializers.ModelSerializer):
 class StudentCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentCareer
+        fields = "__all__"
+
+
+class DegreeScaleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DegreeScale
         fields = "__all__"

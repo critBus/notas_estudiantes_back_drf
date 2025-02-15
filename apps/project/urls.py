@@ -7,6 +7,7 @@ from apps.project.views import (
     BallotListView,
     CareerViewSet,
     CurrentCurseView,
+    DegreeScaleViewSet,
     DropoutViewSet,
     GraduationGradeViewSet,
     GraduationViewSet,
@@ -30,6 +31,7 @@ router.register(r"student_note", StudentNoteViewSet)
 router.register(r"awards", AwardViewSet)
 router.register(r"student_careers", StudentCareerViewSet)
 router.register(r"school_year", SchoolYearViewSet)
+router.register(r"degree_scale", DegreeScaleViewSet)
 
 urlpatterns = [
     path(

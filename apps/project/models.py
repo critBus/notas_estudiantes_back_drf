@@ -231,3 +231,22 @@ class StudentCareer(models.Model):
     class Meta:
         verbose_name = "Estudiante - Carrera"
         verbose_name_plural = "Estudiantes - Carreras"
+
+
+class DegreeScale(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+    ranking_score = models.FloatField(
+        blank=True, null=True, verbose_name="Nota Escalafón"
+    )
+    ranking_number = models.IntegerField(
+        blank=True, null=True, verbose_name="Número de Escalafón"
+    )
+
+    class Meta:
+        verbose_name = "Escalafón Estudiantil"
+        verbose_name_plural = "Escalafones Estudiantiles"
