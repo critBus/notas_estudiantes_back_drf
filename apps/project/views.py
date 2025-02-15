@@ -193,3 +193,17 @@ class DegreeScaleCalculateView(BaseModelAPIView):
             )
         except serializers.ValidationError as e:
             return JsonResponse({"error": e.detail}, status=400)
+
+
+class DegreeScaleCurrentView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: DegreeScaleSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        score = DegreeScale.current()
+        return JsonResponse(
+            DegreeScaleSerializer(score, many=True).data, safe=False
+        )

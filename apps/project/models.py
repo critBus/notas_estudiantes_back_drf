@@ -290,6 +290,20 @@ class DegreeScale(models.Model):
         return self.ranking_score
 
     @staticmethod
+    def current():
+        students = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=9
+        )
+        approved_students = []
+        # valida que todos tienen boletas
+        for student in students:
+            if student.their_notes_are_valid() and student.has_ballot():
+                approved_students.append(student)
+        return DegreeScale.objects.filter(
+            student__in=approved_students
+        ).order_by("-ranking_score")
+
+    @staticmethod
     def calculate_all_ranking_number():
         school_year = SchoolYear.get_current_course()
         approved_students_ranking: List[DegreeScale] = []
@@ -312,7 +326,7 @@ class DegreeScale(models.Model):
                 ).first()
                 if not student_degree_scale:
                     student_degree_scale = DegreeScale.objects.create(
-                        student=student, grade=school_year
+                        student=student, school_year=school_year
                     )
                 student_degree_scale.calculate_ranking_score()
                 student_degree_scale.save()

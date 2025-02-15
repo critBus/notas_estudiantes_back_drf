@@ -8,6 +8,7 @@ from apps.project.views import (
     CareerViewSet,
     CurrentCurseView,
     DegreeScaleCalculateView,
+    DegreeScaleCurrentView,
     DegreeScaleViewSet,
     DropoutViewSet,
     GraduationGradeViewSet,
@@ -58,6 +59,11 @@ urlpatterns = [
     path(
         "degree_scale/calculated/",
         DegreeScaleCalculateView.as_view(),
+        name="degree-scale-calculated",
+    ),
+    path(
+        "degree_scale/current/",
+        DegreeScaleCurrentView.as_view(),
         name="degree-scale-calculated",
     ),
     path("", include(router.urls)),
