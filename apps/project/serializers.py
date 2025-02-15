@@ -68,6 +68,20 @@ class StudentBallotSerializer(StudentSerializer):
         return []
 
 
+class StudentBallotSerializer(serializers.ModelSerializer):
+    ballot = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Student
+        fields = "__all__"
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_ballot(self, obj):
+        if obj:
+            return obj.get_ballot()
+        return []
+
+
 class DropoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dropout
