@@ -3,8 +3,13 @@ from rest_framework.routers import DefaultRouter
 
 from apps.project.views import (
     AwardViewSet,
+    BallotCreateView,
+    BallotListView,
     CareerViewSet,
     CurrentCurseView,
+    DegreeScaleCalculateView,
+    DegreeScaleCurrentView,
+    DegreeScaleViewSet,
     DropoutViewSet,
     GraduationGradeViewSet,
     GraduationViewSet,
@@ -28,6 +33,7 @@ router.register(r"student_note", StudentNoteViewSet)
 router.register(r"awards", AwardViewSet)
 router.register(r"student_careers", StudentCareerViewSet)
 router.register(r"school_year", SchoolYearViewSet)
+router.register(r"degree_scale", DegreeScaleViewSet)
 
 urlpatterns = [
     path(
@@ -36,9 +42,29 @@ urlpatterns = [
         name="upgrading7and8",
     ),
     path(
+        "students/ballot/<int:id>/",
+        BallotCreateView.as_view(),
+        name="create-ballot",
+    ),
+    path(
+        "students/ballot/",
+        BallotListView.as_view(),
+        name="ballot-list",
+    ),
+    path(
         "school_year/current/",
         CurrentCurseView.as_view(),
-        name="upgrading7and8",
+        name="current-course",
+    ),
+    path(
+        "degree_scale/calculated/",
+        DegreeScaleCalculateView.as_view(),
+        name="degree-scale-calculated",
+    ),
+    path(
+        "degree_scale/current/",
+        DegreeScaleCurrentView.as_view(),
+        name="degree-scale-calculated",
     ),
     path("", include(router.urls)),
 ]

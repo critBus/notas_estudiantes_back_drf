@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, viewsets
+from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 
@@ -20,6 +21,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
 
 class BaseGenericAPIView(generics.GenericAPIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsTokenValid,
+    ]  # Requiere autenticación
+    pagination_class = CustomPagination
+
+
+class BaseListAPIView(ListAPIView):
     permission_classes = [
         permissions.IsAuthenticated,
         IsTokenValid,
