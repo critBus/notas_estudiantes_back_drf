@@ -342,3 +342,8 @@ class GrantCareer(models.Model):
                     grant_career_list.append(grant_career)
                     break
         return grant_career_list
+
+    @staticmethod
+    def current():
+        school_year = SchoolYear.get_current_course()
+        return GrantCareer.objects.filter(school_year=school_year)

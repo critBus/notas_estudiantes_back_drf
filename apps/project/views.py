@@ -193,3 +193,31 @@ class DegreeScaleCurrentView(BaseModelAPIView):
         return JsonResponse(
             DegreeScaleSerializer(score, many=True).data, safe=False
         )
+
+
+class CarryOutGrantingOfCoursesView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: GrantCareerSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        grants = GrantCareer.grant()
+        return JsonResponse(
+            GrantCareerSerializer(grants, many=True).data, safe=False
+        )
+
+
+class GrantCareerCurrentView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: GrantCareerSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        grants = GrantCareer.current()
+        return JsonResponse(
+            GrantCareerSerializer(grants, many=True).data, safe=False
+        )

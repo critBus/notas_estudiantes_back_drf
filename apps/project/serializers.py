@@ -37,12 +37,6 @@ class BallotCreateSerializer(serializers.Serializer):
         return list_career
 
 
-class GrantCareerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GrantCareer
-        fields = "__all__"
-
-
 class SchoolYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolYear
@@ -112,15 +106,11 @@ class DegreeScaleSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# class StudentBallotSerializer(serializers.ModelSerializer):
-#     ballot = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Student
-#         fields = "__all__"
-#
-#     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-#     def get_ballot(self, obj):
-#         if obj:
-#             return obj.get_ballot()
-#         return []
+class GrantCareerSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+    school_year = SchoolYearSerializer(read_only=True)
+    career = CareerSerializer(read_only=True)
+
+    class Meta:
+        model = GrantCareer
+        fields = "__all__"
