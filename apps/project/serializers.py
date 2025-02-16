@@ -2,12 +2,10 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
-    Award,
     Career,
     DegreeScale,
     Dropout,
-    Graduation,
-    GraduationGrade,
+    GrantCareer,
     SchoolYear,
     Student,
     StudentCareer,
@@ -69,20 +67,6 @@ class StudentBallotSerializer(StudentSerializer):
         return []
 
 
-class StudentBallotSerializer(serializers.ModelSerializer):
-    ballot = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Student
-        fields = "__all__"
-
-    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_ballot(self, obj):
-        if obj:
-            return obj.get_ballot()
-        return []
-
-
 class DropoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dropout
@@ -92,18 +76,6 @@ class DropoutSerializer(serializers.ModelSerializer):
 class CareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Career
-        fields = "__all__"
-
-
-class GraduationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Graduation
-        fields = "__all__"
-
-
-class GraduationGradeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GraduationGrade
         fields = "__all__"
 
 
@@ -119,12 +91,6 @@ class StudentNoteSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AwardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Award
-        fields = "__all__"
-
-
 class StudentCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentCareer
@@ -137,4 +103,14 @@ class DegreeScaleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DegreeScale
+        fields = "__all__"
+
+
+class GrantCareerSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+    school_year = SchoolYearSerializer(read_only=True)
+    career = CareerSerializer(read_only=True)
+
+    class Meta:
+        model = GrantCareer
         fields = "__all__"

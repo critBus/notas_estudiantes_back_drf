@@ -12,12 +12,10 @@ from config.utils.utils_view import (
 
 # Importa tus modelos
 from .models import (
-    Award,
     Career,
     DegreeScale,
     Dropout,
-    Graduation,
-    GraduationGrade,
+    GrantCareer,
     SchoolYear,
     Student,
     StudentCareer,
@@ -27,14 +25,12 @@ from .models import (
 
 # Importa tus serializadores (debes crearlos)
 from .serializers import (
-    AwardSerializer,
     BallotCreateSerializer,
     CareerSerializer,
     DegreeScaleSerializer,
     DropoutSerializer,
     ErrorSerializer,
-    GraduationGradeSerializer,
-    GraduationSerializer,
+    GrantCareerSerializer,
     SchoolYearSerializer,
     StudentBallotSerializer,
     StudentCareerSerializer,
@@ -42,6 +38,11 @@ from .serializers import (
     StudentSerializer,
     SubjectSerializer,
 )
+
+
+class GrantCareerViewSet(BaseModelViewSet):
+    queryset = GrantCareer.objects.all()
+    serializer_class = GrantCareerSerializer
 
 
 class SchoolYearViewSet(BaseModelViewSet):
@@ -64,16 +65,6 @@ class CareerViewSet(BaseModelViewSet):
     serializer_class = CareerSerializer
 
 
-class GraduationViewSet(BaseModelViewSet):
-    queryset = Graduation.objects.all()
-    serializer_class = GraduationSerializer
-
-
-class GraduationGradeViewSet(BaseModelViewSet):
-    queryset = GraduationGrade.objects.all()
-    serializer_class = GraduationGradeSerializer
-
-
 class SubjectViewSet(BaseModelViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
@@ -82,11 +73,6 @@ class SubjectViewSet(BaseModelViewSet):
 class StudentNoteViewSet(BaseModelViewSet):
     queryset = StudentNote.objects.all()
     serializer_class = StudentNoteSerializer
-
-
-class AwardViewSet(BaseModelViewSet):
-    queryset = Award.objects.all()
-    serializer_class = AwardSerializer
 
 
 class StudentCareerViewSet(BaseModelViewSet):
@@ -206,4 +192,32 @@ class DegreeScaleCurrentView(BaseModelAPIView):
         score = DegreeScale.current()
         return JsonResponse(
             DegreeScaleSerializer(score, many=True).data, safe=False
+        )
+
+
+class CarryOutGrantingOfCoursesView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: GrantCareerSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        grants = GrantCareer.grant()
+        return JsonResponse(
+            GrantCareerSerializer(grants, many=True).data, safe=False
+        )
+
+
+class GrantCareerCurrentView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: GrantCareerSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        grants = GrantCareer.current()
+        return JsonResponse(
+            GrantCareerSerializer(grants, many=True).data, safe=False
         )
