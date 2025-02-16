@@ -2,12 +2,10 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
-    Award,
     Career,
     DegreeScale,
     Dropout,
-    Graduation,
-    GraduationGrade,
+    GrantCareer,
     SchoolYear,
     Student,
     StudentCareer,
@@ -37,6 +35,12 @@ class BallotCreateSerializer(serializers.Serializer):
                     f"No existe la carrera con el nombre {career}"
                 )
         return list_career
+
+
+class GrantCareerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrantCareer
+        fields = "__all__"
 
 
 class SchoolYearSerializer(serializers.ModelSerializer):
@@ -69,20 +73,6 @@ class StudentBallotSerializer(StudentSerializer):
         return []
 
 
-class StudentBallotSerializer(serializers.ModelSerializer):
-    ballot = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Student
-        fields = "__all__"
-
-    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_ballot(self, obj):
-        if obj:
-            return obj.get_ballot()
-        return []
-
-
 class DropoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dropout
@@ -95,18 +85,6 @@ class CareerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class GraduationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Graduation
-        fields = "__all__"
-
-
-class GraduationGradeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GraduationGrade
-        fields = "__all__"
-
-
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
@@ -116,12 +94,6 @@ class SubjectSerializer(serializers.ModelSerializer):
 class StudentNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentNote
-        fields = "__all__"
-
-
-class AwardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Award
         fields = "__all__"
 
 
@@ -138,3 +110,17 @@ class DegreeScaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = DegreeScale
         fields = "__all__"
+
+
+# class StudentBallotSerializer(serializers.ModelSerializer):
+#     ballot = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = Student
+#         fields = "__all__"
+#
+#     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+#     def get_ballot(self, obj):
+#         if obj:
+#             return obj.get_ballot()
+#         return []

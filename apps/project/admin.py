@@ -4,6 +4,7 @@ from django.contrib import admin
 from apps.project.models import (
     Career,
     DegreeScale,
+    GrantCareer,
     SchoolYear,
     Student,
     StudentCareer,
@@ -131,5 +132,20 @@ class StudentCareerAdmin(admin.ModelAdmin):
 class DegreeScaleAdmin(admin.ModelAdmin):
     list_display = ("student", "school_year", "ranking_score", "ranking_number")
     list_filter = ("student", "school_year", "ranking_score", "ranking_number")
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(GrantCareer)
+class GrantCareerAdmin(admin.ModelAdmin):
+    list_display = (
+        "student",
+        "career",
+        "school_year",
+    )
+    list_filter = (
+        "career",
+        "school_year",
+    )
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

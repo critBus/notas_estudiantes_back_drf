@@ -1,6 +1,7 @@
 @startuml
 
-class Student {
+entity Student {
+    id : Integer PK // id
     ci : CharField(20) // Carnet de Identidad
     address : CharField(255) // Dirección
     grade : IntegerField // Grado
@@ -10,10 +11,10 @@ class Student {
     sex : CharField(10) // Sexo
     is_graduated : BooleanField // Graduado
     is_dropped_out : BooleanField // Baja
-    __str__()
 }
 
-class Dropout {
+entity Dropout {
+    id : Integer PK // id
     is_dropped_out : BooleanField // Baja
     date : DateField // Fecha
     municipality : CharField(255) // Municipio
@@ -21,34 +22,18 @@ class Dropout {
     school : CharField(255) // Escuela
 }
 
-class Career {
+entity Career {
+    id : Integer PK // id
     amount : IntegerField // Monto
     name : CharField(255) // Nombre
-    __str__()
 }
 
-class Graduation {
-    graduation_number : CharField(255) // Número de Matrícula
-    graduation_date : DateField // Fecha de Graduación
-    career : CharField(255) // Carrera
-    ranking_score : FloatField // Nota Escalafón
-    ranking_number : IntegerField // Número de Escalafón
-}
 
-class GraduationGrade {
-    subject_name : CharField(255) // Nombre de Asignatura
-    assignment_grade : FloatField // Nota de Asignación
-    tcp1 : FloatField // TCP1
-    tcp2 : FloatField // TCP2
-    final_exam : FloatField // Examen Final
-    final_grade : FloatField // Nota Final
-}
-
-class Subject {
+entity Subject {
+    id : Integer PK // id
     grade : IntegerField // Grado
     name : CharField(255) // Nombre
     tcp2_required : BooleanField // Requiere TCP2
-    __str__()
 }
 
 entity SchoolYear {
@@ -58,7 +43,8 @@ entity SchoolYear {
     name : Varchar(255)
 }
 
-class StudentNote {
+entity StudentNote {
+    id : Integer PK
     acs : FloatField // ACS
     final_grade : FloatField // Nota Final
     final_exam : FloatField // Examen Final
@@ -66,45 +52,37 @@ class StudentNote {
     tcp2 : FloatField // TCP2
 }
 
-class Award {
-    graduation_year : IntegerField // Año de Graduación
-    career : CharField(255) // Carrera
-    ranking_score : FloatField // Nota Escalafón
-    ranking_number : IntegerField // Número de Escalafón
-}
 
-class StudentCareer {
+
+entity StudentCareer {
+    id : Integer PK
     index : IntegerField // Índice
 }
 
-class DegreeScale {
+entity DegreeScale {
     ranking_score : FloatField // Nota Escalafón
     ranking_number : IntegerField // Número de Escalafón
 }
+entity GrantCareer{
+    id : Integer PK
+}
 
-' StudentNote "1..*" -- "1" SchoolYear : belongs to
-SchoolYear --* DegreeScale :  Curso del Escalafon
-SchoolYear --* StudentNote : Curso de la nota
+GrantCareer "1" -- "1" Student : Estudiante del otorgamiento
+GrantCareer "1" -- "1" Career : Carrera otorgada
+
+
+SchoolYear "1" -- "*" DegreeScale :  Curso del Escalafon
+SchoolYear "1" -- "*" StudentNote : Curso de la nota
 
 DegreeScale "1" -- "1" Student : Escalafon del estudiante
 
-Student --* Dropout : student // Estudiante
-Student --* Graduation : student // Estudiante
-Student --* GraduationGrade : student // Estudiante
-Student --* StudentNote : student // Estudiante
-Student --* Award : student // Estudiante
-Student --* StudentCareer : student // Estudiante
+Student "1" -- "1" Dropout : student // Estudiante
+Student "1" -- "*" StudentNote : student // Estudiante
+Student "1" -- "*" StudentCareer : student // Estudiante
 
-Dropout --* Student
-Graduation --* Student
-GraduationGrade --* Student
-StudentNote --* Student
-Award --* Student
-StudentCareer --* Student
 
-StudentNote --* Subject : subject // Asignatura
-StudentCareer --* Career : career // Carrera
-Graduation --* Career : career // Carrera
-Award --* Career : career // Carrera
+
+StudentNote "1" -- "1" Subject : subject // Asignatura
+StudentCareer "*" -- "1" Career : career // Carrera
 
 @enduml

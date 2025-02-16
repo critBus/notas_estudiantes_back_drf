@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from django.db import models
 from rest_framework import serializers
@@ -115,58 +115,6 @@ class Career(models.Model):
         verbose_name_plural = "Carreras"
 
 
-class Graduation(models.Model):
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
-    )
-    graduation_number = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        verbose_name="Número de Matrícula",
-    )
-    graduation_date = models.DateField(
-        blank=True, null=True, verbose_name="Fecha de Graduación"
-    )
-    career = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="Carrera"
-    )
-    ranking_score = models.FloatField(
-        blank=True, null=True, verbose_name="Nota Escalafón"
-    )
-    ranking_number = models.IntegerField(
-        blank=True, null=True, verbose_name="Número de Escalafón"
-    )
-
-    class Meta:
-        verbose_name = "Graduación"
-        verbose_name_plural = "Graduaciones"
-
-
-class GraduationGrade(models.Model):
-    subject_name = models.CharField(
-        max_length=255, verbose_name="Nombre de Asignatura"
-    )
-    assignment_grade = models.FloatField(
-        blank=True, null=True, verbose_name="Nota de Asignación"
-    )
-    tcp1 = models.FloatField(blank=True, null=True, verbose_name="TCP1")
-    tcp2 = models.FloatField(blank=True, null=True, verbose_name="TCP2")
-    final_exam = models.FloatField(
-        blank=True, null=True, verbose_name="Examen Final"
-    )
-    final_grade = models.FloatField(
-        blank=True, null=True, verbose_name="Nota Final"
-    )
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
-    )
-
-    class Meta:
-        verbose_name = "Nota de Graduado"
-        verbose_name_plural = "Notas de Graduados"
-
-
 class Subject(models.Model):
     grade = models.IntegerField(verbose_name="Grado", choices=GRADES_CHOICES)
     name = models.CharField(max_length=255, verbose_name="Nombre")
@@ -227,28 +175,6 @@ class StudentNote(models.Model):
         if not notes:
             return False
         return True
-
-
-class Award(models.Model):
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
-    )
-    graduation_year = models.IntegerField(
-        blank=True, null=True, verbose_name="Año de Graduación"
-    )
-    career = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="Carrera"
-    )
-    ranking_score = models.FloatField(
-        blank=True, null=True, verbose_name="Nota Escalafón"
-    )
-    ranking_number = models.IntegerField(
-        blank=True, null=True, verbose_name="Número de Escalafón"
-    )
-
-    class Meta:
-        verbose_name = "Otorgamiento"
-        verbose_name_plural = "Otorgamientos"
 
 
 class StudentCareer(models.Model):
@@ -347,3 +273,72 @@ class DegreeScale(models.Model):
             ranking.ranking_number = i + 1
 
         return approved_students_ranking
+
+
+class GrantCareer(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    career = models.ForeignKey(
+        Career, on_delete=models.CASCADE, verbose_name="Carrera"
+    )
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+
+    class Meta:
+        verbose_name = "Carrera Otorgada"
+        verbose_name_plural = "Carreras Otorgadas"
+
+    @staticmethod
+    def grant():
+        students = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=9
+        )
+        approved_students = []
+        # valida que todos tienen boletas
+        for student in students:
+            if student.their_notes_are_valid() and student.has_ballot():
+                approved_students.append(student)
+
+        careers_amount: Dict[Career, int] = Career.objects.filter(amount__gt=0)
+        ballots: Dict[Student, List[StudentCareer]] = {
+            student: StudentCareer.objects.filter(student=student).order_by(
+                "index"
+            )
+            for student in approved_students
+        }
+        ranking = DegreeScale.current()
+        school_year = SchoolYear.get_current_course()
+
+        grant_career_list: List[GrantCareer] = []
+        for rank in ranking:
+            student = rank.student
+            ballot = ballots[student]
+            for student_career in ballot:
+                career = student_career.career
+
+                places_available = careers_amount[career]
+
+                if places_available:
+                    grant_career: GrantCareer = GrantCareer.objects.filter(
+                        student=student
+                    ).first()
+                    if not grant_career:
+                        grant_career = GrantCareer.objects.create(
+                            student=student,
+                            career=career,
+                            school_year=school_year,
+                        )
+                    else:
+                        grant_career.career = (career,)
+                        grant_career.school_year = school_year
+                        grant_career.save()
+
+                    places_available -= 1
+                    careers_amount[career] = places_available
+                    career.amount = places_available
+                    career.save()
+                    grant_career_list.append(grant_career)
+                    break
+        return grant_career_list
