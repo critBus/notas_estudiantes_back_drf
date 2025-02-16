@@ -10,7 +10,6 @@ from config.utils.utils_view import (
     BaseModelViewSet,
 )
 
-# Importa tus modelos
 from .models import (
     Career,
     DegreeScale,
@@ -22,8 +21,6 @@ from .models import (
     StudentNote,
     Subject,
 )
-
-# Importa tus serializadores (debes crearlos)
 from .serializers import (
     BallotCreateSerializer,
     CareerSerializer,
@@ -49,10 +46,59 @@ class SchoolYearViewSet(BaseModelViewSet):
     queryset = SchoolYear.objects.all()
     serializer_class = SchoolYearSerializer
 
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["contains", "exact", "icontains", "search"],
+        "start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "end_date": ["gte", "lte", "gt", "lt", "exact"],
+    }
+    search_fields = [
+        "name",
+    ]
+    ordering_fields = [
+        "pk",
+        "name",
+        "start_date",
+        "end_date",
+    ]
+    ordering = ["start_date"]
+
 
 class StudentViewSet(BaseModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "ci": ["contains", "exact", "icontains", "search"],
+        "address": ["contains", "exact", "icontains", "search"],
+        "grade": ["exact"],
+        "first_name": ["contains", "exact", "icontains", "search"],
+        "last_name": ["contains", "exact", "icontains", "search"],
+        "registration_number": ["contains", "exact", "icontains", "search"],
+        "sex": ["exact"],
+        "is_graduated": ["exact"],
+        "is_dropped_out": ["exact"],
+    }
+    search_fields = [
+        "address",
+        "registration_number",
+        "first_name",
+        "last_name",
+    ]
+    ordering_fields = [
+        "pk",
+        "ci",
+        "address",
+        "grade",
+        "first_name",
+        "last_name",
+        "registration_number",
+        "sex",
+        "is_graduated",
+        "is_dropped_out",
+    ]
+    ordering = ["ci"]
 
 
 class DropoutViewSet(BaseModelViewSet):
@@ -64,15 +110,91 @@ class CareerViewSet(BaseModelViewSet):
     queryset = Career.objects.all()
     serializer_class = CareerSerializer
 
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["contains", "exact", "icontains", "search"],
+        "amount": ["gte", "lte", "gt", "lt", "exact"],
+    }
+    search_fields = [
+        "name",
+    ]
+    ordering_fields = [
+        "pk",
+        "name",
+        "amount",
+    ]
+    ordering = ["name"]
+
 
 class SubjectViewSet(BaseModelViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
 
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["contains", "exact", "icontains", "search"],
+        "grade": ["exact"],
+        "tcp2_required": ["exact"],
+    }
+    search_fields = [
+        "name",
+    ]
+    ordering_fields = [
+        "pk",
+        "name",
+        "grade",
+        "tcp2_required",
+    ]
+    ordering = ["name"]
+
 
 class StudentNoteViewSet(BaseModelViewSet):
     queryset = StudentNote.objects.all()
     serializer_class = StudentNoteSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "student": ["exact"],
+        "student__ci": ["contains", "exact", "icontains", "search"],
+        "student__address": ["contains", "exact", "icontains", "search"],
+        "student__grade": ["exact"],
+        "student__first_name": ["contains", "exact", "icontains", "search"],
+        "student__last_name": ["contains", "exact", "icontains", "search"],
+        "student__registration_number": [
+            "contains",
+            "exact",
+            "icontains",
+            "search",
+        ],
+        "student__sex": ["exact"],
+        "student__is_graduated": ["exact"],
+        "student__is_dropped_out": ["exact"],
+        "subject": ["exact"],
+        "subject__name": ["contains", "exact", "icontains", "search"],
+        "subject__grade": ["exact"],
+        "subject__tcp2_required": ["exact"],
+        "school_year": ["exact"],
+        "school_year__name": ["contains", "exact", "icontains", "search"],
+        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
+        "asc": ["gte", "lte", "gt", "lt", "exact"],
+        "final_grade": ["gte", "lte", "gt", "lt", "exact"],
+        "final_exam": ["gte", "lte", "gt", "lt", "exact"],
+        "tcp1": ["gte", "lte", "gt", "lt", "exact"],
+        "tcp2": ["gte", "lte", "gt", "lt", "exact"],
+    }
+
+    ordering_fields = [
+        "pk",
+        "school_year__start_date",
+        "school_year__end_date",
+        "asc",
+        "final_grade",
+        "final_exam",
+        "tcp1",
+        "tcp2",
+    ]
+    ordering = ["pk"]
 
 
 class StudentCareerViewSet(BaseModelViewSet):
@@ -162,6 +284,38 @@ class BallotListView(BaseListAPIView):
         is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
     )
     serializer_class = StudentBallotSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "ci": ["contains", "exact", "icontains", "search"],
+        "address": ["contains", "exact", "icontains", "search"],
+        "grade": ["exact"],
+        "first_name": ["contains", "exact", "icontains", "search"],
+        "last_name": ["contains", "exact", "icontains", "search"],
+        "registration_number": ["contains", "exact", "icontains", "search"],
+        "sex": ["exact"],
+        "is_graduated": ["exact"],
+        "is_dropped_out": ["exact"],
+    }
+    search_fields = [
+        "address",
+        "registration_number",
+        "first_name",
+        "last_name",
+    ]
+    ordering_fields = [
+        "pk",
+        "ci",
+        "address",
+        "grade",
+        "first_name",
+        "last_name",
+        "registration_number",
+        "sex",
+        "is_graduated",
+        "is_dropped_out",
+    ]
+    ordering = ["ci"]
 
 
 class DegreeScaleCalculateView(BaseModelAPIView):
