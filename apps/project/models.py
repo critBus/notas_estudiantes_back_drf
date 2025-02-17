@@ -19,9 +19,7 @@ class SchoolYear(models.Model):
         return self.name
 
     def get_subjects(self, grade: int):
-        return Subject.objects.filter(
-            studentnote__school_year=self, grade=grade
-        )
+        return Subject.objects.filter(grade=grade)
 
     @staticmethod
     def get_current_course():

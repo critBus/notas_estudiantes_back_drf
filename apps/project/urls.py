@@ -35,7 +35,7 @@ router.register(r"grant_career", GrantCareerViewSet)
 
 urlpatterns = [
     path(
-        "students/upgrading7and8/<int:id>/",
+        "students/upgrading7and8/<int:pk>/",
         Upgrading7and8.as_view(),
         name="upgrading7and8",
     ),
