@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import generics, serializers
 from rest_framework.response import Response
 
@@ -270,9 +270,23 @@ class BallotCreateView(BaseGenericAPIView):
         return JsonResponse(StudentBallotSerializer(student).data, status=201)
 
     @extend_schema(
-        responses={
-            200: serializers.ListSerializer(child=serializers.CharField())
-        },
+        examples=[
+            OpenApiExample(
+                "Carreras seleccionadas",
+                value=[
+                    "career19",
+                    "career0",
+                    "career1",
+                    "career2",
+                    "career3",
+                    "career4",
+                    "career5",
+                    "career6",
+                    "career7",
+                    "career8",
+                ],
+            )
+        ],
     )
     def get(self, request, *args, **kwargs):
         student: Student = self.get_object()
