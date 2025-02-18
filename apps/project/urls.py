@@ -62,17 +62,17 @@ urlpatterns = [
     path(
         "degree_scale/current/",
         DegreeScaleCurrentView.as_view(),
-        name="degree-scale-calculated",
+        name="degree-scale-current",
     ),
     path(
         "grant_career/current/",
         GrantCareerCurrentView.as_view(),
-        name="degree-scale-current",
+        name="grant-career-current",
     ),
     path(
         "grant_career/grant/",
         CarryOutGrantingOfCoursesView.as_view(),
-        name="degree-scale-grant",
+        name="grant-career-grant",
     ),
     path("", include(router.urls)),
 ]

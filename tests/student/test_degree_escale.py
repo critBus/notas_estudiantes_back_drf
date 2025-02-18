@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from rest_framework.reverse import reverse
 
 from apps.project.models import (
     DegreeScale,
@@ -12,6 +13,10 @@ User = get_user_model()
 
 
 class TestDegreeEscale(StudentTestCase):
+    def setUp(self):
+        super().setUp()
+        self.maxDiff = None
+
     def test_calculate_final_grade(self):
         student = self.create_random_student(grade=9)
         curso = SchoolYear.get_current_course()
@@ -105,7 +110,7 @@ class TestDegreeEscale(StudentTestCase):
         degree_scale.calculate_ranking_score()
         self.assertEqual(ranking, degree_scale.ranking_score)
 
-    def test_degree_escale(self):
+    def create_fake_ranking(self):
         SchoolYear.objects.all().delete()
         Subject.objects.all().delete()
         curse_7, curse_8, curse_9 = self.create_3_school_year(2022)
@@ -114,9 +119,10 @@ class TestDegreeEscale(StudentTestCase):
             Subject.objects.create(
                 grade=grade, name=f"test_{grade}", tcp2_required=True
             )
-
+        students = []
         for i in range(3):
             student = self.create_random_student(grade=9)
+            students.append(student)
             for j in range(3):
                 grade = j + 7
                 note = StudentNote.objects.create(
@@ -131,9 +137,74 @@ class TestDegreeEscale(StudentTestCase):
                 note.asc = 6 + i + j
                 note.final_exam = 92 + i + j
                 note.save()
+        students.reverse()
+        return students
 
+    def test_degree_escale(self):
+        self.create_fake_ranking()
         DegreeScale.calculate_all_ranking_number()
         q = DegreeScale.objects.order_by("ranking_number")
         self.assertEqual(3, q.count())
         for i, degree in enumerate(q):
             self.assertEqual(i + 1, degree.ranking_number)
+
+    def call_degree_scale_calculated(
+        self,
+        unauthorized: bool = False,
+        forbidden: bool = False,
+        bad_request: bool = False,
+        not_found: bool = False,
+        print_json_response: bool = False,
+    ):
+        URL = reverse("degree-scale-calculated")
+        response_dict = self.call_get(
+            url=URL,
+            unauthorized=unauthorized,
+            forbidden=forbidden,
+            bad_request=bad_request,
+            not_found=not_found,
+            print_json_response=print_json_response,
+        )
+
+        return response_dict
+
+    def test_degree_scale_calculated(self):
+        students = self.create_fake_ranking()
+        response_dict = self.call_degree_scale_calculated(
+            print_json_response=False
+        )
+        rankings = []
+        for student in students:
+            ranking = DegreeScale.objects.filter(student=student).first()
+            self.assertIsNotNone(ranking)
+            rankings.append(ranking)
+        self.assertEqual(
+            response_dict,
+            [
+                {
+                    "id": rank.id,
+                    "student": {
+                        "id": rank.student.id,
+                        "is_approved": True,
+                        "ci": rank.student.ci,
+                        "address": rank.student.address,
+                        "grade": 9,
+                        "last_name": rank.student.last_name,
+                        "first_name": rank.student.first_name,
+                        "registration_number": rank.student.registration_number,
+                        "sex": rank.student.sex,
+                        "is_graduated": False,
+                        "is_dropped_out": False,
+                    },
+                    "school_year": {
+                        "id": rank.school_year.id,
+                        "start_date": str(rank.school_year.start_date),
+                        "end_date": str(rank.school_year.end_date),
+                        "name": rank.school_year.name,
+                    },
+                    "ranking_score": rank.ranking_score,
+                    "ranking_number": i + 1,
+                }
+                for i, rank in enumerate(rankings)
+            ],
+        )
