@@ -22,7 +22,7 @@ class StudentMixin:
             address=fake.address(),
             grade=grade if grade else random.choices([7, 8, 9]),
             registration_number=fake.unique.numerify(text="############")[:11],
-            sex=random.choices(["F", "M"]),
+            sex=random.choice(["M", "F"]),
             is_graduated=is_graduated
             if is_graduated is not None
             else random.choices([True, False]),
