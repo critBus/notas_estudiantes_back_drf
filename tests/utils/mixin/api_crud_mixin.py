@@ -14,6 +14,7 @@ class ApiCrudMixin:
         unauthorized: bool = False,
         forbidden: bool = False,
         bad_request: bool = False,
+        not_found: bool = False,
         print_json_response: bool = False,
         format_json=False,
     ) -> Optional[Dict[str, Any]]:
@@ -36,6 +37,9 @@ class ApiCrudMixin:
             return
         elif forbidden:
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            return
+        elif not_found:
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
             return
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_dict = json.loads(str(response.content, encoding="utf8"))

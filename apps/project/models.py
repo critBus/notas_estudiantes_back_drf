@@ -73,7 +73,7 @@ class Student(models.Model):
 
     def get_ballot(self):
         return [
-            v.name
+            v.career.name
             for v in StudentCareer.objects.filter(student=self).order_by(
                 "index"
             )

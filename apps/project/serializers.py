@@ -32,8 +32,9 @@ class BallotCreateSerializer(serializers.Serializer):
             career = Career.objects.filter(name=career_name).first()
             if career is None:
                 raise serializers.ValidationError(
-                    f"No existe la carrera con el nombre {career}"
+                    f"No existe la carrera con el nombre {career_name}"
                 )
+            list_career.append(career)
         return list_career
 
 

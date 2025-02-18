@@ -40,7 +40,7 @@ urlpatterns = [
         name="upgrading7and8",
     ),
     path(
-        "students/ballot/<int:id>/",
+        "students/ballot/<int:pk>/",
         BallotCreateView.as_view(),
         name="create-ballot",
     ),

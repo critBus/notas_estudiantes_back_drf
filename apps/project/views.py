@@ -252,13 +252,13 @@ class CurrentCurseView(BaseModelAPIView):
 
 class BallotCreateView(BaseGenericAPIView):
     queryset = Student.objects.filter(
-        is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
+        is_graduated=False, is_dropped_out=False, grade=9
     )
     serializer_class = BallotCreateSerializer
 
     @extend_schema(
         responses={
-            200: StudentBallotSerializer,
+            201: StudentBallotSerializer,
         },
     )
     def post(self, request, *args, **kwargs):
@@ -267,7 +267,7 @@ class BallotCreateView(BaseGenericAPIView):
         serializer.is_valid(raise_exception=True)
         list_career = serializer.validated_data["list_career_name"]
         student.create_ballot(list_career)
-        return JsonResponse(StudentBallotSerializer(student).data)
+        return JsonResponse(StudentBallotSerializer(student).data, status=201)
 
     @extend_schema(
         responses={
@@ -281,7 +281,7 @@ class BallotCreateView(BaseGenericAPIView):
 
 class BallotListView(BaseListAPIView):
     queryset = Student.objects.filter(
-        is_graduated=False, is_dropped_out=False, grade__in=[7, 8]
+        is_graduated=False, is_dropped_out=False, grade=9
     )
     serializer_class = StudentBallotSerializer
 
