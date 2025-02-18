@@ -1,7 +1,6 @@
 from typing import Dict, List
 
 from django.db import models
-from rest_framework import serializers
 
 from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
@@ -151,10 +150,13 @@ class StudentNote(models.Model):
         verbose_name_plural = "Notas"
 
     def calculate_final_grade(self):
+        if self.tcp1 is None or self.asc is None or self.final_exam is None:
+            return
+
         prom_asc = self.asc  # en base a 10
-        prom_tcp = self.tcp1  # * 0.4; //en base a 40
+        prom_tcp = self.tcp1 * 0.4  # * 0.4; //en base a 40
         if (self.tcp2 is not None) and self.subject.tcp2_required:
-            prom_tcp += self.tcp2  # * 0.4;
+            prom_tcp += self.tcp2 * 0.4  # * 0.4;
             prom_tcp /= 2
 
         if self.subject.grade == 9:
@@ -241,14 +243,6 @@ class DegreeScale(models.Model):
             is_graduated=False, is_dropped_out=False, grade=9
         )
 
-        # valida que todos tienen boletas
-        for student in students:
-            if student.their_notes_are_valid():
-                if not student.has_ballot():
-                    raise serializers.ValidationError(
-                        f"El estudiante {student.ci} no tiene una boleta"
-                    )
-
         for student in students:
             if student.their_notes_are_valid():
                 student_degree_scale = DegreeScale.objects.filter(
@@ -269,6 +263,7 @@ class DegreeScale(models.Model):
         )
         for i, ranking in enumerate(approved_students_ranking):
             ranking.ranking_number = i + 1
+            ranking.save()
 
         return approved_students_ranking
 
