@@ -181,7 +181,9 @@ class StudentNote(models.Model):
                 or note.asc < 6
             ):
                 return False
-            if note.subject.tcp2_required and (note.tcp2 or note.tcp2 < 60):
+            if note.subject.tcp2_required and (
+                note.tcp2 is None or note.tcp2 < 60
+            ):
                 return False
 
         return True

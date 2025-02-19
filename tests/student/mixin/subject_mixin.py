@@ -26,8 +26,8 @@ class SubjectMixin(StudentMixin):
                 nota = StudentNote.objects.create(
                     subject=asignatura, student=student, school_year=curso
                 )
-            nota.tcp1 = random.randint(30, 40)
-            nota.tcp2 = random.randint(30, 40)
+            nota.tcp1 = random.randint(60, 100)
+            nota.tcp2 = random.randint(60, 100)
             nota.asc = random.randint(6, 10)
             nota.final_exam = random.randint(60, 100)
             nota.calculate_final_grade()
