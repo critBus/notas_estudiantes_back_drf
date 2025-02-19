@@ -169,9 +169,17 @@ class StudentNote(models.Model):
 
     @staticmethod
     def are_valid(notes):
-        # TODO: este metodo es fake aun
         if not notes:
             return False
+        # for note in notes:
+        #     if (note.tcp1 is None or note.tcp1<60
+        #             or note.final_exam is None or note.final_exam < 60
+        #         or note.asc is None or note.asc < 6
+        #     ):
+        #         return False
+        #     if note.subject.tcp2_required and ( note.tcp2 or  note.tcp2<60) :
+        #         return False
+
         return True
 
 

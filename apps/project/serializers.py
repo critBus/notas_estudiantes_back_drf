@@ -87,6 +87,10 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class StudentNoteSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+    subject = SubjectSerializer(read_only=True)
+    school_year = SchoolYearSerializer(read_only=True)
+
     class Meta:
         model = StudentNote
         fields = "__all__"
