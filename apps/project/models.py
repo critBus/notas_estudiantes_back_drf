@@ -42,7 +42,7 @@ class Student(models.Model):
         choices=[("F", "Femenino"), ("M", "Masculino")],
     )
     is_graduated = models.BooleanField(default=False, verbose_name="Graduado")
-    is_dropped_out = models.BooleanField(verbose_name="Baja")
+    is_dropped_out = models.BooleanField(default=False,verbose_name="Baja")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
