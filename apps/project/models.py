@@ -79,10 +79,8 @@ class Student(models.Model):
         ]
 
     def has_ballot(self) -> bool:
-        return (
-            StudentCareer.objects.filter(student=self).count()
-            == AMOUNT_OF_CAREER_ON_BALLOT
-        )
+        count = StudentCareer.objects.filter(student=self).count()
+        return count == AMOUNT_OF_CAREER_ON_BALLOT
 
 
 class Dropout(models.Model):
@@ -102,7 +100,7 @@ class Dropout(models.Model):
 
 class Career(models.Model):
     amount = models.IntegerField(verbose_name="Monto")
-    name = models.CharField(max_length=255, verbose_name="Nombre")
+    name = models.CharField(max_length=255, verbose_name="Nombre", unique=True)
 
     def __str__(self):
         return self.name
@@ -190,6 +188,9 @@ class StudentCareer(models.Model):
         verbose_name = "Estudiante - Carrera"
         verbose_name_plural = "Estudiantes - Carreras"
 
+    def __str__(self):
+        return f"{self.career.name}-{self.index}"
+
 
 class DegreeScale(models.Model):
     student = models.ForeignKey(
@@ -208,6 +209,9 @@ class DegreeScale(models.Model):
     class Meta:
         verbose_name = "Escalafón Estudiantil"
         verbose_name_plural = "Escalafones Estudiantiles"
+
+    def __str__(self):
+        return f"{self.ranking_number} - {self.ranking_score} - {self.student.first_name} {self.student.last_name}"
 
     def calculate_ranking_score(self) -> float:
         sume = 0
@@ -232,7 +236,7 @@ class DegreeScale(models.Model):
                 approved_students.append(student)
         return DegreeScale.objects.filter(
             student__in=approved_students
-        ).order_by("-ranking_score")
+        ).order_by("ranking_number")
 
     @staticmethod
     def calculate_all_ranking_number():
@@ -284,21 +288,8 @@ class GrantCareer(models.Model):
 
     @staticmethod
     def grant():
-        students = Student.objects.filter(
-            is_graduated=False, is_dropped_out=False, grade=9
-        )
-        approved_students = []
-        # valida que todos tienen boletas
-        for student in students:
-            if student.their_notes_are_valid() and student.has_ballot():
-                approved_students.append(student)
-
-        careers_amount: Dict[Career, int] = Career.objects.filter(amount__gt=0)
-        ballots: Dict[Student, List[StudentCareer]] = {
-            student: StudentCareer.objects.filter(student=student).order_by(
-                "index"
-            )
-            for student in approved_students
+        careers_amount: Dict[Career, int] = {
+            v: v.amount for v in Career.objects.filter(amount__gt=0)
         }
         ranking = DegreeScale.current()
         school_year = SchoolYear.get_current_course()
@@ -306,7 +297,9 @@ class GrantCareer(models.Model):
         grant_career_list: List[GrantCareer] = []
         for rank in ranking:
             student = rank.student
-            ballot = ballots[student]
+            ballot = StudentCareer.objects.filter(student=student).order_by(
+                "index"
+            )
             for student_career in ballot:
                 career = student_career.career
 
@@ -332,6 +325,8 @@ class GrantCareer(models.Model):
                     career.amount = places_available
                     career.save()
                     grant_career_list.append(grant_career)
+                    student.is_graduated = True
+                    student.save()
                     break
         return grant_career_list
 
