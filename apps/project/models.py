@@ -227,9 +227,8 @@ class DegreeScale(models.Model):
             is_graduated=False, is_dropped_out=False, grade=9
         )
         approved_students = []
-        # valida que todos tienen boletas
         for student in students:
-            if student.their_notes_are_valid() and student.has_ballot():
+            if student.their_notes_are_valid():
                 approved_students.append(student)
         return DegreeScale.objects.filter(
             student__in=approved_students

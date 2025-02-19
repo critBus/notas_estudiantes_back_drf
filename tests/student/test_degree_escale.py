@@ -168,9 +168,71 @@ class TestDegreeEscale(StudentTestCase):
 
         return response_dict
 
+    def call_degree_scale_current(
+        self,
+        unauthorized: bool = False,
+        forbidden: bool = False,
+        bad_request: bool = False,
+        not_found: bool = False,
+        print_json_response: bool = False,
+    ):
+        URL = reverse("degree-scale-current")
+        response_dict = self.call_get(
+            url=URL,
+            unauthorized=unauthorized,
+            forbidden=forbidden,
+            bad_request=bad_request,
+            not_found=not_found,
+            print_json_response=print_json_response,
+        )
+
+        return response_dict
+
     def test_degree_scale_calculated(self):
         students = self.create_fake_ranking()
         response_dict = self.call_degree_scale_calculated(
+            print_json_response=False
+        )
+        rankings = []
+        for student in students:
+            ranking = DegreeScale.objects.filter(student=student).first()
+            self.assertIsNotNone(ranking)
+            rankings.append(ranking)
+        self.assertEqual(
+            response_dict,
+            [
+                {
+                    "id": rank.id,
+                    "student": {
+                        "id": rank.student.id,
+                        "is_approved": True,
+                        "ci": rank.student.ci,
+                        "address": rank.student.address,
+                        "grade": 9,
+                        "last_name": rank.student.last_name,
+                        "first_name": rank.student.first_name,
+                        "registration_number": rank.student.registration_number,
+                        "sex": rank.student.sex,
+                        "is_graduated": False,
+                        "is_dropped_out": False,
+                    },
+                    "school_year": {
+                        "id": rank.school_year.id,
+                        "start_date": str(rank.school_year.start_date),
+                        "end_date": str(rank.school_year.end_date),
+                        "name": rank.school_year.name,
+                    },
+                    "ranking_score": rank.ranking_score,
+                    "ranking_number": i + 1,
+                }
+                for i, rank in enumerate(rankings)
+            ],
+        )
+
+    def test_degree_scale_current(self):
+        students = self.create_fake_ranking()
+        DegreeScale.calculate_all_ranking_number()
+        response_dict = self.call_degree_scale_current(
             print_json_response=False
         )
         rankings = []
