@@ -6,10 +6,13 @@ from tests.student.mixin.student_mixin import StudentMixin
 
 class SubjectMixin(StudentMixin):
     def crear_asignaturas(self):
+        self.subjects = []
         for grade in [7, 8, 9]:
             for name in ["Math", "English", "Cience"]:
-                Subject.objects.create(
-                    grade=grade, name=f"{name}_{grade}", tcp2_required=False
+                self.subjects.append(
+                    Subject.objects.create(
+                        grade=grade, name=f"{name}_{grade}", tcp2_required=False
+                    )
                 )
 
     def ponerle_notas_validas_al_estudiante(self, student: Student):

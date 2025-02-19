@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("project", "0007_grantcareer_remove_graduation_student_and_more"),
     ]
@@ -13,7 +12,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="career",
             name="name",
-            field=models.CharField(max_length=255, unique=True, verbose_name="Nombre"),
+            field=models.CharField(
+                max_length=255, unique=True, verbose_name="Nombre"
+            ),
         ),
         migrations.AlterField(
             model_name="student",

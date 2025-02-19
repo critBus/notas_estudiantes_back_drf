@@ -86,7 +86,7 @@ class SubjectSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class StudentNoteSerializer(serializers.ModelSerializer):
+class StudentNoteRepresentationSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
     subject = SubjectSerializer(read_only=True)
     school_year = SchoolYearSerializer(read_only=True)
@@ -94,6 +94,15 @@ class StudentNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentNote
         fields = "__all__"
+
+
+class StudentNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentNote
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return StudentNoteRepresentationSerializer(instance).data
 
 
 class StudentCareerSerializer(serializers.ModelSerializer):

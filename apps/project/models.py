@@ -42,7 +42,7 @@ class Student(models.Model):
         choices=[("F", "Femenino"), ("M", "Masculino")],
     )
     is_graduated = models.BooleanField(default=False, verbose_name="Graduado")
-    is_dropped_out = models.BooleanField(default=False,verbose_name="Baja")
+    is_dropped_out = models.BooleanField(default=False, verbose_name="Baja")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -171,14 +171,18 @@ class StudentNote(models.Model):
     def are_valid(notes):
         if not notes:
             return False
-        # for note in notes:
-        #     if (note.tcp1 is None or note.tcp1<60
-        #             or note.final_exam is None or note.final_exam < 60
-        #         or note.asc is None or note.asc < 6
-        #     ):
-        #         return False
-        #     if note.subject.tcp2_required and ( note.tcp2 or  note.tcp2<60) :
-        #         return False
+        for note in notes:
+            if (
+                note.tcp1 is None
+                or note.tcp1 < 60
+                or note.final_exam is None
+                or note.final_exam < 60
+                or note.asc is None
+                or note.asc < 6
+            ):
+                return False
+            if note.subject.tcp2_required and (note.tcp2 or note.tcp2 < 60):
+                return False
 
         return True
 

@@ -1,5 +1,9 @@
 from django.http import JsonResponse
-from drf_spectacular.utils import OpenApiExample, extend_schema
+from drf_spectacular.utils import (
+    OpenApiExample,
+    extend_schema,
+    extend_schema_view,
+)
 from rest_framework import generics, serializers
 from rest_framework.response import Response
 
@@ -31,6 +35,7 @@ from .serializers import (
     SchoolYearSerializer,
     StudentBallotSerializer,
     StudentCareerSerializer,
+    StudentNoteRepresentationSerializer,
     StudentNoteSerializer,
     StudentSerializer,
     SubjectSerializer,
@@ -148,6 +153,15 @@ class SubjectViewSet(BaseModelViewSet):
     ordering = ["name"]
 
 
+@extend_schema_view(
+    list=extend_schema(
+        responses=StudentNoteRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=StudentNoteRepresentationSerializer),
+    retrieve=extend_schema(responses=StudentNoteRepresentationSerializer),
+    update=extend_schema(responses=StudentNoteRepresentationSerializer),
+    partial_update=extend_schema(responses=StudentNoteRepresentationSerializer),
+)
 class StudentNoteViewSet(BaseModelViewSet):
     queryset = StudentNote.objects.all()
     serializer_class = StudentNoteSerializer
