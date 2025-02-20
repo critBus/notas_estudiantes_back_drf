@@ -318,6 +318,12 @@ class GrantCareer(models.Model):
         verbose_name_plural = "Carreras Otorgadas"
 
     def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if not es_nuevo:
+            old: GrantCareer = GrantCareer.objects.get(id=self.id)
+            if old.student != self.student:
+                old.student.is_graduated = False
+                old.student.save()
         if self.student:
             self.student.is_graduated = True
             self.student.save()
