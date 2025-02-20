@@ -66,8 +66,18 @@ entity GrantCareer{
     id : Integer PK
 }
 
+entity ApprovedSchoolCourse{
+    id : Integer PK
+    grade : IntegerField // Grado
+    date : DateField // Fecha
+}
+
+ApprovedSchoolCourse "1" -- "1" Student : Estudiante del curso aprobado
+ApprovedSchoolCourse "*" -- "1" SchoolYear : Curso Escolar aprobado
+ApprovedSchoolCourse "1" -- "1" GrantCareer : Otorgamiento en este curso aprobado
+
 GrantCareer "1" -- "1" Student : Estudiante del otorgamiento
-GrantCareer "1" -- "1" Career : Carrera otorgada
+GrantCareer "*" -- "1" Career : Carrera otorgada
 
 
 SchoolYear "1" -- "*" DegreeScale :  Curso del Escalafon

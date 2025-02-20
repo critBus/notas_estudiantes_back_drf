@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from django.db import models
+from django.utils import timezone
 
 from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
@@ -81,6 +82,31 @@ class Student(models.Model):
     def has_ballot(self) -> bool:
         count = StudentCareer.objects.filter(student=self).count()
         return count == AMOUNT_OF_CAREER_ON_BALLOT
+
+    # @staticmethod
+    # def upgrading_7():
+    #     students=Student.objects.filter(
+    #         is_graduated=False, is_dropped_out=False, grade=7
+    #     )
+    #     for student in students:
+    #         if student.their_notes_are_valid():
+    #             student.grade += 1
+    #             student.save()
+
+
+class ApprovedSchoolCourse(models.Model):
+    date = models.DateField(verbose_name="Fecha")
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    grade = models.IntegerField(verbose_name="Grado", choices=GRADES_CHOICES)
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+
+    class Meta:
+        verbose_name = "Curso Escolar Aprobado"
+        verbose_name_plural = "Cursos Escolares Aprobados"
 
 
 class Dropout(models.Model):
@@ -309,8 +335,10 @@ class GrantCareer(models.Model):
     career = models.ForeignKey(
         Career, on_delete=models.CASCADE, verbose_name="Carrera"
     )
-    school_year = models.ForeignKey(
-        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    approved_school_course = models.ForeignKey(
+        ApprovedSchoolCourse,
+        on_delete=models.CASCADE,
+        verbose_name="Curso Escolar Aprobado",
     )
 
     class Meta:
@@ -337,6 +365,7 @@ class GrantCareer(models.Model):
 
     @staticmethod
     def grant():
+        today = timezone.now().date()
         careers_amount: Dict[Career, int] = {
             v: v.amount for v in Career.objects.filter(amount__gt=0)
         }
@@ -359,10 +388,25 @@ class GrantCareer(models.Model):
                         student=student
                     ).first()
                     if not grant_career:
+                        approved_school_course = (
+                            ApprovedSchoolCourse.objects.filter(
+                                student=student
+                            ).first()
+                        )
+                        if not approved_school_course:
+                            approved_school_course = (
+                                ApprovedSchoolCourse.objects.create(
+                                    student=student,
+                                    school_year=school_year,
+                                    date=today,
+                                    grade=9,
+                                )
+                            )
+
                         grant_career = GrantCareer.objects.create(
                             student=student,
                             career=career,
-                            school_year=school_year,
+                            approved_school_course=approved_school_course,
                         )
                     else:
                         grant_career.career = (career,)
@@ -380,4 +424,6 @@ class GrantCareer(models.Model):
     @staticmethod
     def current():
         school_year = SchoolYear.get_current_course()
-        return GrantCareer.objects.filter(school_year=school_year)
+        return GrantCareer.objects.filter(
+            approved_school_course__school_year=school_year
+        )

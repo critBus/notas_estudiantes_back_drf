@@ -121,11 +121,33 @@ class TestGrantCareer(DegreeEscaleTestCase):
                         "is_graduated": True,
                         "is_dropped_out": False,
                     },
-                    "school_year": {
-                        "id": grant.school_year.id,
-                        "start_date": str(grant.school_year.start_date),
-                        "end_date": str(grant.school_year.end_date),
-                        "name": grant.school_year.name,
+                    "approved_school_course": {
+                        "id": grant.approved_school_course.id,
+                        "student": {
+                            "id": grant.student.id,
+                            "is_approved": True,
+                            "ci": grant.student.ci,
+                            "address": grant.student.address,
+                            "grade": grant.student.grade,
+                            "last_name": grant.student.last_name,
+                            "first_name": grant.student.first_name,
+                            "registration_number": grant.student.registration_number,
+                            "sex": grant.student.sex,
+                            "is_graduated": True,
+                            "is_dropped_out": False,
+                        },
+                        "school_year": {
+                            "id": grant.approved_school_course.school_year.id,
+                            "start_date": str(
+                                grant.approved_school_course.school_year.start_date
+                            ),
+                            "end_date": str(
+                                grant.approved_school_course.school_year.end_date
+                            ),
+                            "name": grant.approved_school_course.school_year.name,
+                        },
+                        "date": str(grant.approved_school_course.date),
+                        "grade": 9,
                     },
                     "career": {
                         "id": grant.career.id,
@@ -193,11 +215,33 @@ class TestGrantCareer(DegreeEscaleTestCase):
                         "is_graduated": True,
                         "is_dropped_out": False,
                     },
-                    "school_year": {
-                        "id": grant.school_year.id,
-                        "start_date": str(grant.school_year.start_date),
-                        "end_date": str(grant.school_year.end_date),
-                        "name": grant.school_year.name,
+                    "approved_school_course": {
+                        "id": grant.approved_school_course.id,
+                        "student": {
+                            "id": grant.student.id,
+                            "is_approved": True,
+                            "ci": grant.student.ci,
+                            "address": grant.student.address,
+                            "grade": grant.student.grade,
+                            "last_name": grant.student.last_name,
+                            "first_name": grant.student.first_name,
+                            "registration_number": grant.student.registration_number,
+                            "sex": grant.student.sex,
+                            "is_graduated": True,
+                            "is_dropped_out": False,
+                        },
+                        "school_year": {
+                            "id": grant.approved_school_course.school_year.id,
+                            "start_date": str(
+                                grant.approved_school_course.school_year.start_date
+                            ),
+                            "end_date": str(
+                                grant.approved_school_course.school_year.end_date
+                            ),
+                            "name": grant.approved_school_course.school_year.name,
+                        },
+                        "date": str(grant.approved_school_course.date),
+                        "grade": 9,
                     },
                     "career": {
                         "id": grant.career.id,

@@ -32,6 +32,7 @@ from .serializers import (
     DropoutRepresentationSerializer,
     DropoutSerializer,
     ErrorSerializer,
+    GrantCareerRepresentationSerializer,
     GrantCareerSerializer,
     SchoolYearSerializer,
     StudentBallotSerializer,
@@ -43,6 +44,15 @@ from .serializers import (
 )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        responses=GrantCareerRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=GrantCareerRepresentationSerializer),
+    retrieve=extend_schema(responses=GrantCareerRepresentationSerializer),
+    update=extend_schema(responses=GrantCareerRepresentationSerializer),
+    partial_update=extend_schema(responses=GrantCareerRepresentationSerializer),
+)
 class GrantCareerViewSet(BaseModelViewSet):
     queryset = GrantCareer.objects.all()
     serializer_class = GrantCareerSerializer

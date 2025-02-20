@@ -2,6 +2,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
+    ApprovedSchoolCourse,
     Career,
     DegreeScale,
     Dropout,
@@ -118,14 +119,34 @@ class DegreeScaleSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class GrantCareerSerializer(serializers.ModelSerializer):
+class ApprovedSchoolCourseRepresentationSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
     school_year = SchoolYearSerializer(read_only=True)
+
+    class Meta:
+        model = ApprovedSchoolCourse
+        fields = "__all__"
+
+
+class GrantCareerRepresentationSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+    approved_school_course = ApprovedSchoolCourseRepresentationSerializer(
+        read_only=True
+    )
     career = CareerSerializer(read_only=True)
 
     class Meta:
         model = GrantCareer
         fields = "__all__"
+
+
+class GrantCareerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrantCareer
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return GrantCareerRepresentationSerializer(instance).data
 
 
 class DropoutRepresentationSerializer(serializers.ModelSerializer):
