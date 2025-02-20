@@ -397,6 +397,21 @@ class BallotListView(BaseListAPIView):
     ]
     ordering = ["ci"]
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        with_ballots = []
+        for obj in queryset:
+            if obj.has_ballot():
+                with_ballots.append(obj)
+        queryset = with_ballots
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class DegreeScaleCalculateView(BaseModelAPIView):
     @extend_schema(

@@ -59,3 +59,15 @@ class TestListBallot(BallotParentCase):
                 ],
             },
         )
+
+        StudentCareer.objects.all().delete()
+        response_dict = self.call_list_ballot(print_json_response=False)
+        self.assertDictEqual(
+            response_dict,
+            {
+                "count": 0,
+                "next": None,
+                "previous": None,
+                "results": [],
+            },
+        )
