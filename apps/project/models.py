@@ -106,15 +106,20 @@ class Student(models.Model):
             return True
         return False
 
-    # @staticmethod
-    # def upgrading_7():
-    #     students=Student.objects.filter(
-    #         is_graduated=False, is_dropped_out=False, grade=7
-    #     )
-    #     for student in students:
-    #         if student.their_notes_are_valid():
-    #             student.grade += 1
-    #             student.save()
+    @staticmethod
+    def upgrading_7_8_all(grade=7, today=None):
+        if grade not in [7, 8]:
+            raise serializers.ValidationError("El grado tiene que ser 7 o 8")
+        if today is None:
+            today = timezone.now().date()
+        students = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=grade
+        )
+        upgrading_students = []
+        for student in students:
+            if student.upgrading_7_8(today=today):
+                upgrading_students.append(student)
+        return upgrading_students
 
 
 class ApprovedSchoolCourse(models.Model):
