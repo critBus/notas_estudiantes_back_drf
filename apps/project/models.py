@@ -121,6 +121,22 @@ class Student(models.Model):
                 upgrading_students.append(student)
         return upgrading_students
 
+    @staticmethod
+    def get_students_current_9():
+        return Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=9
+        )
+
+    @staticmethod
+    def are_missing_ballots():
+        q = Student.get_students_current_9()
+        if q.count() == 0:
+            return True
+        for student in q:
+            if not student.has_ballot():
+                return True
+        return False
+
 
 class ApprovedSchoolCourse(models.Model):
     date = models.DateField(verbose_name="Fecha")
@@ -312,9 +328,7 @@ class DegreeScale(models.Model):
 
     @staticmethod
     def current():
-        students = Student.objects.filter(
-            is_graduated=False, is_dropped_out=False, grade=9
-        )
+        students = Student.get_students_current_9()
         approved_students = []
         for student in students:
             if student.their_notes_are_valid():
@@ -327,9 +341,7 @@ class DegreeScale(models.Model):
     def calculate_all_ranking_number():
         school_year = SchoolYear.get_current_course()
         approved_students_ranking: List[DegreeScale] = []
-        students = Student.objects.filter(
-            is_graduated=False, is_dropped_out=False, grade=9
-        )
+        students = Student.get_students_current_9()
 
         for student in students:
             if student.their_notes_are_valid():
