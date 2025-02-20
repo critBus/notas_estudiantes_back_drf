@@ -3,6 +3,7 @@ from drf_spectacular.utils import (
     OpenApiExample,
     extend_schema,
     extend_schema_view,
+    inline_serializer,
 )
 from rest_framework import generics, serializers
 from rest_framework.response import Response
@@ -453,4 +454,23 @@ class GrantCareerCurrentView(BaseModelAPIView):
         grants = GrantCareer.current()
         return JsonResponse(
             GrantCareerSerializer(grants, many=True).data, safe=False
+        )
+
+
+class AreMissingBallotsView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                "AreMissingBallots",
+                fields={
+                    "are_missing_ballots": serializers.BooleanField(
+                        default=False
+                    ),
+                },
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(
+            {"are_missing_ballots": Student.are_missing_ballots()}
         )

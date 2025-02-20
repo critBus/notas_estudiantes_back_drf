@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from apps.project.views import (
+    AreMissingBallotsView,
     BallotCreateView,
     BallotListView,
     CareerViewSet,
@@ -38,6 +39,11 @@ urlpatterns = [
         "students/upgrading7and8/<int:pk>/",
         Upgrading7and8.as_view(),
         name="upgrading7and8",
+    ),
+    path(
+        "students/ballot/are_missing/",
+        AreMissingBallotsView.as_view(),
+        name="ballot-are-missing",
     ),
     path(
         "students/ballot/<int:pk>/",
