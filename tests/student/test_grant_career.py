@@ -2,9 +2,11 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 
 from apps.project.models import (
+    ApprovedSchoolCourse,
     Career,
     DegreeScale,
     GrantCareer,
+    SchoolYear,
     Student,
     StudentCareer,
 )
@@ -62,12 +64,18 @@ class TestGrantCareer(DegreeEscaleTestCase):
     def test_grant_career(self):
         students, careers = self.create_ballots_to_students()
         DegreeScale.calculate_all_ranking_number()
+        course = SchoolYear.get_current_course()
         GrantCareer.grant()
         q = GrantCareer.objects.all()
+        qa = ApprovedSchoolCourse.objects.all()
         self.assertEqual(q.count(), 3)
+        self.assertEqual(qa.count(), 3)
         for i, student in enumerate(students):
             self.assertTrue(
                 q.filter(student=student, career=careers[i]).exists()
+            )
+            self.assertTrue(
+                qa.filter(student=student, school_year=course, grade=9).exists()
             )
 
     def call_grant_career(
@@ -95,12 +103,17 @@ class TestGrantCareer(DegreeEscaleTestCase):
         DegreeScale.calculate_all_ranking_number()
 
         response_dict = self.call_grant_career(print_json_response=False)
-
+        course = SchoolYear.get_current_course()
         q = GrantCareer.objects.all()
+        qa = ApprovedSchoolCourse.objects.all()
         self.assertEqual(q.count(), 3)
+        self.assertEqual(qa.count(), 3)
         for i, student in enumerate(students):
             self.assertTrue(
                 q.filter(student=student, career=careers[i]).exists()
+            )
+            self.assertTrue(
+                qa.filter(student=student, school_year=course, grade=9).exists()
             )
 
         self.assertEqual(
@@ -189,12 +202,18 @@ class TestGrantCareer(DegreeEscaleTestCase):
         response_dict = self.call_grant_career_current(
             print_json_response=False
         )
+        course = SchoolYear.get_current_course()
 
         q = GrantCareer.objects.all()
+        qa = ApprovedSchoolCourse.objects.all()
         self.assertEqual(q.count(), 3)
+        self.assertEqual(qa.count(), 3)
         for i, student in enumerate(students):
             self.assertTrue(
                 q.filter(student=student, career=careers[i]).exists()
+            )
+            self.assertTrue(
+                qa.filter(student=student, school_year=course, grade=9).exists()
             )
 
         self.assertEqual(
