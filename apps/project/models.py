@@ -96,6 +96,18 @@ class Dropout(models.Model):
         verbose_name = "Baja"
         verbose_name_plural = "Bajas"
 
+    def save(self, *args, **kwargs):
+        if self.student:
+            self.student.is_dropped_out = True
+            self.student.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.student:
+            self.student.is_dropped_out = False
+            self.student.save()
+        return super().delete(*args, **kwargs)
+
 
 class Career(models.Model):
     amount = models.IntegerField(verbose_name="Monto")
