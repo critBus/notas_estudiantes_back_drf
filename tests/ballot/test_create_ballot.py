@@ -82,3 +82,12 @@ class TestCreateBallot(StudentTestCase):
         self.assertEqual(q.count(), 10)
         for i, student_career in enumerate(q.order_by("index")):
             self.assertEqual(student_career.career.name, careers_names[i])
+
+        careers_names[1] = careers_names[0]
+        self.call_create_ballot(
+            student_id=student.id,
+            careers_names=careers_names,
+            bad_request=True,
+            print_json_response=True,
+            not_found=False,
+        )

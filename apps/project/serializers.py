@@ -25,7 +25,11 @@ class BallotCreateSerializer(serializers.Serializer):
 
     def validate_list_career_name(self, value):
         list_career = []
-        if len(list(set(value))) != AMOUNT_OF_CAREER_ON_BALLOT:
+        size = len(value)
+        reduce = len(list(set(value)))
+        if reduce != size:
+            raise serializers.ValidationError("Hay carreras repetidas")
+        if reduce != AMOUNT_OF_CAREER_ON_BALLOT:
             raise serializers.ValidationError(
                 f"La cantidad de carreras debe ser un total de {AMOUNT_OF_CAREER_ON_BALLOT}"
             )
