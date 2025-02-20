@@ -435,7 +435,7 @@ class DegreeScaleCurrentView(BaseModelAPIView):
 class CarryOutGrantingOfCoursesView(BaseModelAPIView):
     @extend_schema(
         responses={
-            200: GrantCareerSerializer(many=True),
+            200: GrantCareerRepresentationSerializer(many=True),
             400: ErrorSerializer,
         },
     )
@@ -449,7 +449,7 @@ class CarryOutGrantingOfCoursesView(BaseModelAPIView):
 class GrantCareerCurrentView(BaseModelAPIView):
     @extend_schema(
         responses={
-            200: GrantCareerSerializer(many=True),
+            200: GrantCareerRepresentationSerializer(many=True),
             400: ErrorSerializer,
         },
     )
