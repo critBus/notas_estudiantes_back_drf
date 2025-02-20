@@ -84,7 +84,6 @@ class Student(models.Model):
 
 
 class Dropout(models.Model):
-    is_dropped_out = models.BooleanField(verbose_name="Baja")
     date = models.DateField(verbose_name="Fecha")
     municipality = models.CharField(max_length=255, verbose_name="Municipio")
     province = models.CharField(max_length=255, verbose_name="Provincia")

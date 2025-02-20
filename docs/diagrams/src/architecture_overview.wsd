@@ -15,7 +15,6 @@ entity Student {
 
 entity Dropout {
     id : Integer PK // id
-    is_dropped_out : BooleanField // Baja
     date : DateField // Fecha
     municipality : CharField(255) // Municipio
     province : CharField(255) // Provincia
@@ -38,8 +37,8 @@ entity Subject {
 
 entity SchoolYear {
     id : Integer PK
-    startDate : Date
-    endDate : Date
+    start_date : Date
+    end_date : Date
     name : Varchar(255)
 }
 
