@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse  # Para generar urls
 
+from apps.project.models import ApprovedSchoolCourse
 from tests.student.parent_case.student_test_case import StudentTestCase
 
 User = get_user_model()
@@ -37,6 +38,7 @@ class TestStudentSubirDeGrado_7_8(StudentTestCase):
             bad_request=True,
             print_json_response=False,
         )
+        self.assertEqual(0, ApprovedSchoolCourse.objects.count())
 
         self.ponerle_notas_validas_al_estudiante(student=student)
         self.call_subir_de_grado(
@@ -46,6 +48,12 @@ class TestStudentSubirDeGrado_7_8(StudentTestCase):
         )
         student.refresh_from_db()
         self.assertEqual(student.grade, 8)
+        self.assertEqual(1, ApprovedSchoolCourse.objects.count())
+        self.assertTrue(
+            ApprovedSchoolCourse.objects.filter(
+                student=student, grade=7
+            ).exists()
+        )
 
         self.ponerle_notas_validas_al_estudiante(student=student)
         self.call_subir_de_grado(
@@ -54,3 +62,9 @@ class TestStudentSubirDeGrado_7_8(StudentTestCase):
         )
         student.refresh_from_db()
         self.assertEqual(student.grade, 9)
+        self.assertEqual(2, ApprovedSchoolCourse.objects.count())
+        self.assertTrue(
+            ApprovedSchoolCourse.objects.filter(
+                student=student, grade=8
+            ).exists()
+        )

@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from django.db import models
 from django.utils import timezone
+from rest_framework import serializers
 
 from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
@@ -82,6 +83,28 @@ class Student(models.Model):
     def has_ballot(self) -> bool:
         count = StudentCareer.objects.filter(student=self).count()
         return count == AMOUNT_OF_CAREER_ON_BALLOT
+
+    def upgrading_7_8(self, today=None) -> bool:
+        grade = self.grade
+        if grade not in [7, 8]:
+            raise serializers.ValidationError("El grado tiene que ser 7 o 8")
+        if today is None:
+            today = timezone.now().date()
+        course = SchoolYear.get_current_course()
+        if self.their_notes_are_valid():
+            self.grade += 1
+            self.save()
+            if not ApprovedSchoolCourse.objects.filter(
+                student=self, grade=grade
+            ).exists():
+                ApprovedSchoolCourse.objects.create(
+                    student=self,
+                    school_year=course,
+                    date=today,
+                    grade=grade,
+                )
+            return True
+        return False
 
     # @staticmethod
     # def upgrading_7():
@@ -364,8 +387,9 @@ class GrantCareer(models.Model):
         return super().delete(*args, **kwargs)
 
     @staticmethod
-    def grant():
-        today = timezone.now().date()
+    def grant(today=None):
+        if today is None:
+            today = timezone.now().date()
         careers_amount: Dict[Career, int] = {
             v: v.amount for v in Career.objects.filter(amount__gt=0)
         }
@@ -390,7 +414,7 @@ class GrantCareer(models.Model):
                     if not grant_career:
                         approved_school_course = (
                             ApprovedSchoolCourse.objects.filter(
-                                student=student
+                                student=student, grade=9
                             ).first()
                         )
                         if not approved_school_course:

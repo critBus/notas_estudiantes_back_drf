@@ -292,14 +292,15 @@ class Upgrading7and8(generics.GenericAPIView):
         Solo para subir 7-8 (no 9)
         """
         student: Student = self.get_object()
-        if student.their_notes_are_valid():
-            student.grade += 1
-            student.save()
-            serializer = self.get_serializer(student)
-            return Response(serializer.data)
-        return JsonResponse(
-            {"error": "Tiene notas que no son validas"}, status=400
-        )
+        try:
+            if student.upgrading_7_8():
+                serializer = self.get_serializer(student)
+                return Response(serializer.data)
+            return JsonResponse(
+                {"error": "Tiene notas que no son validas"}, status=400
+            )
+        except serializers.ValidationError as e:
+            return JsonResponse({"error": e.detail}, status=400)
 
 
 class CurrentCurseView(BaseModelAPIView):
