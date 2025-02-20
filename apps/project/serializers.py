@@ -49,7 +49,11 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = "__all__"  # Incluye todos los campos del modelo
+        fields = "__all__"
+        extra_kwargs = {
+            "is_graduated": {"read_only": True},
+            "is_dropped_out": {"read_only": True},
+        }
 
     @extend_schema_field(serializers.BooleanField())
     def get_is_approved(self, obj):

@@ -22,3 +22,4 @@ class BallotParentCase(StudentTestCase):
                 )
             self.students_9.append(student)
         self.students_9 = sorted(self.students_9, key=lambda v: v.ci)
+        self.maxDiff = None

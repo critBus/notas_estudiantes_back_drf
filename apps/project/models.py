@@ -311,6 +311,18 @@ class GrantCareer(models.Model):
         verbose_name = "Carrera Otorgada"
         verbose_name_plural = "Carreras Otorgadas"
 
+    def save(self, *args, **kwargs):
+        if self.student:
+            self.student.is_graduated = True
+            self.student.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.student:
+            self.student.is_graduated = False
+            self.student.save()
+        return super().delete(*args, **kwargs)
+
     @staticmethod
     def grant():
         careers_amount: Dict[Career, int] = {
@@ -350,8 +362,6 @@ class GrantCareer(models.Model):
                     career.amount = places_available
                     career.save()
                     grant_career_list.append(grant_career)
-                    student.is_graduated = True
-                    student.save()
                     break
         return grant_career_list
 
