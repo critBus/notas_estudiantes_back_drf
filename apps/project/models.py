@@ -97,6 +97,12 @@ class Dropout(models.Model):
         verbose_name_plural = "Bajas"
 
     def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if not es_nuevo:
+            old: Dropout = Dropout.objects.get(id=self.id)
+            if old.student != self.student:
+                old.student.is_dropped_out = False
+                old.student.save()
         if self.student:
             self.student.is_dropped_out = True
             self.student.save()

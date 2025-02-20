@@ -29,6 +29,7 @@ from .serializers import (
     BallotCreateSerializer,
     CareerSerializer,
     DegreeScaleSerializer,
+    DropoutRepresentationSerializer,
     DropoutSerializer,
     ErrorSerializer,
     GrantCareerSerializer,
@@ -106,9 +107,52 @@ class StudentViewSet(BaseModelViewSet):
     ordering = ["ci"]
 
 
+@extend_schema_view(
+    list=extend_schema(responses=DropoutRepresentationSerializer(many=True)),
+    create=extend_schema(responses=DropoutRepresentationSerializer),
+    retrieve=extend_schema(responses=DropoutRepresentationSerializer),
+    update=extend_schema(responses=DropoutRepresentationSerializer),
+    partial_update=extend_schema(responses=DropoutRepresentationSerializer),
+)
 class DropoutViewSet(BaseModelViewSet):
     queryset = Dropout.objects.all()
     serializer_class = DropoutSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "municipality": ["contains", "exact", "icontains", "search"],
+        "date": ["gte", "lte", "gt", "lt", "exact"],
+        "province": ["contains", "exact", "icontains", "search"],
+        "school": ["contains", "exact", "icontains", "search"],
+        "student": ["exact"],
+        "student__ci": ["contains", "exact", "icontains", "search"],
+        "student__address": ["contains", "exact", "icontains", "search"],
+        "student__grade": ["exact"],
+        "student__first_name": ["contains", "exact", "icontains", "search"],
+        "student__last_name": ["contains", "exact", "icontains", "search"],
+        "student__registration_number": [
+            "contains",
+            "exact",
+            "icontains",
+            "search",
+        ],
+        "student__sex": ["exact"],
+        "student__is_graduated": ["exact"],
+        "student__is_dropped_out": ["exact"],
+    }
+    search_fields = [
+        "student__ci",
+    ]
+    ordering_fields = [
+        "pk",
+        "municipality",
+        "province",
+        "school",
+        "student__ci",
+        "student__first_name",
+        "student__last_name",
+    ]
+    ordering = ["student__ci"]
 
 
 class CareerViewSet(BaseModelViewSet):

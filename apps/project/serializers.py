@@ -72,12 +72,6 @@ class StudentBallotSerializer(StudentSerializer):
         return []
 
 
-class DropoutSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Dropout
-        fields = "__all__"
-
-
 class CareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Career
@@ -132,3 +126,20 @@ class GrantCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrantCareer
         fields = "__all__"
+
+
+class DropoutRepresentationSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+
+    class Meta:
+        model = Dropout
+        fields = "__all__"
+
+
+class DropoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dropout
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return DropoutRepresentationSerializer(instance).data
