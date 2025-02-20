@@ -132,10 +132,13 @@ class Student(models.Model):
         q = Student.get_students_current_9()
         if q.count() == 0:
             return True
+        count_with_notes_valid = 0
         for student in q:
-            if not student.has_ballot():
-                return True
-        return False
+            if student.their_notes_are_valid():
+                count_with_notes_valid += 1
+                if not student.has_ballot():
+                    return True
+        return count_with_notes_valid == 0
 
 
 class ApprovedSchoolCourse(models.Model):

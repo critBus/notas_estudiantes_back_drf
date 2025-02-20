@@ -33,10 +33,18 @@ class TestAreBallot(StudentTestCase):
         self.assertTrue(Student.are_missing_ballots())
         students = [self.create_random_student(grade=9) for _ in range(10)]
         self.assertTrue(Student.are_missing_ballots())
+
+        for student in students[1:]:
+            self.ponerle_notas_validas_al_estudiante(student=student)
+        self.assertTrue(Student.are_missing_ballots())
+        self.ponerle_notas_validas_al_estudiante(student=students[0])
+        self.assertTrue(Student.are_missing_ballots())
+
         for student in students[:-1]:
             self.add_ballot_to_student(student=student)
         self.assertTrue(Student.are_missing_ballots())
         self.add_ballot_to_student(student=students[-1])
+
         self.assertFalse(Student.are_missing_ballots())
 
     def call_are_ballot(
@@ -77,4 +85,9 @@ class TestAreBallot(StudentTestCase):
             self.add_ballot_to_student(student=student)
         self.call_are_ballot(are_ballot=False)
         self.add_ballot_to_student(student=students[-1])
+        self.call_are_ballot(are_ballot=False)
+
+        for student in students[1:]:
+            self.ponerle_notas_validas_al_estudiante(student=student)
+
         self.call_are_ballot(are_ballot=True)
