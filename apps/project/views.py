@@ -16,6 +16,7 @@ from config.utils.utils_view import (
 )
 
 from .models import (
+    ApprovedSchoolCourse,
     Career,
     DegreeScale,
     Dropout,
@@ -27,6 +28,7 @@ from .models import (
     Subject,
 )
 from .serializers import (
+    ApprovedSchoolCourseRepresentationSerializer,
     BallotCreateSerializer,
     CareerSerializer,
     DegreeScaleSerializer,
@@ -532,3 +534,39 @@ class AreStudentsWhithoutRankingView(BaseModelAPIView):
                 "are_students_whithout_ranking": DegreeScale.there_are_students_whithout_ranking()
             }
         )
+
+
+class UpgradingAllView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: ApprovedSchoolCourseRepresentationSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            if Student.are_missing_ballots():
+                return JsonResponse(
+                    {"error": "Faltan estudiantes por boletas"}, status=400
+                )
+            if DegreeScale.there_are_students_whithout_ranking():
+                return JsonResponse(
+                    {
+                        "error": "Faltan estudiantes por estar ubicados en el escalafon"
+                    },
+                    status=400,
+                )
+            GrantCareer.grant()
+            Student.upgrading_7_8_all(grade=8)
+            Student.upgrading_7_8_all(grade=7)
+            approved_students = ApprovedSchoolCourse.objects.order_by(
+                "grade", "student__ci"
+            )
+            return JsonResponse(
+                ApprovedSchoolCourseRepresentationSerializer(
+                    approved_students, many=True
+                ).data,
+                safe=False,
+            )
+        except serializers.ValidationError as e:
+            return JsonResponse({"error": e.detail}, status=400)

@@ -22,6 +22,7 @@ from apps.project.views import (
     StudentViewSet,
     SubjectViewSet,
     Upgrading7and8,
+    UpgradingAllView,
 )
 
 router = DefaultRouter()
@@ -37,6 +38,11 @@ router.register(r"degree_scale", DegreeScaleViewSet)
 router.register(r"grant_career", GrantCareerViewSet)
 
 urlpatterns = [
+    path(
+        "students/upgrading_all/",
+        UpgradingAllView.as_view(),
+        name="upgrading-all",
+    ),
     path(
         "students/upgrading7and8/<int:pk>/",
         Upgrading7and8.as_view(),
