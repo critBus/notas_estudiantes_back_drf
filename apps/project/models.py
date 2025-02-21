@@ -379,6 +379,28 @@ class DegreeScale(models.Model):
 
         return approved_students_ranking
 
+    @staticmethod
+    def there_are_students_whithout_ranking(course=None):
+        if not course:
+            course = SchoolYear.get_current_course()
+        q = Student.get_students_current_9()
+        if q.count() == 0:
+            return True
+        count_with_notes_valid = 0
+        for student in q:
+            if student.their_notes_are_valid():
+                count_with_notes_valid += 1
+                degree_scale = DegreeScale.objects.filter(
+                    student=student, school_year=course
+                ).first()
+                if (
+                    (not degree_scale)
+                    or (not degree_scale.ranking_score)
+                    or (not degree_scale.ranking_number)
+                ):
+                    return True
+        return count_with_notes_valid == 0
+
 
 class GrantCareer(models.Model):
     student = models.ForeignKey(

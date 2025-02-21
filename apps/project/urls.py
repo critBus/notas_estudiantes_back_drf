@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.project.views import (
     AreMissingBallotsView,
+    AreStudentsWhithoutRankingView,
     BallotCreateView,
     BallotListView,
     CareerViewSet,
@@ -75,6 +76,11 @@ urlpatterns = [
         "degree_scale/current/",
         DegreeScaleCurrentView.as_view(),
         name="degree-scale-current",
+    ),
+    path(
+        "degree_scale/exist_whithout/",
+        AreStudentsWhithoutRankingView.as_view(),
+        name="degree-scale-exist-whithout",
     ),
     path(
         "grant_career/current/",

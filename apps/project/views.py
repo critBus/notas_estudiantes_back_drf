@@ -506,3 +506,24 @@ class AreMissingBallotsView(BaseModelAPIView):
         return JsonResponse(
             {"are_missing_ballots": Student.are_missing_ballots()}
         )
+
+
+class AreStudentsWhithoutRankingView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                "AreStudentsWhithoutRanking",
+                fields={
+                    "are_students_whithout_ranking": serializers.BooleanField(
+                        default=False
+                    ),
+                },
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(
+            {
+                "are_students_whithout_ranking": DegreeScale.there_are_students_whithout_ranking()
+            }
+        )
