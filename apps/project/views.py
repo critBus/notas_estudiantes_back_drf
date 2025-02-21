@@ -5,7 +5,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.response import Response
 
 from config.utils.utils_view import (
@@ -359,6 +359,11 @@ class BallotCreateView(BaseGenericAPIView):
     def get(self, request, *args, **kwargs):
         student: Student = self.get_object()
         return JsonResponse(student.get_ballot(), safe=False)
+
+    def delete(self, request, *args, **kwargs):
+        student: Student = self.get_object()
+        StudentCareer.objects.filter(student=student).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BallotListView(BaseListAPIView):
