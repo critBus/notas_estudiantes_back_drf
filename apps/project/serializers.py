@@ -132,6 +132,15 @@ class ApprovedSchoolCourseRepresentationSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ApprovedSchoolCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApprovedSchoolCourse
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return ApprovedSchoolCourseRepresentationSerializer(instance).data
+
+
 class GrantCareerRepresentationSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
     approved_school_course = ApprovedSchoolCourseRepresentationSerializer(

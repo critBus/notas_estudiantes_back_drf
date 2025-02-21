@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from apps.project.views import (
+    ApprovedSchoolCourseViewSet,
     AreMissingBallotsView,
     AreStudentsWhithoutRankingView,
     BallotCreateView,
@@ -36,6 +37,7 @@ router.register(r"student_careers", StudentCareerViewSet)
 router.register(r"school_year", SchoolYearViewSet)
 router.register(r"degree_scale", DegreeScaleViewSet)
 router.register(r"grant_career", GrantCareerViewSet)
+router.register(r"approved_school_course", ApprovedSchoolCourseViewSet)
 
 urlpatterns = [
     path(

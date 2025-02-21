@@ -29,6 +29,7 @@ from .models import (
 )
 from .serializers import (
     ApprovedSchoolCourseRepresentationSerializer,
+    ApprovedSchoolCourseSerializer,
     BallotCreateSerializer,
     CareerSerializer,
     DegreeScaleSerializer,
@@ -276,6 +277,69 @@ class StudentCareerViewSet(BaseModelViewSet):
 class DegreeScaleViewSet(BaseModelViewSet):
     queryset = DegreeScale.objects.all()
     serializer_class = DegreeScaleSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=ApprovedSchoolCourseRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(
+        responses=ApprovedSchoolCourseRepresentationSerializer
+    ),
+    retrieve=extend_schema(
+        responses=ApprovedSchoolCourseRepresentationSerializer
+    ),
+    update=extend_schema(
+        responses=ApprovedSchoolCourseRepresentationSerializer
+    ),
+    partial_update=extend_schema(
+        responses=ApprovedSchoolCourseRepresentationSerializer
+    ),
+)
+class ApprovedSchoolCourseViewSet(BaseModelViewSet):
+    queryset = ApprovedSchoolCourse.objects.all()
+    serializer_class = ApprovedSchoolCourseSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "date": ["gte", "lte", "gt", "lt", "exact"],
+        "grade": ["gte", "lte", "gt", "lt", "exact"],
+        "student": ["exact"],
+        "student__ci": ["contains", "exact", "icontains", "search"],
+        "student__address": ["contains", "exact", "icontains", "search"],
+        "student__grade": ["exact"],
+        "student__first_name": ["contains", "exact", "icontains", "search"],
+        "student__last_name": ["contains", "exact", "icontains", "search"],
+        "student__registration_number": [
+            "contains",
+            "exact",
+            "icontains",
+            "search",
+        ],
+        "student__sex": ["exact"],
+        "student__is_graduated": ["exact"],
+        "student__is_dropped_out": ["exact"],
+        "school_year": ["exact"],
+        "school_year__name": ["contains", "exact", "icontains", "search"],
+        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
+    }
+    search_fields = [
+        "student__ci",
+        "student__first_name",
+        "student__last_name",
+    ]
+    ordering_fields = [
+        "pk",
+        "date",
+        "grade",
+        "school_year__start_date",
+        "school_year__end_date",
+        "student__ci",
+        "student__first_name",
+        "student__last_name",
+    ]
+    ordering = ["school_year__start_date"]
 
 
 class Upgrading7and8(generics.GenericAPIView):
