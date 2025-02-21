@@ -175,11 +175,11 @@ AUTH_USER_MODEL = "users.User"
 JAZZMIN_SETTINGS = {
     "welcome_sign": "Bienvenido",
     # title of the window (Will default to current_admin_site.site_title if absent or None)
-    "site_title": "Backup Manager",
+    "site_title": "Administración",
     # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_header": "Backup Manager",
+    "site_header": "Administración",
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_brand": "Backup Manager",
+    "site_brand": "Administración",
     # Logo to use for your site, must be present in static files, used for brand on top left
     "site_logo": "img/logo.png",
     # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
