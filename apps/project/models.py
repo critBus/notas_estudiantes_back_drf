@@ -140,6 +140,15 @@ class Student(models.Model):
                     return True
         return count_with_notes_valid == 0
 
+    @staticmethod
+    def get_students_without_ballots():
+        q = Student.get_students_current_9()
+        students_without_ballots = []
+        for student in q:
+            if not student.has_ballot():  # student.their_notes_are_valid() and
+                students_without_ballots.append(student)
+        return students_without_ballots
+
 
 class ApprovedSchoolCourse(models.Model):
     date = models.DateField(verbose_name="Fecha")

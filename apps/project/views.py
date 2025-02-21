@@ -413,6 +413,23 @@ class BallotListView(BaseListAPIView):
         return Response(serializer.data)
 
 
+class StudentsWithoutBallotsView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            students = Student.get_students_without_ballots()
+            return JsonResponse(
+                StudentSerializer(students, many=True).data, safe=False
+            )
+        except serializers.ValidationError as e:
+            return JsonResponse({"error": e.detail}, status=400)
+
+
 class DegreeScaleCalculateView(BaseModelAPIView):
     @extend_schema(
         responses={

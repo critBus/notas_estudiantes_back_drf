@@ -17,6 +17,7 @@ from apps.project.views import (
     SchoolYearViewSet,
     StudentCareerViewSet,
     StudentNoteViewSet,
+    StudentsWithoutBallotsView,
     StudentViewSet,
     SubjectViewSet,
     Upgrading7and8,
@@ -44,6 +45,11 @@ urlpatterns = [
         "students/ballot/are_missing/",
         AreMissingBallotsView.as_view(),
         name="ballot-are-missing",
+    ),
+    path(
+        "students/ballot/without/",
+        StudentsWithoutBallotsView.as_view(),
+        name="ballot-are-without",
     ),
     path(
         "students/ballot/<int:pk>/",

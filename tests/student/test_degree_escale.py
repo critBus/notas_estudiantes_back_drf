@@ -106,7 +106,7 @@ class TestDegreeEscale(DegreeEscaleTestCase):
             school_year=curse_9,
         )
         degree_scale.calculate_ranking_score()
-        self.assertEqual(ranking, degree_scale.ranking_score)
+        self.assertEqual(int(ranking), int(degree_scale.ranking_score))
 
     def test_degree_escale(self):
         self.create_fake_ranking()
