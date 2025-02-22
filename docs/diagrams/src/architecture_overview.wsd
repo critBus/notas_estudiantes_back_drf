@@ -32,7 +32,6 @@ entity Subject {
     id : Integer PK // id
     grade : IntegerField // Grado
     name : CharField(255) // Nombre
-    tcp2_required : BooleanField // Requiere TCP2
 }
 
 entity SchoolYear {
@@ -44,11 +43,11 @@ entity SchoolYear {
 
 entity StudentNote {
     id : Integer PK
-    acs : FloatField // ACS
-    final_grade : FloatField // Nota Final
-    final_exam : FloatField // Examen Final
-    tcp1 : FloatField // TCP1
-    tcp2 : FloatField // TCP2
+    average_acs : FloatField
+    average_tcp : FloatField
+    final_exam : FloatField
+    final_grade : FloatField
+    automatic_calculation: BooleanField
 }
 
 
@@ -71,6 +70,71 @@ entity ApprovedSchoolCourse{
     grade : IntegerField // Grado
     date : DateField // Fecha
 }
+
+entity SubjectSection{
+    id : Integer PK
+    title : CharField(255)
+    description: CharField(255)
+}
+entity Folder{
+    id : Integer PK
+    title : CharField(255)
+    description: CharField(255)
+}
+entity File{
+    id : Integer PK
+    title : CharField(255)
+    description: CharField(255)
+    type: CharField(255)
+    url: CharField(255)
+}
+entity Professor {
+    id : Integer PK
+    ci : CharField(20)
+    last_name : CharField(255)
+    first_name : CharField(255)
+}
+
+entity SchoolTask{
+    id : Integer PK
+    date : DateField
+    title : CharField(255)
+    description: CharField(255)
+    is_acs: BooleanField
+    is_tcp: BooleanField
+    is_final_exam: BooleanField
+
+}
+entity StudentResponse{
+    id : Integer PK
+    note : FloatField
+    date : DateField
+    description: CharField(255)
+}
+
+entity SchoolEvent {
+    id : Integer PK
+    date : DateTimeField
+    title : CharField(255)
+    description: CharField(255)
+}
+
+SchoolEvent "*" -- SchoolYear : Evento de Curso Escolar
+
+SubjectSection "*" -- "1" SchoolYear : Seccion del curso
+SubjectSection "*" -- "1" Subject : Seccion de asignatura
+SchoolTask "*" -- "1" SubjectSection : Tarea de seccion
+
+Folder "*" -- "1" SubjectSection : Carpeta de seccion
+Folder "1" -- "*" File : Archivo de carpeta
+
+SchoolTask "1" -- "*" File : Archivo de tarea
+SchoolTask "1" -- "*" StudentResponse : Respuesta de Tarea
+
+StudentResponse "1" -- "*" File : Archivo de respuesta
+StudentResponse "*" -- "*" Student : Respuesta de Estudiante
+
+Subject "*" -- "*" Professor : Profesor de seccion de asignatura
 
 ApprovedSchoolCourse "1" -- "1" Student : Estudiante del curso aprobado
 ApprovedSchoolCourse "*" -- "1" SchoolYear : Curso Escolar aprobado
