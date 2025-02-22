@@ -209,10 +209,30 @@ class Career(models.Model):
         verbose_name_plural = "Carreras"
 
 
+class Professor(models.Model):
+    ci = models.CharField(
+        max_length=20, verbose_name="Carnet de Identidad", unique=True
+    )
+    address = models.CharField(max_length=255, verbose_name="Dirección")
+    grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
+    last_name = models.CharField(max_length=255, verbose_name="Apellidos")
+    first_name = models.CharField(max_length=255, verbose_name="Nombres")
+    sex = models.CharField(
+        max_length=10,
+        verbose_name="Sexo",
+        choices=[("F", "Femenino"), ("M", "Masculino")],
+    )
+
+    class Meta:
+        verbose_name = "Profesor"
+        verbose_name_plural = "Profesores"
+
+
 class Subject(models.Model):
     grade = models.IntegerField(verbose_name="Grado", choices=GRADES_CHOICES)
     name = models.CharField(max_length=255, verbose_name="Nombre")
     tcp2_required = models.BooleanField(verbose_name="Requiere TCP2")
+    professor = models.ManyToManyField(Professor, verbose_name="Profesores")
 
     def __str__(self):
         return self.name
@@ -502,3 +522,125 @@ class GrantCareer(models.Model):
         return GrantCareer.objects.filter(
             approved_school_course__school_year=school_year
         )
+
+
+class SubjectSection(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE, verbose_name="Asignatura"
+    )
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+
+    class Meta:
+        verbose_name = "Sección de Asignatura"
+        verbose_name_plural = "Secciones de Asignaturas"
+
+
+class Folder(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    subject_section = models.ForeignKey(
+        SubjectSection,
+        on_delete=models.CASCADE,
+        verbose_name="Sección de Asignatura",
+    )
+
+    class Meta:
+        verbose_name = "Carpeta"
+        verbose_name_plural = "Carpetas"
+
+
+class File(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    type = models.CharField(max_length=255, verbose_name="Tipo")
+    file = models.FileField(verbose_name="Archivo")
+
+    class Meta:
+        abstract = True
+        verbose_name = "Archivo"
+        verbose_name_plural = "Archivos"
+
+
+class FileFolder(File):
+    folder = models.ForeignKey(
+        Folder, on_delete=models.CASCADE, verbose_name="Carpeta"
+    )
+
+    class Meta:
+        verbose_name = "Archivo De Carpeta"
+        verbose_name_plural = "Archivos De Carpetas"
+
+
+class SchoolTask(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    date = models.DateField(verbose_name="Fecha")
+    is_acs = models.BooleanField(default=False, verbose_name="Acs")
+    is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
+    is_final_exam = models.BooleanField(
+        default=False, verbose_name="Examen Final"
+    )
+    subject_section = models.ForeignKey(
+        SubjectSection,
+        on_delete=models.CASCADE,
+        verbose_name="Sección de Asignatura",
+    )
+
+    class Meta:
+        verbose_name = "Tarea Escolar"
+        verbose_name_plural = "Tareas Escolares"
+
+
+class FileSchoolTask(File):
+    school_task = models.ForeignKey(
+        SchoolTask, on_delete=models.CASCADE, verbose_name="Tarea Escolar"
+    )
+
+    class Meta:
+        verbose_name = "Archivo De Tarea Escolar"
+        verbose_name_plural = "Archivos De Tareas Escolares"
+
+
+class StudentResponse(models.Model):
+    date = models.DateField(verbose_name="Fecha")
+    description = models.TextField(verbose_name="Descripcion")
+
+    class Meta:
+        verbose_name = "Respuesta del Estudiante"
+        verbose_name_plural = "Respuestas de los Estudiantes"
+
+
+class FileStudentResponse(File):
+    student_response = models.ForeignKey(
+        StudentResponse,
+        on_delete=models.CASCADE,
+        verbose_name="Respuesta del Estudiante",
+    )
+
+    class Meta:
+        verbose_name = "Archivo De Respuesta del Estudiante"
+        verbose_name_plural = "Archivos De Respuestas de los Estudiantes"
+
+
+class ProfessorEvaluation(models.Model):
+    note = models.TextField(verbose_name="Nota")
+    date = models.DateField(verbose_name="Fecha")
+    description = models.TextField(verbose_name="Descripcion")
+
+    class Meta:
+        verbose_name = "Evaluación del Profesor"
+        verbose_name_plural = "Evaluaciones de los Profesores"
+
+
+class SchoolEvent(models.Model):
+    date = models.DateTimeField(verbose_name="Fecha")
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+
+    class Meta:
+        verbose_name = "Evento Escolar"
+        verbose_name_plural = "Eventos Escolares"

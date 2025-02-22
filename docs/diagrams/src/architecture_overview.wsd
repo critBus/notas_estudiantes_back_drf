@@ -86,7 +86,7 @@ entity File{
     title : CharField(255)
     description: CharField(255)
     type: CharField(255)
-    url: CharField(255)
+    file: CharField(255)
 }
 entity Professor {
     id : Integer PK
@@ -107,6 +107,12 @@ entity SchoolTask{
 }
 entity StudentResponse{
     id : Integer PK
+    date : DateField
+    description: CharField(255)
+}
+
+entity ProfessorEvaluation{
+    id : Integer PK
     note : FloatField
     date : DateField
     description: CharField(255)
@@ -118,6 +124,9 @@ entity SchoolEvent {
     title : CharField(255)
     description: CharField(255)
 }
+
+ProfessorEvaluation "1" -- "1" StudentResponse : Evaluación del Profesor  
+ProfessorEvaluation "*" -- "1" Professor : Profesor de la evaluacion
 
 SchoolEvent "*" -- SchoolYear : Evento de Curso Escolar
 
