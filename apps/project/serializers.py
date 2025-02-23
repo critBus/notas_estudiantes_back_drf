@@ -6,12 +6,21 @@ from .models import (
     Career,
     DegreeScale,
     Dropout,
+    FileFolder,
+    FileStudentResponse,
+    Folder,
     GrantCareer,
+    Professor,
+    ProfessorEvaluation,
+    SchoolEvent,
+    SchoolTask,
     SchoolYear,
     Student,
     StudentCareer,
     StudentNote,
+    StudentResponse,
     Subject,
+    SubjectSection,
 )
 from .utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
@@ -41,6 +50,12 @@ class BallotCreateSerializer(serializers.Serializer):
                 )
             list_career.append(career)
         return list_career
+
+
+class ProfessorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Professor
+        fields = "__all__"
 
 
 class SchoolYearSerializer(serializers.ModelSerializer):
@@ -83,10 +98,21 @@ class CareerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SubjectRepresentationSerializer(serializers.ModelSerializer):
+    professor = ProfessorSerializer(read_only=True)
+
+    class Meta:
+        model = Subject
+        fields = "__all__"
+
+
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
         fields = "__all__"
+
+    def to_representation(self, instance):
+        return SubjectRepresentationSerializer(instance).data
 
 
 class StudentNoteRepresentationSerializer(serializers.ModelSerializer):
@@ -177,3 +203,148 @@ class DropoutSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return DropoutRepresentationSerializer(instance).data
+
+
+class SubjectSectionRepresentationSerializer(serializers.ModelSerializer):
+    subject = SubjectRepresentationSerializer(read_only=True)
+    school_year = SchoolYearSerializer(read_only=True)
+
+    class Meta:
+        model = SubjectSection
+        fields = "__all__"
+
+
+class SubjectSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubjectSection
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return SubjectSectionRepresentationSerializer(instance).data
+
+
+class FolderRepresentationSerializer(serializers.ModelSerializer):
+    subject_section = SubjectSectionRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = Folder
+        fields = "__all__"
+
+
+class FolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Folder
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return FolderRepresentationSerializer(instance).data
+
+
+class FileFolderRepresentationSerializer(serializers.ModelSerializer):
+    folder = FolderRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = FileFolder
+        fields = "__all__"
+
+
+class FileFolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileFolder
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return FileFolderRepresentationSerializer(instance).data
+
+
+class SchoolTaskRepresentationSerializer(serializers.ModelSerializer):
+    subject_section = SubjectSectionRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = SchoolTask
+        fields = "__all__"
+
+
+class SchoolTaskSerializer(serializers.ModelSerializer):
+    subject_section = SubjectSectionRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = SchoolTask
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return SchoolTaskRepresentationSerializer(instance).data
+
+
+class FileSchoolTaskRepresentationSerializer(serializers.ModelSerializer):
+    school_task = SchoolTaskRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = SchoolTask
+        fields = "__all__"
+
+
+class FileSchoolTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchoolTask
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return FileSchoolTaskRepresentationSerializer(instance)
+
+
+class StudentResponseRepresentationSerializer(serializers.ModelSerializer):
+    school_task = SchoolTaskRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = StudentResponse
+        fields = "__all__"
+
+
+class StudentResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentResponse
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return StudentResponseRepresentationSerializer(instance).data
+
+
+class FileStudentResponseRepresentationSerializer(serializers.ModelSerializer):
+    student_response = StudentResponseRepresentationSerializer(read_only=True)
+
+    class Meta:
+        model = FileStudentResponse
+        fields = "__all__"
+
+
+class FileStudentResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileStudentResponse
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return FileStudentResponseRepresentationSerializer(instance).data
+
+
+class ProfessorEvaluationRepresentationSerializer(serializers.ModelSerializer):
+    professor = ProfessorSerializer(read_only=True)
+
+    class Meta:
+        model = ProfessorEvaluation
+        fields = "__all__"
+
+
+class ProfessorEvaluationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProfessorEvaluation
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return ProfessorEvaluationRepresentationSerializer(instance).data
+
+
+class SchoolEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchoolEvent
+        fields = "__all__"

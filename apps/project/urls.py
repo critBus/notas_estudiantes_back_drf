@@ -14,13 +14,22 @@ from apps.project.views import (
     DegreeScaleCurrentView,
     DegreeScaleViewSet,
     DropoutViewSet,
+    FileFolderViewSet,
+    FileSchoolTaskViewSet,
+    FolderViewSet,
     GrantCareerCurrentView,
     GrantCareerViewSet,
+    ProfessorEvaluationViewSet,
+    ProfessorViewSet,
+    SchoolEventViewSet,
+    SchoolTaskViewSet,
     SchoolYearViewSet,
     StudentCareerViewSet,
     StudentNoteViewSet,
+    StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
+    SubjectSectionViewSet,
     SubjectViewSet,
     Upgrading7and8,
     UpgradingAllView,
@@ -38,6 +47,15 @@ router.register(r"school_year", SchoolYearViewSet)
 router.register(r"degree_scale", DegreeScaleViewSet)
 router.register(r"grant_career", GrantCareerViewSet)
 router.register(r"approved_school_course", ApprovedSchoolCourseViewSet)
+router.register(r"professor", ProfessorViewSet)
+router.register(r"subject_section", SubjectSectionViewSet)
+router.register(r"folder", FolderViewSet)
+router.register(r"file_folder", FileFolderViewSet)
+router.register(r"school_task", SchoolTaskViewSet)
+router.register(r"file_school_task", FileSchoolTaskViewSet)
+router.register(r"student_response", StudentResponseViewSet)
+router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
+router.register(r"school_event", SchoolEventViewSet)
 
 urlpatterns = [
     path(

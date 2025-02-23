@@ -20,12 +20,22 @@ from .models import (
     Career,
     DegreeScale,
     Dropout,
+    FileFolder,
+    FileSchoolTask,
+    FileStudentResponse,
+    Folder,
     GrantCareer,
+    Professor,
+    ProfessorEvaluation,
+    SchoolEvent,
+    SchoolTask,
     SchoolYear,
     Student,
     StudentCareer,
     StudentNote,
+    StudentResponse,
     Subject,
+    SubjectSection,
 )
 from .serializers import (
     ApprovedSchoolCourseRepresentationSerializer,
@@ -36,16 +46,165 @@ from .serializers import (
     DropoutRepresentationSerializer,
     DropoutSerializer,
     ErrorSerializer,
+    FileFolderRepresentationSerializer,
+    FileFolderSerializer,
+    FileSchoolTaskRepresentationSerializer,
+    FileSchoolTaskSerializer,
+    FileStudentResponseRepresentationSerializer,
+    FileStudentResponseSerializer,
+    FolderRepresentationSerializer,
+    FolderSerializer,
     GrantCareerRepresentationSerializer,
     GrantCareerSerializer,
+    ProfessorEvaluationRepresentationSerializer,
+    ProfessorEvaluationSerializer,
+    ProfessorSerializer,
+    SchoolEventSerializer,
+    SchoolTaskRepresentationSerializer,
+    SchoolTaskSerializer,
     SchoolYearSerializer,
     StudentBallotSerializer,
     StudentCareerSerializer,
     StudentNoteRepresentationSerializer,
     StudentNoteSerializer,
+    StudentResponseRepresentationSerializer,
+    StudentResponseSerializer,
     StudentSerializer,
+    SubjectRepresentationSerializer,
+    SubjectSectionRepresentationSerializer,
+    SubjectSectionSerializer,
     SubjectSerializer,
 )
+
+
+class SchoolEventViewSet(BaseModelViewSet):
+    queryset = SchoolEvent.objects.all()
+    serializer_class = SchoolEventSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=ProfessorEvaluationRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=ProfessorEvaluationRepresentationSerializer),
+    retrieve=extend_schema(
+        responses=ProfessorEvaluationRepresentationSerializer
+    ),
+    update=extend_schema(responses=ProfessorEvaluationRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=ProfessorEvaluationRepresentationSerializer
+    ),
+)
+class ProfessorEvaluationViewSet(BaseModelViewSet):
+    queryset = ProfessorEvaluation.objects.all()
+    serializer_class = ProfessorEvaluationSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=FileStudentResponseRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=FileStudentResponseRepresentationSerializer),
+    retrieve=extend_schema(
+        responses=FileStudentResponseRepresentationSerializer
+    ),
+    update=extend_schema(responses=FileStudentResponseRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=FileStudentResponseRepresentationSerializer
+    ),
+)
+class StudentResponseViewSet(BaseModelViewSet):
+    queryset = FileStudentResponse.objects.all()
+    serializer_class = FileStudentResponseSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=StudentResponseRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=StudentResponseRepresentationSerializer),
+    retrieve=extend_schema(responses=StudentResponseRepresentationSerializer),
+    update=extend_schema(responses=StudentResponseRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=StudentResponseRepresentationSerializer
+    ),
+)
+class StudentResponseViewSet(BaseModelViewSet):
+    queryset = StudentResponse.objects.all()
+    serializer_class = StudentResponseSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=FileSchoolTaskRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=FileSchoolTaskRepresentationSerializer),
+    retrieve=extend_schema(responses=FileSchoolTaskRepresentationSerializer),
+    update=extend_schema(responses=FileSchoolTaskRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=FileSchoolTaskRepresentationSerializer
+    ),
+)
+class FileSchoolTaskViewSet(BaseModelViewSet):
+    queryset = FileSchoolTask.objects.all()
+    serializer_class = FileSchoolTaskSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(responses=SchoolTaskRepresentationSerializer(many=True)),
+    create=extend_schema(responses=SchoolTaskRepresentationSerializer),
+    retrieve=extend_schema(responses=SchoolTaskRepresentationSerializer),
+    update=extend_schema(responses=SchoolTaskRepresentationSerializer),
+    partial_update=extend_schema(responses=SchoolTaskRepresentationSerializer),
+)
+class SchoolTaskViewSet(BaseModelViewSet):
+    queryset = SchoolTask.objects.all()
+    serializer_class = SchoolTaskSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(responses=FileFolderRepresentationSerializer(many=True)),
+    create=extend_schema(responses=FileFolderRepresentationSerializer),
+    retrieve=extend_schema(responses=FileFolderRepresentationSerializer),
+    update=extend_schema(responses=FileFolderRepresentationSerializer),
+    partial_update=extend_schema(responses=FileFolderRepresentationSerializer),
+)
+class FileFolderViewSet(BaseModelViewSet):
+    queryset = FileFolder.objects.all()
+    serializer_class = FileFolderSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(responses=FolderRepresentationSerializer(many=True)),
+    create=extend_schema(responses=FolderRepresentationSerializer),
+    retrieve=extend_schema(responses=FolderRepresentationSerializer),
+    update=extend_schema(responses=FolderRepresentationSerializer),
+    partial_update=extend_schema(responses=FolderRepresentationSerializer),
+)
+class FolderViewSet(BaseModelViewSet):
+    queryset = Folder.objects.all()
+    serializer_class = FolderSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=SubjectSectionRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=SubjectSectionRepresentationSerializer),
+    retrieve=extend_schema(responses=SubjectSectionRepresentationSerializer),
+    update=extend_schema(responses=SubjectSectionRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=SubjectSectionRepresentationSerializer
+    ),
+)
+class SubjectSectionViewSet(BaseModelViewSet):
+    queryset = SubjectSection.objects.all()
+    serializer_class = SubjectSectionSerializer
+
+
+class ProfessorViewSet(BaseModelViewSet):
+    queryset = Professor.objects.all()
+    serializer_class = ProfessorSerializer
 
 
 @extend_schema_view(
@@ -189,6 +348,13 @@ class CareerViewSet(BaseModelViewSet):
     ordering = ["name"]
 
 
+@extend_schema_view(
+    list=extend_schema(responses=SubjectRepresentationSerializer(many=True)),
+    create=extend_schema(responses=SubjectRepresentationSerializer),
+    retrieve=extend_schema(responses=SubjectRepresentationSerializer),
+    update=extend_schema(responses=SubjectRepresentationSerializer),
+    partial_update=extend_schema(responses=SubjectRepresentationSerializer),
+)
 class SubjectViewSet(BaseModelViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
@@ -481,6 +647,7 @@ class BallotListView(BaseListAPIView):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+
         return Response(serializer.data)
 
 

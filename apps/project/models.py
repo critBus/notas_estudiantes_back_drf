@@ -504,7 +504,7 @@ class GrantCareer(models.Model):
                             approved_school_course=approved_school_course,
                         )
                     else:
-                        grant_career.career = (career,)
+                        grant_career.career = career
                         grant_career.school_year = school_year
                         grant_career.save()
 
@@ -630,6 +630,9 @@ class ProfessorEvaluation(models.Model):
     note = models.TextField(verbose_name="Nota")
     date = models.DateField(verbose_name="Fecha")
     description = models.TextField(verbose_name="Descripcion")
+    professor = models.ForeignKey(
+        Professor, on_delete=models.CASCADE, verbose_name="Profesor"
+    )
 
     class Meta:
         verbose_name = "Evaluación del Profesor"

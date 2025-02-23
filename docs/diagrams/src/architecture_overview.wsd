@@ -73,6 +73,7 @@ entity ApprovedSchoolCourse{
 
 entity SubjectSection{
     id : Integer PK
+    index: IntegerField
     title : CharField(255)
     description: CharField(255)
 }
