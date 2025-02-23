@@ -1,9 +1,10 @@
 from typing import Dict, Optional
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from rest_framework.reverse import reverse  # Para generar urls
 
-from apps.project.models import Student
+from apps.project.models import ROL_NAME_STUDENT, Student
 from tests.student.parent_case.student_test_case import StudentTestCase
 
 User = get_user_model()
@@ -93,6 +94,11 @@ class TestCreateStudent(StudentTestCase):
         self.assertEqual(student.user.username, data["account"]["username"])
         self.assertEqual(student.user.email, data["account"]["email"])
         student.user.check_password(data["account"]["password"])
+        self.assertTrue(
+            Group.objects.filter(
+                user=student.user, name=ROL_NAME_STUDENT
+            ).exists()
+        )
 
         data = {
             "ci": "12321232114",

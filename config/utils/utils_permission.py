@@ -96,7 +96,10 @@ def crear_rol(
         lista_modelos_solo_create = []
     if not lista_modelos_solo_view:
         lista_modelos_solo_view = []
-
+    if not lista_modelos:
+        lista_modelos = []
+    if not lista_modelos_solo_update:
+        lista_modelos_solo_update = []
     permisos = []
     for m in lista_modelos:
         # print(f"m {m}")

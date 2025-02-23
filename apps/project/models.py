@@ -9,6 +9,10 @@ from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
 User = get_user_model()
 GRADES_CHOICES = [(7, 7), (8, 8), (9, 9)]
+ROL_NAME_ADMIN = "admin"
+ROL_NAME_STUDENT = "estudiante"
+ROL_NAME_PROFESSOR = "professor"
+ROL_NAME_SECRETARY = "secretary"
 
 
 class SchoolYear(models.Model):

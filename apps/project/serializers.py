@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
+    ROL_NAME_STUDENT,
     ApprovedSchoolCourse,
     Career,
     DegreeScale,
@@ -125,7 +127,12 @@ class StudentCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         account = validated_data.pop("account", None)
         if account:
-            validated_data["user"] = User.objects.create_user(**account)
+            user = User.objects.create_user(**account)
+            role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+            if not role:
+                role = Group.objects.create(name=ROL_NAME_STUDENT)
+            user.groups.add(role)
+            validated_data["user"] = user
         instance = super().create(validated_data)
         return instance
 
