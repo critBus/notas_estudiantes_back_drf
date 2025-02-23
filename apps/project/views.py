@@ -65,6 +65,7 @@ from .serializers import (
     SchoolYearSerializer,
     StudentBallotSerializer,
     StudentCareerSerializer,
+    StudentCreateSerializer,
     StudentNoteRepresentationSerializer,
     StudentNoteSerializer,
     StudentResponseRepresentationSerializer,
@@ -243,6 +244,9 @@ class SchoolYearViewSet(BaseModelViewSet):
     ordering = ["start_date"]
 
 
+@extend_schema_view(
+    create=extend_schema(request=StudentCreateSerializer),
+)
 class StudentViewSet(BaseModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
@@ -278,6 +282,11 @@ class StudentViewSet(BaseModelViewSet):
         "is_dropped_out",
     ]
     ordering = ["ci"]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return StudentCreateSerializer
+        return self.serializer_class
 
 
 @extend_schema_view(

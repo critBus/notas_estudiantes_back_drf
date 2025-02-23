@@ -37,7 +37,7 @@ from apps.project.views import (
 
 router = DefaultRouter()
 
-router.register(r"students", StudentViewSet)
+router.register(r"students", StudentViewSet, basename="students")
 router.register(r"dropouts", DropoutViewSet)
 router.register(r"careers", CareerViewSet)
 router.register(r"subjects", SubjectViewSet)

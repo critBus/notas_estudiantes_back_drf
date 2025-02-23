@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -23,6 +24,8 @@ from .models import (
     SubjectSection,
 )
 from .utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
+
+User = get_user_model()
 
 
 class ErrorSerializer(serializers.Serializer):
@@ -73,6 +76,7 @@ class StudentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "is_graduated": {"read_only": True},
             "is_dropped_out": {"read_only": True},
+            "user": {"read_only": True},
         }
 
     @extend_schema_field(serializers.BooleanField())
@@ -80,6 +84,53 @@ class StudentSerializer(serializers.ModelSerializer):
         if obj:
             return obj.their_notes_are_valid()
         return False
+
+
+class AccountCreateSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+    email = serializers.EmailField()
+
+    def validate_username(self, username):
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                "Uste nombre de usuario ya existe"
+            )
+        return username
+
+    def validate_email(self, email):
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                "Uste correo de usuario ya existe"
+            )
+        return email
+
+
+class StudentCreateSerializer(serializers.ModelSerializer):
+    account = AccountCreateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Student
+        fields = [
+            "ci",
+            "address",
+            "grade",
+            "last_name",
+            "first_name",
+            "registration_number",
+            "sex",
+            "account",
+        ]
+
+    def create(self, validated_data):
+        account = validated_data.pop("account", None)
+        if account:
+            validated_data["user"] = User.objects.create_user(**account)
+        instance = super().create(validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return StudentSerializer(instance).data
 
 
 class StudentBallotSerializer(StudentSerializer):
