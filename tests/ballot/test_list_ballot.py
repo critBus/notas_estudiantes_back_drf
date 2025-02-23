@@ -54,6 +54,7 @@ class TestListBallot(BallotParentCase):
                         "sex": student.sex,
                         "is_graduated": False,
                         "is_dropped_out": False,
+                        "user": None,
                     }
                     for student in Student.objects.order_by("ci")[:10]
                 ],

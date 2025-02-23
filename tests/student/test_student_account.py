@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 
 from tests.student.parent_case.student_test_case import StudentTestCase

@@ -237,7 +237,6 @@ class Professor(models.Model):
         max_length=20, verbose_name="Carnet de Identidad", unique=True
     )
     address = models.CharField(max_length=255, verbose_name="Dirección")
-    grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
     last_name = models.CharField(max_length=255, verbose_name="Apellidos")
     first_name = models.CharField(max_length=255, verbose_name="Nombres")
     sex = models.CharField(
@@ -256,6 +255,20 @@ class Professor(models.Model):
     class Meta:
         verbose_name = "Profesor"
         verbose_name_plural = "Profesores"
+
+    def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if self.user:
+            self.user.first_name = self.first_name
+            self.user.last_name = self.last_name
+            self.user.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.user:
+            self.user.delete()
+            self.user = None
+        return super().delete(*args, **kwargs)
 
 
 class Subject(models.Model):

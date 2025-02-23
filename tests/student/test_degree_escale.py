@@ -183,6 +183,7 @@ class TestDegreeEscale(DegreeEscaleTestCase):
                         "sex": rank.student.sex,
                         "is_graduated": False,
                         "is_dropped_out": False,
+                        "user": None,
                     },
                     "school_year": {
                         "id": rank.school_year.id,
@@ -225,6 +226,7 @@ class TestDegreeEscale(DegreeEscaleTestCase):
                         "sex": rank.student.sex,
                         "is_graduated": False,
                         "is_dropped_out": False,
+                        "user": None,
                     },
                     "school_year": {
                         "id": rank.school_year.id,
