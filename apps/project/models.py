@@ -1,11 +1,18 @@
 from typing import Dict, List
 
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
+User = get_user_model()
 GRADES_CHOICES = [(7, 7), (8, 8), (9, 9)]
+ROL_NAME_ADMIN = "admin"
+ROL_NAME_STUDENT = "estudiante"
+ROL_NAME_PROFESSOR = "professor"
+ROL_NAME_SECRETARY = "secretary"
 
 
 class SchoolYear(models.Model):
@@ -19,9 +26,7 @@ class SchoolYear(models.Model):
         return self.name
 
     def get_subjects(self, grade: int):
-        return Subject.objects.filter(
-            studentnote__school_year=self, grade=grade
-        )
+        return Subject.objects.filter(grade=grade)
 
     @staticmethod
     def get_current_course():
@@ -45,7 +50,14 @@ class Student(models.Model):
         choices=[("F", "Femenino"), ("M", "Masculino")],
     )
     is_graduated = models.BooleanField(default=False, verbose_name="Graduado")
-    is_dropped_out = models.BooleanField(verbose_name="Baja")
+    is_dropped_out = models.BooleanField(default=False, verbose_name="Baja")
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        verbose_name="Cuenta",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -53,6 +65,20 @@ class Student(models.Model):
     class Meta:
         verbose_name = "Estudiante"
         verbose_name_plural = "Estudiantes"
+
+    def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if self.user:
+            self.user.first_name = self.first_name
+            self.user.last_name = self.last_name
+            self.user.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.user:
+            self.user.delete()
+            self.user = None
+        return super().delete(*args, **kwargs)
 
     def their_notes_are_valid(self, curse=None):
         if not curse:
@@ -75,21 +101,98 @@ class Student(models.Model):
 
     def get_ballot(self):
         return [
-            v.name
+            v.career.name
             for v in StudentCareer.objects.filter(student=self).order_by(
                 "index"
             )
         ]
 
     def has_ballot(self) -> bool:
-        return (
-            StudentCareer.objects.filter(student=self).count()
-            == AMOUNT_OF_CAREER_ON_BALLOT
+        count = StudentCareer.objects.filter(student=self).count()
+        return count == AMOUNT_OF_CAREER_ON_BALLOT
+
+    def upgrading_7_8(self, today=None) -> bool:
+        grade = self.grade
+        if grade not in [7, 8]:
+            raise serializers.ValidationError("El grado tiene que ser 7 o 8")
+        if today is None:
+            today = timezone.now().date()
+        course = SchoolYear.get_current_course()
+        if self.their_notes_are_valid():
+            self.grade += 1
+            self.save()
+            if not ApprovedSchoolCourse.objects.filter(
+                student=self, grade=grade
+            ).exists():
+                ApprovedSchoolCourse.objects.create(
+                    student=self,
+                    school_year=course,
+                    date=today,
+                    grade=grade,
+                )
+            return True
+        return False
+
+    @staticmethod
+    def upgrading_7_8_all(grade=7, today=None):
+        if grade not in [7, 8]:
+            raise serializers.ValidationError("El grado tiene que ser 7 o 8")
+        if today is None:
+            today = timezone.now().date()
+        students = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=grade
         )
+        upgrading_students = []
+        for student in students:
+            if student.upgrading_7_8(today=today):
+                upgrading_students.append(student)
+        return upgrading_students
+
+    @staticmethod
+    def get_students_current_9():
+        return Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=9
+        )
+
+    @staticmethod
+    def are_missing_ballots():
+        q = Student.get_students_current_9()
+        if q.count() == 0:
+            return True
+        count_with_notes_valid = 0
+        for student in q:
+            if student.their_notes_are_valid():
+                count_with_notes_valid += 1
+                if not student.has_ballot():
+                    return True
+        return count_with_notes_valid == 0
+
+    @staticmethod
+    def get_students_without_ballots():
+        q = Student.get_students_current_9()
+        students_without_ballots = []
+        for student in q:
+            if not student.has_ballot():  # student.their_notes_are_valid() and
+                students_without_ballots.append(student)
+        return students_without_ballots
+
+
+class ApprovedSchoolCourse(models.Model):
+    date = models.DateField(verbose_name="Fecha")
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    grade = models.IntegerField(verbose_name="Grado", choices=GRADES_CHOICES)
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+
+    class Meta:
+        verbose_name = "Curso Escolar Aprobado"
+        verbose_name_plural = "Cursos Escolares Aprobados"
 
 
 class Dropout(models.Model):
-    is_dropped_out = models.BooleanField(verbose_name="Baja")
     date = models.DateField(verbose_name="Fecha")
     municipality = models.CharField(max_length=255, verbose_name="Municipio")
     province = models.CharField(max_length=255, verbose_name="Provincia")
@@ -102,10 +205,28 @@ class Dropout(models.Model):
         verbose_name = "Baja"
         verbose_name_plural = "Bajas"
 
+    def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if not es_nuevo:
+            old: Dropout = Dropout.objects.get(id=self.id)
+            if old.student != self.student:
+                old.student.is_dropped_out = False
+                old.student.save()
+        if self.student:
+            self.student.is_dropped_out = True
+            self.student.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.student:
+            self.student.is_dropped_out = False
+            self.student.save()
+        return super().delete(*args, **kwargs)
+
 
 class Career(models.Model):
     amount = models.IntegerField(verbose_name="Monto")
-    name = models.CharField(max_length=255, verbose_name="Nombre")
+    name = models.CharField(max_length=255, verbose_name="Nombre", unique=True)
 
     def __str__(self):
         return self.name
@@ -115,10 +236,50 @@ class Career(models.Model):
         verbose_name_plural = "Carreras"
 
 
+class Professor(models.Model):
+    ci = models.CharField(
+        max_length=20, verbose_name="Carnet de Identidad", unique=True
+    )
+    address = models.CharField(max_length=255, verbose_name="Dirección")
+    last_name = models.CharField(max_length=255, verbose_name="Apellidos")
+    first_name = models.CharField(max_length=255, verbose_name="Nombres")
+    sex = models.CharField(
+        max_length=10,
+        verbose_name="Sexo",
+        choices=[("F", "Femenino"), ("M", "Masculino")],
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Cuenta",
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Profesor"
+        verbose_name_plural = "Profesores"
+
+    def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if self.user:
+            self.user.first_name = self.first_name
+            self.user.last_name = self.last_name
+            self.user.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.user:
+            self.user.delete()
+            self.user = None
+        return super().delete(*args, **kwargs)
+
+
 class Subject(models.Model):
     grade = models.IntegerField(verbose_name="Grado", choices=GRADES_CHOICES)
     name = models.CharField(max_length=255, verbose_name="Nombre")
     tcp2_required = models.BooleanField(verbose_name="Requiere TCP2")
+    professor = models.ManyToManyField(Professor, verbose_name="Profesores")
 
     def __str__(self):
         return self.name
@@ -153,10 +314,13 @@ class StudentNote(models.Model):
         verbose_name_plural = "Notas"
 
     def calculate_final_grade(self):
+        if self.tcp1 is None or self.asc is None or self.final_exam is None:
+            return
+
         prom_asc = self.asc  # en base a 10
-        prom_tcp = self.tcp1  # * 0.4; //en base a 40
+        prom_tcp = self.tcp1 * 0.4  # * 0.4; //en base a 40
         if (self.tcp2 is not None) and self.subject.tcp2_required:
-            prom_tcp += self.tcp2  # * 0.4;
+            prom_tcp += self.tcp2 * 0.4  # * 0.4;
             prom_tcp /= 2
 
         if self.subject.grade == 9:
@@ -171,9 +335,23 @@ class StudentNote(models.Model):
 
     @staticmethod
     def are_valid(notes):
-        # TODO: este metodo es fake aun
         if not notes:
             return False
+        for note in notes:
+            if (
+                note.tcp1 is None
+                or note.tcp1 < 60
+                or note.final_exam is None
+                or note.final_exam < 60
+                or note.asc is None
+                or note.asc < 6
+            ):
+                return False
+            if note.subject.tcp2_required and (
+                note.tcp2 is None or note.tcp2 < 60
+            ):
+                return False
+
         return True
 
 
@@ -189,6 +367,9 @@ class StudentCareer(models.Model):
     class Meta:
         verbose_name = "Estudiante - Carrera"
         verbose_name_plural = "Estudiantes - Carreras"
+
+    def __str__(self):
+        return f"{self.career.name}-{self.index}"
 
 
 class DegreeScale(models.Model):
@@ -209,6 +390,9 @@ class DegreeScale(models.Model):
         verbose_name = "Escalafón Estudiantil"
         verbose_name_plural = "Escalafones Estudiantiles"
 
+    def __str__(self):
+        return f"{self.ranking_number} - {self.ranking_score} - {self.student.first_name} {self.student.last_name}"
+
     def calculate_ranking_score(self) -> float:
         sume = 0
         notes = StudentNote.objects.filter(student=self.student)
@@ -223,33 +407,20 @@ class DegreeScale(models.Model):
 
     @staticmethod
     def current():
-        students = Student.objects.filter(
-            is_graduated=False, is_dropped_out=False, grade=9
-        )
+        students = Student.get_students_current_9()
         approved_students = []
-        # valida que todos tienen boletas
         for student in students:
-            if student.their_notes_are_valid() and student.has_ballot():
+            if student.their_notes_are_valid():
                 approved_students.append(student)
         return DegreeScale.objects.filter(
             student__in=approved_students
-        ).order_by("-ranking_score")
+        ).order_by("ranking_number")
 
     @staticmethod
     def calculate_all_ranking_number():
         school_year = SchoolYear.get_current_course()
         approved_students_ranking: List[DegreeScale] = []
-        students = Student.objects.filter(
-            is_graduated=False, is_dropped_out=False, grade=9
-        )
-
-        # valida que todos tienen boletas
-        for student in students:
-            if student.their_notes_are_valid():
-                if not student.has_ballot():
-                    raise serializers.ValidationError(
-                        f"El estudiante {student.ci} no tiene una boleta"
-                    )
+        students = Student.get_students_current_9()
 
         for student in students:
             if student.their_notes_are_valid():
@@ -271,8 +442,31 @@ class DegreeScale(models.Model):
         )
         for i, ranking in enumerate(approved_students_ranking):
             ranking.ranking_number = i + 1
+            ranking.save()
 
         return approved_students_ranking
+
+    @staticmethod
+    def there_are_students_whithout_ranking(course=None):
+        if not course:
+            course = SchoolYear.get_current_course()
+        q = Student.get_students_current_9()
+        if q.count() == 0:
+            return True
+        count_with_notes_valid = 0
+        for student in q:
+            if student.their_notes_are_valid():
+                count_with_notes_valid += 1
+                degree_scale = DegreeScale.objects.filter(
+                    student=student, school_year=course
+                ).first()
+                if (
+                    (not degree_scale)
+                    or (not degree_scale.ranking_score)
+                    or (not degree_scale.ranking_number)
+                ):
+                    return True
+        return count_with_notes_valid == 0
 
 
 class GrantCareer(models.Model):
@@ -282,31 +476,40 @@ class GrantCareer(models.Model):
     career = models.ForeignKey(
         Career, on_delete=models.CASCADE, verbose_name="Carrera"
     )
-    school_year = models.ForeignKey(
-        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    approved_school_course = models.ForeignKey(
+        ApprovedSchoolCourse,
+        on_delete=models.CASCADE,
+        verbose_name="Curso Escolar Aprobado",
     )
 
     class Meta:
         verbose_name = "Carrera Otorgada"
         verbose_name_plural = "Carreras Otorgadas"
 
-    @staticmethod
-    def grant():
-        students = Student.objects.filter(
-            is_graduated=False, is_dropped_out=False, grade=9
-        )
-        approved_students = []
-        # valida que todos tienen boletas
-        for student in students:
-            if student.their_notes_are_valid() and student.has_ballot():
-                approved_students.append(student)
+    def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if not es_nuevo:
+            old: GrantCareer = GrantCareer.objects.get(id=self.id)
+            if old.student != self.student:
+                old.student.is_graduated = False
+                old.student.save()
+        if self.student:
+            self.student.is_graduated = True
+            self.student.save()
+        return super().save(*args, **kwargs)
 
-        careers_amount: Dict[Career, int] = Career.objects.filter(amount__gt=0)
-        ballots: Dict[Student, List[StudentCareer]] = {
-            student: StudentCareer.objects.filter(student=student).order_by(
-                "index"
-            )
-            for student in approved_students
+    def delete(self, *args, **kwargs):
+        if self.student:
+            self.student.is_graduated = False
+            self.student.save()
+        return super().delete(*args, **kwargs)
+
+    @staticmethod
+    def grant(today=None):
+        if today is None:
+            today = timezone.now().date()
+        careers_amount: Dict[Career, int] = {
+            v: v.amount for v in Career.objects.filter(amount__gt=0)
         }
         ranking = DegreeScale.current()
         school_year = SchoolYear.get_current_course()
@@ -314,7 +517,9 @@ class GrantCareer(models.Model):
         grant_career_list: List[GrantCareer] = []
         for rank in ranking:
             student = rank.student
-            ballot = ballots[student]
+            ballot = StudentCareer.objects.filter(student=student).order_by(
+                "index"
+            )
             for student_career in ballot:
                 career = student_career.career
 
@@ -325,13 +530,28 @@ class GrantCareer(models.Model):
                         student=student
                     ).first()
                     if not grant_career:
+                        approved_school_course = (
+                            ApprovedSchoolCourse.objects.filter(
+                                student=student, grade=9
+                            ).first()
+                        )
+                        if not approved_school_course:
+                            approved_school_course = (
+                                ApprovedSchoolCourse.objects.create(
+                                    student=student,
+                                    school_year=school_year,
+                                    date=today,
+                                    grade=9,
+                                )
+                            )
+
                         grant_career = GrantCareer.objects.create(
                             student=student,
                             career=career,
-                            school_year=school_year,
+                            approved_school_course=approved_school_course,
                         )
                     else:
-                        grant_career.career = (career,)
+                        grant_career.career = career
                         grant_career.school_year = school_year
                         grant_career.save()
 
@@ -346,4 +566,131 @@ class GrantCareer(models.Model):
     @staticmethod
     def current():
         school_year = SchoolYear.get_current_course()
-        return GrantCareer.objects.filter(school_year=school_year)
+        return GrantCareer.objects.filter(
+            approved_school_course__school_year=school_year
+        )
+
+
+class SubjectSection(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE, verbose_name="Asignatura"
+    )
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+
+    class Meta:
+        verbose_name = "Sección de Asignatura"
+        verbose_name_plural = "Secciones de Asignaturas"
+
+
+class Folder(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    subject_section = models.ForeignKey(
+        SubjectSection,
+        on_delete=models.CASCADE,
+        verbose_name="Sección de Asignatura",
+    )
+
+    class Meta:
+        verbose_name = "Carpeta"
+        verbose_name_plural = "Carpetas"
+
+
+class File(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    type = models.CharField(max_length=255, verbose_name="Tipo")
+    file = models.FileField(verbose_name="Archivo")
+
+    class Meta:
+        abstract = True
+        verbose_name = "Archivo"
+        verbose_name_plural = "Archivos"
+
+
+class FileFolder(File):
+    folder = models.ForeignKey(
+        Folder, on_delete=models.CASCADE, verbose_name="Carpeta"
+    )
+
+    class Meta:
+        verbose_name = "Archivo De Carpeta"
+        verbose_name_plural = "Archivos De Carpetas"
+
+
+class SchoolTask(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+    date = models.DateField(verbose_name="Fecha")
+    is_acs = models.BooleanField(default=False, verbose_name="Acs")
+    is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
+    is_final_exam = models.BooleanField(
+        default=False, verbose_name="Examen Final"
+    )
+    subject_section = models.ForeignKey(
+        SubjectSection,
+        on_delete=models.CASCADE,
+        verbose_name="Sección de Asignatura",
+    )
+
+    class Meta:
+        verbose_name = "Tarea Escolar"
+        verbose_name_plural = "Tareas Escolares"
+
+
+class FileSchoolTask(File):
+    school_task = models.ForeignKey(
+        SchoolTask, on_delete=models.CASCADE, verbose_name="Tarea Escolar"
+    )
+
+    class Meta:
+        verbose_name = "Archivo De Tarea Escolar"
+        verbose_name_plural = "Archivos De Tareas Escolares"
+
+
+class StudentResponse(models.Model):
+    date = models.DateField(verbose_name="Fecha")
+    description = models.TextField(verbose_name="Descripcion")
+
+    class Meta:
+        verbose_name = "Respuesta del Estudiante"
+        verbose_name_plural = "Respuestas de los Estudiantes"
+
+
+class FileStudentResponse(File):
+    student_response = models.ForeignKey(
+        StudentResponse,
+        on_delete=models.CASCADE,
+        verbose_name="Respuesta del Estudiante",
+    )
+
+    class Meta:
+        verbose_name = "Archivo De Respuesta del Estudiante"
+        verbose_name_plural = "Archivos De Respuestas de los Estudiantes"
+
+
+class ProfessorEvaluation(models.Model):
+    note = models.TextField(verbose_name="Nota")
+    date = models.DateField(verbose_name="Fecha")
+    description = models.TextField(verbose_name="Descripcion")
+    professor = models.ForeignKey(
+        Professor, on_delete=models.CASCADE, verbose_name="Profesor"
+    )
+
+    class Meta:
+        verbose_name = "Evaluación del Profesor"
+        verbose_name_plural = "Evaluaciones de los Profesores"
+
+
+class SchoolEvent(models.Model):
+    date = models.DateTimeField(verbose_name="Fecha")
+    title = models.CharField(max_length=255, verbose_name="Titulo")
+    description = models.TextField(verbose_name="Descripcion")
+
+    class Meta:
+        verbose_name = "Evento Escolar"
+        verbose_name_plural = "Eventos Escolares"

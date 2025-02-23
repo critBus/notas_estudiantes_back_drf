@@ -3,11 +3,11 @@
 entity Student {
     id : Integer PK // id
     ci : CharField(20) // Carnet de Identidad
-    address : CharField(255) // Dirección
+    address : CharField // Dirección
     grade : IntegerField // Grado
-    last_name : CharField(255) // Apellidos
-    first_name : CharField(255) // Nombres
-    registration_number : CharField(255) // Número de Registro
+    last_name : CharField // Apellidos
+    first_name : CharField // Nombres
+    registration_number : CharField // Número de Registro
     sex : CharField(10) // Sexo
     is_graduated : BooleanField // Graduado
     is_dropped_out : BooleanField // Baja
@@ -15,41 +15,39 @@ entity Student {
 
 entity Dropout {
     id : Integer PK // id
-    is_dropped_out : BooleanField // Baja
     date : DateField // Fecha
-    municipality : CharField(255) // Municipio
-    province : CharField(255) // Provincia
-    school : CharField(255) // Escuela
+    municipality : CharField // Municipio
+    province : CharField // Provincia
+    school : CharField // Escuela
 }
 
 entity Career {
     id : Integer PK // id
     amount : IntegerField // Monto
-    name : CharField(255) // Nombre
+    name : CharField // Nombre
 }
 
 
 entity Subject {
     id : Integer PK // id
     grade : IntegerField // Grado
-    name : CharField(255) // Nombre
-    tcp2_required : BooleanField // Requiere TCP2
+    name : CharField // Nombre
 }
 
 entity SchoolYear {
     id : Integer PK
-    startDate : Date
-    endDate : Date
+    start_date : Date
+    end_date : Date
     name : Varchar(255)
 }
 
 entity StudentNote {
     id : Integer PK
-    acs : FloatField // ACS
-    final_grade : FloatField // Nota Final
-    final_exam : FloatField // Examen Final
-    tcp1 : FloatField // TCP1
-    tcp2 : FloatField // TCP2
+    average_acs : FloatField
+    average_tcp : FloatField
+    final_exam : FloatField
+    final_grade : FloatField
+    automatic_calculation: BooleanField
 }
 
 
@@ -67,8 +65,104 @@ entity GrantCareer{
     id : Integer PK
 }
 
+entity ApprovedSchoolCourse{
+    id : Integer PK
+    grade : IntegerField // Grado
+    date : DateField // Fecha
+}
+
+entity SubjectSection{
+    id : Integer PK
+    index: IntegerField
+    title : CharField
+    description: CharField
+}
+entity Folder{
+    id : Integer PK
+    title : CharField
+    description: CharField
+}
+entity File{
+    id : Integer PK
+    title : CharField
+    description: CharField
+    type: CharField
+    file: CharField
+}
+entity Professor {
+    id : Integer PK
+    ci : CharField(20)
+    last_name : CharField
+    first_name : CharField
+}
+
+entity SchoolTask{
+    id : Integer PK
+    date : DateField
+    title : CharField
+    description: CharField
+    is_acs: BooleanField
+    is_tcp: BooleanField
+    is_final_exam: BooleanField
+
+}
+entity StudentResponse{
+    id : Integer PK
+    date : DateField
+    description: CharField
+}
+
+entity ProfessorEvaluation{
+    id : Integer PK
+    note : FloatField
+    date : DateField
+    description: CharField
+}
+
+entity SchoolEvent {
+    id : Integer PK
+    date : DateTimeField
+    title : CharField
+    description: CharField
+}
+
+entity User{
+    id : Integer PK
+    username: CharField
+    email: CharField
+    password: CharField
+}
+
+User "1" -- "1" Professor : Cuenta de Profesor
+User "1" -- "1" Student : Cuenta de Estudiante
+
+
+ProfessorEvaluation "1" -- "1" StudentResponse : Evaluación del Profesor  
+ProfessorEvaluation "*" -- "1" Professor : Profesor de la evaluacion
+
+SchoolEvent "*" -- SchoolYear : Evento de Curso Escolar
+
+SubjectSection "*" -- "1" SchoolYear : Seccion del curso
+SubjectSection "*" -- "1" Subject : Seccion de asignatura
+SchoolTask "*" -- "1" SubjectSection : Tarea de seccion
+
+Folder "*" -- "1" SubjectSection : Carpeta de seccion
+Folder "1" -- "*" File : Archivo de carpeta
+
+SchoolTask "1" -- "*" File : Archivo de tarea
+SchoolTask "1" -- "*" StudentResponse : Respuesta de Tarea
+
+StudentResponse "1" -- "*" File : Archivo de respuesta
+StudentResponse "*" -- "*" Student : Respuesta de Estudiante
+
+Subject "*" -- "*" Professor : Profesor de seccion de asignatura
+
+ApprovedSchoolCourse "1" -- "1" Student : Estudiante del curso aprobado
+ApprovedSchoolCourse "*" -- "1" SchoolYear : Curso Escolar aprobado
+ApprovedSchoolCourse "1" -- "1" GrantCareer : Otorgamiento en este curso aprobado
+
 GrantCareer "1" -- "1" Student : Estudiante del otorgamiento
-GrantCareer "1" -- "1" Career : Carrera otorgada
+GrantCareer "*" -- "1" Career : Carrera otorgada
 
 
 SchoolYear "1" -- "*" DegreeScale :  Curso del Escalafon

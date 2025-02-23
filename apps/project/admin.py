@@ -2,8 +2,10 @@
 from django.contrib import admin
 
 from apps.project.models import (
+    ApprovedSchoolCourse,
     Career,
     DegreeScale,
+    Dropout,
     GrantCareer,
     SchoolYear,
     Student,
@@ -141,11 +143,39 @@ class GrantCareerAdmin(admin.ModelAdmin):
     list_display = (
         "student",
         "career",
-        "school_year",
+        "approved_school_course",
     )
     list_filter = (
         "career",
-        "school_year",
+        "approved_school_course",
     )
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(Dropout)
+class DropoutAdmin(admin.ModelAdmin):
+    list_display = ("date", "municipality", "province", "school", "student")
+    list_filter = (
+        "date",
+        "municipality",
+        "province",
+        "school",
+    )
+    search_fields = (
+        "municipality",
+        "province",
+        "school",
+    )
+    date_hierarchy = "date"
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(ApprovedSchoolCourse)
+class ApprovedSchoolCourseAdmin(admin.ModelAdmin):
+    list_display = ("date", "student", "grade", "school_year")
+    list_filter = ("date", "student", "grade", "school_year")
+    date_hierarchy = "date"
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()
