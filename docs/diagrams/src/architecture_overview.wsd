@@ -3,11 +3,11 @@
 entity Student {
     id : Integer PK // id
     ci : CharField(20) // Carnet de Identidad
-    address : CharField(255) // Dirección
+    address : CharField // Dirección
     grade : IntegerField // Grado
-    last_name : CharField(255) // Apellidos
-    first_name : CharField(255) // Nombres
-    registration_number : CharField(255) // Número de Registro
+    last_name : CharField // Apellidos
+    first_name : CharField // Nombres
+    registration_number : CharField // Número de Registro
     sex : CharField(10) // Sexo
     is_graduated : BooleanField // Graduado
     is_dropped_out : BooleanField // Baja
@@ -16,22 +16,22 @@ entity Student {
 entity Dropout {
     id : Integer PK // id
     date : DateField // Fecha
-    municipality : CharField(255) // Municipio
-    province : CharField(255) // Provincia
-    school : CharField(255) // Escuela
+    municipality : CharField // Municipio
+    province : CharField // Provincia
+    school : CharField // Escuela
 }
 
 entity Career {
     id : Integer PK // id
     amount : IntegerField // Monto
-    name : CharField(255) // Nombre
+    name : CharField // Nombre
 }
 
 
 entity Subject {
     id : Integer PK // id
     grade : IntegerField // Grado
-    name : CharField(255) // Nombre
+    name : CharField // Nombre
 }
 
 entity SchoolYear {
@@ -74,33 +74,33 @@ entity ApprovedSchoolCourse{
 entity SubjectSection{
     id : Integer PK
     index: IntegerField
-    title : CharField(255)
-    description: CharField(255)
+    title : CharField
+    description: CharField
 }
 entity Folder{
     id : Integer PK
-    title : CharField(255)
-    description: CharField(255)
+    title : CharField
+    description: CharField
 }
 entity File{
     id : Integer PK
-    title : CharField(255)
-    description: CharField(255)
-    type: CharField(255)
-    file: CharField(255)
+    title : CharField
+    description: CharField
+    type: CharField
+    file: CharField
 }
 entity Professor {
     id : Integer PK
     ci : CharField(20)
-    last_name : CharField(255)
-    first_name : CharField(255)
+    last_name : CharField
+    first_name : CharField
 }
 
 entity SchoolTask{
     id : Integer PK
     date : DateField
-    title : CharField(255)
-    description: CharField(255)
+    title : CharField
+    description: CharField
     is_acs: BooleanField
     is_tcp: BooleanField
     is_final_exam: BooleanField
@@ -109,22 +109,33 @@ entity SchoolTask{
 entity StudentResponse{
     id : Integer PK
     date : DateField
-    description: CharField(255)
+    description: CharField
 }
 
 entity ProfessorEvaluation{
     id : Integer PK
     note : FloatField
     date : DateField
-    description: CharField(255)
+    description: CharField
 }
 
 entity SchoolEvent {
     id : Integer PK
     date : DateTimeField
-    title : CharField(255)
-    description: CharField(255)
+    title : CharField
+    description: CharField
 }
+
+entity User{
+    id : Integer PK
+    username: CharField
+    email: CharField
+    password: CharField
+}
+
+User "1" -- "1" Professor : Cuenta de Profesor
+User "1" -- "1" Student : Cuenta de Estudiante
+
 
 ProfessorEvaluation "1" -- "1" StudentResponse : Evaluación del Profesor  
 ProfessorEvaluation "*" -- "1" Professor : Profesor de la evaluacion

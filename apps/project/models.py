@@ -1,11 +1,13 @@
 from typing import Dict, List
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 from rest_framework import serializers
 
 from apps.project.utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
+User = get_user_model()
 GRADES_CHOICES = [(7, 7), (8, 8), (9, 9)]
 
 
@@ -45,6 +47,13 @@ class Student(models.Model):
     )
     is_graduated = models.BooleanField(default=False, verbose_name="Graduado")
     is_dropped_out = models.BooleanField(default=False, verbose_name="Baja")
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        verbose_name="Cuenta",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -52,6 +61,20 @@ class Student(models.Model):
     class Meta:
         verbose_name = "Estudiante"
         verbose_name_plural = "Estudiantes"
+
+    def save(self, *args, **kwargs):
+        es_nuevo = self.pk is None
+        if self.user:
+            self.user.first_name = self.first_name
+            self.user.last_name = self.last_name
+            self.user.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.user:
+            self.user.delete()
+            self.user = None
+        return super().delete(*args, **kwargs)
 
     def their_notes_are_valid(self, curse=None):
         if not curse:
@@ -221,6 +244,13 @@ class Professor(models.Model):
         max_length=10,
         verbose_name="Sexo",
         choices=[("F", "Femenino"), ("M", "Masculino")],
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Cuenta",
+        blank=True,
+        null=True,
     )
 
     class Meta:
