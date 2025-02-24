@@ -318,12 +318,26 @@ class StudentViewSet(BaseModelViewSet):
         "sex": ["exact"],
         "is_graduated": ["exact"],
         "is_dropped_out": ["exact"],
+        "user": ["isnull"],
+        "user__id": ["exact"],
+        "user__last_login": ["gte", "lte", "gt", "lt", "exact"],
+        "user__is_superuser": ["exact"],
+        "user__username": ["contains", "exact", "icontains", "search"],
+        "user__email": ["contains", "exact", "icontains", "search"],
+        "user__first_name": ["contains", "exact", "icontains", "search"],
+        "user__last_name": ["contains", "exact", "icontains", "search"],
+        "user__is_active": ["exact"],
+        "user__is_staff": ["exact"],
+        "user__groups__id": ["exact"],
+        "user__groups__name": ["contains", "exact", "icontains", "search"],
     }
     search_fields = [
         "address",
         "registration_number",
         "first_name",
         "last_name",
+        "user__username",
+        "user__email",
     ]
     ordering_fields = [
         "pk",
@@ -336,6 +350,8 @@ class StudentViewSet(BaseModelViewSet):
         "sex",
         "is_graduated",
         "is_dropped_out",
+        "user__username",
+        "user__email",
     ]
     ordering = ["ci"]
 
