@@ -56,9 +56,11 @@ from .serializers import (
     FolderSerializer,
     GrantCareerRepresentationSerializer,
     GrantCareerSerializer,
+    ProfessorCreateSerializer,
     ProfessorEvaluationRepresentationSerializer,
     ProfessorEvaluationSerializer,
     ProfessorSerializer,
+    ProfessorUpdateSerializer,
     SchoolEventSerializer,
     SchoolTaskRepresentationSerializer,
     SchoolTaskSerializer,
@@ -204,9 +206,21 @@ class SubjectSectionViewSet(BaseModelViewSet):
     serializer_class = SubjectSectionSerializer
 
 
+@extend_schema_view(
+    create=extend_schema(request=ProfessorCreateSerializer),
+    update=extend_schema(request=ProfessorUpdateSerializer),
+    partial_update=extend_schema(request=ProfessorUpdateSerializer),
+)
 class ProfessorViewSet(BaseModelViewSet):
     queryset = Professor.objects.all()
     serializer_class = ProfessorSerializer
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ProfessorCreateSerializer
+        elif self.action in ["update", "partial_update"]:
+            return ProfessorUpdateSerializer
+        return self.serializer_class
 
 
 @extend_schema_view(
@@ -247,6 +261,8 @@ class SchoolYearViewSet(BaseModelViewSet):
 
 @extend_schema_view(
     create=extend_schema(request=StudentCreateSerializer),
+    update=extend_schema(request=StudentUpdateSerializer),
+    partial_update=extend_schema(request=StudentUpdateSerializer),
 )
 class StudentViewSet(BaseModelViewSet):
     queryset = Student.objects.all()
