@@ -85,6 +85,20 @@ class SchoolEventViewSet(BaseModelViewSet):
     queryset = SchoolEvent.objects.all()
     serializer_class = SchoolEventSerializer
 
+    filterset_fields = {
+        "id": ["exact"],
+        "title": ["contains", "exact", "icontains", "search"],
+        "date": ["gte", "lte", "gt", "lt", "exact"],
+        "description": ["contains", "exact", "icontains", "search"],
+    }
+    search_fields = ["title", "description"]
+    ordering_fields = [
+        "pk",
+        "title",
+        "date",
+    ]
+    ordering = ["date"]
+
 
 @extend_schema_view(
     list=extend_schema(
