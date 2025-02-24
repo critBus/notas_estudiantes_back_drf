@@ -71,6 +71,7 @@ from .serializers import (
     StudentResponseRepresentationSerializer,
     StudentResponseSerializer,
     StudentSerializer,
+    StudentUpdateSerializer,
     SubjectRepresentationSerializer,
     SubjectSectionRepresentationSerializer,
     SubjectSectionSerializer,
@@ -286,6 +287,8 @@ class StudentViewSet(BaseModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return StudentCreateSerializer
+        elif self.action in ["update", "partial_update"]:
+            return StudentUpdateSerializer
         return self.serializer_class
 
 

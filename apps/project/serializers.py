@@ -108,6 +108,47 @@ class AccountCreateSerializer(serializers.Serializer):
         return email
 
 
+class AccountUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(required=False, write_only=True)
+    email = serializers.EmailField(required=False)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
+    def validate_username(self, value):
+        """Valida que el username sea único si se modifica."""
+        if self.instance and self.instance.username == value:
+            return value  # No hay cambio en el username
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                "El nombre de usuario ya está en uso."
+            )
+        return value
+
+    def validate_email(self, value):
+        """Valida que el email sea único si se modifica."""
+        if self.instance and self.instance.email == value:
+            return value  # No hay cambio en el email
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "El correo electrónico ya está en uso."
+            )
+        return value
+
+    def update(self, instance, validated_data):
+        """Actualiza los campos del usuario."""
+        if "username" in validated_data:
+            instance.username = validated_data["username"]
+        if "email" in validated_data:
+            instance.email = validated_data["email"]
+        if "password" in validated_data:
+            instance.set_password(validated_data["password"])
+        instance.save()
+        return instance
+
+
 class StudentCreateSerializer(serializers.ModelSerializer):
     account = AccountCreateSerializer(write_only=True, required=False)
 
@@ -134,6 +175,48 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             user.groups.add(role)
             validated_data["user"] = user
         instance = super().create(validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return StudentSerializer(instance).data
+
+
+class StudentUpdateSerializer(serializers.ModelSerializer):
+    account = AccountUpdateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Student
+        fields = [
+            "ci",
+            "address",
+            "grade",
+            "last_name",
+            "first_name",
+            "registration_number",
+            "sex",
+            "account",
+        ]
+
+    def update(self, instance, validated_data):
+        # Actualizar la cuenta asociada (si existe)
+        account_data = validated_data.pop("account", None)
+        if account_data is not None:
+            if instance.user:  # Si ya tiene una cuenta, actualizamos
+                user_serializer = AccountUpdateSerializer(
+                    instance.user, data=account_data, partial=True
+                )
+                user_serializer.is_valid(raise_exception=True)
+                user_serializer.save()
+            else:  # Si no tiene cuenta, creamos una nueva
+                user_serializer = AccountCreateSerializer(data=account_data)
+                user_serializer.is_valid(raise_exception=True)
+                user = User.objects.create_user(**account_data)
+                role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+                if not role:
+                    role = Group.objects.create(name=ROL_NAME_STUDENT)
+                user.groups.add(role)
+                validated_data["user"] = user
+        instance = super().update(instance, validated_data)
         return instance
 
     def to_representation(self, instance):
