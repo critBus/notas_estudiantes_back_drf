@@ -215,6 +215,45 @@ class ProfessorViewSet(BaseModelViewSet):
     queryset = Professor.objects.all()
     serializer_class = ProfessorSerializer
 
+    filterset_fields = {
+        "id": ["exact"],
+        "ci": ["contains", "exact", "icontains", "search"],
+        "address": ["contains", "exact", "icontains", "search"],
+        "first_name": ["contains", "exact", "icontains", "search"],
+        "last_name": ["contains", "exact", "icontains", "search"],
+        "sex": ["exact"],
+        "user": ["isnull"],
+        "user__id": ["exact"],
+        "user__last_login": ["gte", "lte", "gt", "lt", "exact"],
+        "user__is_superuser": ["exact"],
+        "user__username": ["contains", "exact", "icontains", "search"],
+        "user__email": ["contains", "exact", "icontains", "search"],
+        "user__first_name": ["contains", "exact", "icontains", "search"],
+        "user__last_name": ["contains", "exact", "icontains", "search"],
+        "user__is_active": ["exact"],
+        "user__is_staff": ["exact"],
+        "user__groups__id": ["exact"],
+        "user__groups__name": ["contains", "exact", "icontains", "search"],
+    }
+    search_fields = [
+        "address",
+        "first_name",
+        "last_name",
+        "user__username",
+        "user__email",
+    ]
+    ordering_fields = [
+        "pk",
+        "ci",
+        "address",
+        "first_name",
+        "last_name",
+        "sex",
+        "user__username",
+        "user__email",
+    ]
+    ordering = ["ci"]
+
     def get_serializer_class(self):
         if self.action == "create":
             return ProfessorCreateSerializer
@@ -325,7 +364,8 @@ class DropoutViewSet(BaseModelViewSet):
         "date": ["gte", "lte", "gt", "lt", "exact"],
         "province": ["contains", "exact", "icontains", "search"],
         "school": ["contains", "exact", "icontains", "search"],
-        "student": ["exact"],
+        "student": ["isnull"],
+        "student__id": ["exact"],
         "student__ci": ["contains", "exact", "icontains", "search"],
         "student__address": ["contains", "exact", "icontains", "search"],
         "student__grade": ["exact"],
@@ -420,7 +460,8 @@ class StudentNoteViewSet(BaseModelViewSet):
 
     filterset_fields = {
         "id": ["exact"],
-        "student": ["exact"],
+        "student": ["isnull"],
+        "student__id": ["exact"],
         "student__ci": ["contains", "exact", "icontains", "search"],
         "student__address": ["contains", "exact", "icontains", "search"],
         "student__grade": ["exact"],
@@ -435,11 +476,13 @@ class StudentNoteViewSet(BaseModelViewSet):
         "student__sex": ["exact"],
         "student__is_graduated": ["exact"],
         "student__is_dropped_out": ["exact"],
-        "subject": ["exact"],
+        "subject": ["isnull"],
+        "subject__id": ["exact"],
         "subject__name": ["contains", "exact", "icontains", "search"],
         "subject__grade": ["exact"],
         "subject__tcp2_required": ["exact"],
-        "school_year": ["exact"],
+        "school_year": ["isnull"],
+        "school_year__id": ["exact"],
         "school_year__name": ["contains", "exact", "icontains", "search"],
         "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
         "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
@@ -498,7 +541,8 @@ class ApprovedSchoolCourseViewSet(BaseModelViewSet):
         "id": ["exact"],
         "date": ["gte", "lte", "gt", "lt", "exact"],
         "grade": ["gte", "lte", "gt", "lt", "exact"],
-        "student": ["exact"],
+        "student": ["isnull"],
+        "student__id": ["exact"],
         "student__ci": ["contains", "exact", "icontains", "search"],
         "student__address": ["contains", "exact", "icontains", "search"],
         "student__grade": ["exact"],
@@ -513,7 +557,8 @@ class ApprovedSchoolCourseViewSet(BaseModelViewSet):
         "student__sex": ["exact"],
         "student__is_graduated": ["exact"],
         "student__is_dropped_out": ["exact"],
-        "school_year": ["exact"],
+        "school_year": ["isnull"],
+        "school_year__id": ["exact"],
         "school_year__name": ["contains", "exact", "icontains", "search"],
         "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
         "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
