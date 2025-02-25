@@ -26,7 +26,6 @@ from .models import (
     Folder,
     GrantCareer,
     Professor,
-    ProfessorEvaluation,
     SchoolEvent,
     SchoolTask,
     SchoolYear,
@@ -57,8 +56,6 @@ from .serializers import (
     GrantCareerRepresentationSerializer,
     GrantCareerSerializer,
     ProfessorCreateSerializer,
-    ProfessorEvaluationRepresentationSerializer,
-    ProfessorEvaluationSerializer,
     ProfessorSerializer,
     ProfessorUpdateSerializer,
     SchoolEventSerializer,
@@ -100,22 +97,22 @@ class SchoolEventViewSet(BaseModelViewSet):
     ordering = ["date"]
 
 
-@extend_schema_view(
-    list=extend_schema(
-        responses=ProfessorEvaluationRepresentationSerializer(many=True)
-    ),
-    create=extend_schema(responses=ProfessorEvaluationRepresentationSerializer),
-    retrieve=extend_schema(
-        responses=ProfessorEvaluationRepresentationSerializer
-    ),
-    update=extend_schema(responses=ProfessorEvaluationRepresentationSerializer),
-    partial_update=extend_schema(
-        responses=ProfessorEvaluationRepresentationSerializer
-    ),
-)
-class ProfessorEvaluationViewSet(BaseModelViewSet):
-    queryset = ProfessorEvaluation.objects.all()
-    serializer_class = ProfessorEvaluationSerializer
+# @extend_schema_view(
+#     list=extend_schema(
+#         responses=ProfessorEvaluationRepresentationSerializer(many=True)
+#     ),
+#     create=extend_schema(responses=ProfessorEvaluationRepresentationSerializer),
+#     retrieve=extend_schema(
+#         responses=ProfessorEvaluationRepresentationSerializer
+#     ),
+#     update=extend_schema(responses=ProfessorEvaluationRepresentationSerializer),
+#     partial_update=extend_schema(
+#         responses=ProfessorEvaluationRepresentationSerializer
+#     ),
+# )
+# class ProfessorEvaluationViewSet(BaseModelViewSet):
+#     queryset = ProfessorEvaluation.objects.all()
+#     serializer_class = ProfessorEvaluationSerializer
 
 
 @extend_schema_view(

@@ -19,7 +19,6 @@ from apps.project.views import (
     FolderViewSet,
     GrantCareerCurrentView,
     GrantCareerViewSet,
-    ProfessorEvaluationViewSet,
     ProfessorViewSet,
     SchoolEventViewSet,
     SchoolTaskViewSet,
@@ -54,7 +53,7 @@ router.register(r"file_folder", FileFolderViewSet)
 router.register(r"school_task", SchoolTaskViewSet)
 router.register(r"file_school_task", FileSchoolTaskViewSet)
 router.register(r"student_response", StudentResponseViewSet)
-router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
+# router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
 router.register(r"school_event", SchoolEventViewSet)
 
 urlpatterns = [

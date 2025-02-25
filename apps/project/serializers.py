@@ -14,7 +14,6 @@ from .models import (
     Folder,
     GrantCareer,
     Professor,
-    ProfessorEvaluation,
     SchoolEvent,
     SchoolTask,
     SchoolYear,
@@ -538,21 +537,21 @@ class FileStudentResponseSerializer(serializers.ModelSerializer):
         return FileStudentResponseRepresentationSerializer(instance).data
 
 
-class ProfessorEvaluationRepresentationSerializer(serializers.ModelSerializer):
-    professor = ProfessorSerializer(read_only=True)
-
-    class Meta:
-        model = ProfessorEvaluation
-        fields = "__all__"
-
-
-class ProfessorEvaluationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProfessorEvaluation
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        return ProfessorEvaluationRepresentationSerializer(instance).data
+# class ProfessorEvaluationRepresentationSerializer(serializers.ModelSerializer):
+#     professor = ProfessorSerializer(read_only=True)
+#
+#     class Meta:
+#         model = ProfessorEvaluation
+#         fields = "__all__"
+#
+#
+# class ProfessorEvaluationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ProfessorEvaluation
+#         fields = "__all__"
+#
+#     def to_representation(self, instance):
+#         return ProfessorEvaluationRepresentationSerializer(instance).data
 
 
 class SchoolEventSerializer(serializers.ModelSerializer):

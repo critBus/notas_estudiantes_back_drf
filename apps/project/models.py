@@ -626,11 +626,11 @@ class SchoolTask(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
     description = models.TextField(verbose_name="Descripcion")
     date = models.DateField(verbose_name="Fecha")
-    is_acs = models.BooleanField(default=False, verbose_name="Acs")
-    is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
-    is_final_exam = models.BooleanField(
-        default=False, verbose_name="Examen Final"
-    )
+    # is_acs = models.BooleanField(default=False, verbose_name="Acs")
+    # is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
+    # is_final_exam = models.BooleanField(
+    #     default=False, verbose_name="Examen Final"
+    # )
     subject_section = models.ForeignKey(
         SubjectSection,
         on_delete=models.CASCADE,
@@ -673,17 +673,17 @@ class FileStudentResponse(File):
         verbose_name_plural = "Archivos De Respuestas de los Estudiantes"
 
 
-class ProfessorEvaluation(models.Model):
-    note = models.TextField(verbose_name="Nota")
-    date = models.DateField(verbose_name="Fecha")
-    description = models.TextField(verbose_name="Descripcion")
-    professor = models.ForeignKey(
-        Professor, on_delete=models.CASCADE, verbose_name="Profesor"
-    )
-
-    class Meta:
-        verbose_name = "Evaluación del Profesor"
-        verbose_name_plural = "Evaluaciones de los Profesores"
+# class ProfessorEvaluation(models.Model):
+#     note = models.TextField(verbose_name="Nota")
+#     date = models.DateField(verbose_name="Fecha")
+#     description = models.TextField(verbose_name="Descripcion")
+#     professor = models.ForeignKey(
+#         Professor, on_delete=models.CASCADE, verbose_name="Profesor"
+#     )
+#
+#     class Meta:
+#         verbose_name = "Evaluación del Profesor"
+#         verbose_name_plural = "Evaluaciones de los Profesores"
 
 
 class SchoolEvent(models.Model):
