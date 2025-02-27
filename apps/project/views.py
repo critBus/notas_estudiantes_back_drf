@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.utils import timezone
 from drf_spectacular.utils import (
     OpenApiExample,
     extend_schema,
@@ -36,7 +37,7 @@ from .models import (
     Subject,
     SubjectSection,
 )
-from .serializers import (
+from .serializers.general import (
     ApprovedSchoolCourseRepresentationSerializer,
     ApprovedSchoolCourseSerializer,
     BallotCreateSerializer,
@@ -76,6 +77,8 @@ from .serializers import (
     SubjectSectionSerializer,
     SubjectSerializer,
 )
+from .serializers.subject_section.create import SubjectSectionCreateSerializer
+from .utils.extenciones import get_extension
 
 
 class SchoolEventViewSet(BaseModelViewSet):
@@ -901,3 +904,143 @@ class UpgradingAllView(BaseModelAPIView):
             )
         except serializers.ValidationError as e:
             return JsonResponse({"error": e.detail}, status=400)
+
+
+class SubjectSectionCreateView(BaseModelAPIView):
+    @extend_schema(
+        request=SubjectSectionCreateSerializer(many=True),
+        responses={
+            200: ApprovedSchoolCourseRepresentationSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def post(self, request, id, *args, **kwargs):
+        subject = Subject.objects.filter(pk=id).first()
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        if not subject:
+            return JsonResponse(
+                {"error": "No existe esta asignatura"}, status=400
+            )
+        serializer = SubjectSectionCreateSerializer(
+            data=request.data, many=True
+        )
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, safe=False, status=400)
+        for data_section in serializer.validated_data:
+            section_index = data_section["index"]
+            section_title = data_section["title"]
+            section_description = data_section["description"]
+
+            if "id" in data_section:
+                section = SubjectSection.objects.get(id=data_section["id"])
+                section.index = section_index
+                section.title = section_title
+                section.description = section_description
+                section.save()
+            else:
+                section = SubjectSection.objects.create(
+                    title=section_title,
+                    description=section_description,
+                    index=section_index,
+                    subject=subject,
+                    school_year=course,
+                )
+            if "folders" in data_section:
+                section_folders = data_section["folders"]
+                for data_folder in section_folders:
+                    folder_title = data_folder["title"]
+                    folder_description = data_folder["description"]
+                    if "id" in data_folder:
+                        folder_id = data_folder["id"]
+                        folder = Folder.objects.get(id=folder_id)
+                        folder.title = folder_title
+                        folder.description = folder_description
+                        folder.save()
+                    else:
+                        folder = Folder.objects.create(
+                            title=folder_title,
+                            description=folder_description,
+                            subject_section=section,
+                        )
+
+                    if "files" in data_folder:
+                        folder_files = data_folder["files"]
+
+                        for data_file in folder_files:
+                            file_title = data_file["title"]
+                            file_description = data_file["description"]
+                            file_file = data_file["file"]
+
+                            if "id" in data_file:
+                                file = FileFolder.objects.get(
+                                    id=data_file["id"]
+                                )
+                                file.title = file_title
+                                file.description = file_description
+                                file.type = get_extension(file_file)
+                                file.file = file_file
+                                file.folder = folder
+                                file.save()
+                            else:
+                                FileFolder.objects.create(
+                                    file=file_file,
+                                    title=file_title,
+                                    description=file_description,
+                                    type=get_extension(file_file),
+                                    folder=folder,
+                                )
+
+            if "tasks" in data_section:
+                section_tasks = data_section["tasks"]
+                for data_task in section_tasks:
+                    task_title = data_task["title"]
+                    task_description = data_task["description"]
+
+                    if "id" in data_task:
+                        task = SchoolTask.objects.get(id=data_task["id"])
+                        task.title = task_title
+                        task.description = task_description
+                        task.subject_section = section
+                        task.save()
+                    else:
+                        task = SchoolTask.objects.create(
+                            title=task_title,
+                            description=task_description,
+                            subject_section=section,
+                            date=timezone.now(),
+                        )
+
+                    if "files" in data_task:
+                        task_files = data_task["files"]
+
+                        for data_task_file in task_files:
+                            task_file_title = data_task_file["title"]
+                            task_file_description = data_task_file[
+                                "description"
+                            ]
+                            task_file_file = data_task_file["file"]
+
+                            if "id" in data_task_file:
+                                file = FileSchoolTask.objects.get(
+                                    id=data_task_file["id"]
+                                )
+                                file.title = task_file_title
+                                file.description = task_file_description
+                                file.type = get_extension(task_file_file)
+                                file.file = task_file_file
+                                file.school_task = task
+                                file.save()
+                            else:
+                                FileSchoolTask.objects.create(
+                                    file=task_file_file,
+                                    title=task_file_title,
+                                    description=task_file_description,
+                                    type=get_extension(task_file_file),
+                                    school_task=task,
+                                )
+
+        return Response({"data": "success"}, status=200)

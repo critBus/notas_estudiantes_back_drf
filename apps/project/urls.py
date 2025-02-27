@@ -28,6 +28,7 @@ from apps.project.views import (
     StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
+    SubjectSectionCreateView,
     SubjectSectionViewSet,
     SubjectViewSet,
     Upgrading7and8,
@@ -116,6 +117,11 @@ urlpatterns = [
         "grant_career/grant/",
         CarryOutGrantingOfCoursesView.as_view(),
         name="grant-career-grant",
+    ),
+    path(
+        "subject_section/create/<int:id>/",
+        SubjectSectionCreateView.as_view(),
+        name="subject-section-create",
     ),
     path("", include(router.urls)),
 ]

@@ -572,6 +572,7 @@ class GrantCareer(models.Model):
 
 
 class SubjectSection(models.Model):
+    index = models.IntegerField(verbose_name="Indice", default=1)
     title = models.CharField(max_length=255, verbose_name="Titulo")
     description = models.TextField(verbose_name="Descripcion")
     subject = models.ForeignKey(

@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import (
+from ..models import (
     ROL_NAME_STUDENT,
     ApprovedSchoolCourse,
     Career,
@@ -24,7 +24,7 @@ from .models import (
     Subject,
     SubjectSection,
 )
-from .utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
+from ..utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
 User = get_user_model()
 
