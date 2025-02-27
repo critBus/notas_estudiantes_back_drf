@@ -605,7 +605,7 @@ class File(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
     description = models.TextField(verbose_name="Descripcion")
     type = models.CharField(max_length=255, verbose_name="Tipo")
-    file = models.FileField(verbose_name="Archivo")
+    file = models.CharField(max_length=500, verbose_name="Archivo")
 
     class Meta:
         abstract = True
@@ -656,6 +656,9 @@ class FileSchoolTask(File):
 class StudentResponse(models.Model):
     date = models.DateField(verbose_name="Fecha")
     description = models.TextField(verbose_name="Descripcion")
+    school_task = models.ForeignKey(
+        SchoolTask, on_delete=models.CASCADE, verbose_name="Tarea Escolar"
+    )
 
     class Meta:
         verbose_name = "Respuesta del Estudiante"

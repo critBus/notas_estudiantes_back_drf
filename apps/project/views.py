@@ -78,6 +78,9 @@ from .serializers.general import (
     SubjectSerializer,
 )
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
+from .serializers.subject_section.representation import (
+    SubjectSectionCreateRepresentationSerializer,
+)
 from .utils.extenciones import get_extension
 
 
@@ -910,7 +913,12 @@ class SubjectSectionCreateView(BaseModelAPIView):
     @extend_schema(
         request=SubjectSectionCreateSerializer(many=True),
         responses={
-            200: ApprovedSchoolCourseRepresentationSerializer(many=True),
+            200: inline_serializer(
+                "SubjectSectionCreateResponse",
+                fields={
+                    "message": serializers.CharField(default="success"),
+                },
+            ),
             400: ErrorSerializer,
         },
     )
@@ -1043,4 +1051,32 @@ class SubjectSectionCreateView(BaseModelAPIView):
                                     school_task=task,
                                 )
 
-        return Response({"data": "success"}, status=200)
+        return Response({"message": "success"}, status=200)
+
+    @extend_schema(
+        responses={
+            200: SubjectSectionCreateRepresentationSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, id, *args, **kwargs):
+        subject = Subject.objects.filter(pk=id).first()
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        if not subject:
+            return JsonResponse(
+                {"error": "No existe esta asignatura"}, status=400
+            )
+        sections = SubjectSection.objects.filter(
+            subject=subject, school_year=course
+        ).order_by("index")
+        return JsonResponse(
+            SubjectSectionCreateRepresentationSerializer(
+                sections, many=True, context={"request": request}
+            ).data,
+            safe=False,
+            status=200,
+        )

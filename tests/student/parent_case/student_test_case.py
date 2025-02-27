@@ -16,3 +16,4 @@ class StudentTestCase(
         self.create_current_school_year()
         self.login_superuser()
         self.crear_asignaturas()
+        self.maxDiff = None

@@ -17,7 +17,7 @@ User = get_user_model()
 
 
 class TestCreateSubjectSection(StudentTestCase):
-    def call_degree_scale_current(
+    def call_create_subject_section(
         self,
         id: int,
         payload: Dict[str, Any],
@@ -76,7 +76,7 @@ class TestCreateSubjectSection(StudentTestCase):
                 ],
             }
         ]
-        self.call_degree_scale_current(id=subject.id, payload=data)
+        self.call_create_subject_section(id=subject.id, payload=data)
         section = SubjectSection.objects.filter(title="secciontest").first()
         self.assertIsNotNone(section)
         folders = Folder.objects.filter(subject_section=section)
