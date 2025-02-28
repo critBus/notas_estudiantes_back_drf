@@ -309,7 +309,7 @@ class CareerSerializer(serializers.ModelSerializer):
 
 
 class SubjectRepresentationSerializer(serializers.ModelSerializer):
-    professor = ProfessorSerializer(read_only=True)
+    professor = ProfessorSerializer(read_only=True, many=True)
 
     class Meta:
         model = Subject

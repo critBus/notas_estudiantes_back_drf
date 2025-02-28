@@ -1098,18 +1098,24 @@ class SubjectOfUser(BaseModelAPIView):
         if user.groups.filter(name__in=[ROL_NAME_ADMIN, ROL_NAME_PROFESSOR]):
             professor = Professor.objects.filter(user=user).first()
             if professor:
-                subjects = Subject.objects.filter(professor__in=[professor])
+                subjects = Subject.objects.filter(
+                    professor__in=[professor]
+                ).order_by("name")
                 return JsonResponse(
                     SubjectRepresentationSerializer(subjects, many=True).data,
                     status=200,
+                    safe=False,
                 )
 
         elif user.groups.filter(name__in=[ROL_NAME_STUDENT]):
             student = Student.objects.filter(user=user).first()
             if student:
-                subjects = Subject.objects.filter(grade=student.grade)
+                subjects = Subject.objects.filter(grade=student.grade).order_by(
+                    "name"
+                )
                 return JsonResponse(
                     SubjectRepresentationSerializer(subjects, many=True).data,
                     status=200,
+                    safe=False,
                 )
         return JsonResponse({"error": "Usuario invalido"}, status=403)
