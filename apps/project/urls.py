@@ -28,6 +28,7 @@ from apps.project.views import (
     StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
+    SubjectOfUser,
     SubjectSectionCreateView,
     SubjectSectionViewSet,
     SubjectViewSet,
@@ -122,6 +123,11 @@ urlpatterns = [
         "subject_section/create/<int:id>/",
         SubjectSectionCreateView.as_view(),
         name="subject-section-create",
+    ),
+    path(
+        "subject_section/subjects/",
+        SubjectOfUser.as_view(),
+        name="subject-section-subjects",
     ),
     path("", include(router.urls)),
 ]

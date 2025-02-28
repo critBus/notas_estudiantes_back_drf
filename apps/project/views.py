@@ -17,6 +17,9 @@ from config.utils.utils_view import (
 )
 
 from .models import (
+    ROL_NAME_ADMIN,
+    ROL_NAME_PROFESSOR,
+    ROL_NAME_STUDENT,
     ApprovedSchoolCourse,
     Career,
     DegreeScale,
@@ -1080,3 +1083,33 @@ class SubjectSectionCreateView(BaseModelAPIView):
             safe=False,
             status=200,
         )
+
+
+class SubjectOfUser(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: SubjectRepresentationSerializer(many=True),
+            400: ErrorSerializer,
+            403: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.groups.filter(name__in=[ROL_NAME_ADMIN, ROL_NAME_PROFESSOR]):
+            professor = Professor.objects.filter(user=user).first()
+            if professor:
+                subjects = Subject.objects.filter(professor__in=[professor])
+                return JsonResponse(
+                    SubjectRepresentationSerializer(subjects, many=True).data,
+                    status=200,
+                )
+
+        elif user.groups.filter(name__in=[ROL_NAME_STUDENT]):
+            student = Student.objects.filter(user=user).first()
+            if student:
+                subjects = Subject.objects.filter(grade=student.grade)
+                return JsonResponse(
+                    SubjectRepresentationSerializer(subjects, many=True).data,
+                    status=200,
+                )
+        return JsonResponse({"error": "Usuario invalido"}, status=403)

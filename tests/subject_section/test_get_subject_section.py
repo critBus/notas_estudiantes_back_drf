@@ -112,10 +112,12 @@ class TestGetSubjectSection(StudentTestCase):
             file="/path2/to.tipo",
             school_task=task_section_2,
         )
+        student = self.create_random_student()
         student_response_section_2 = StudentResponse.objects.create(
             date=timezone.now(),
             description="description_subject_section_2",
             school_task=task_section_2,
+            student=student,
         )
         file_student_response_section_2 = FileStudentResponse.objects.create(
             title="title_subject_section_2",
@@ -203,6 +205,20 @@ class TestGetSubjectSection(StudentTestCase):
                                 {
                                     "id": student_response_section_2.id,
                                     "description": student_response_section_2.description,
+                                    "student": {
+                                        "id": student.id,
+                                        "is_approved": False,
+                                        "ci": student.ci,
+                                        "address": student.address,
+                                        "grade": student.grade,
+                                        "last_name": student.last_name,
+                                        "first_name": student.first_name,
+                                        "registration_number": student.registration_number,
+                                        "sex": student.sex,
+                                        "is_graduated": False,
+                                        "is_dropped_out": False,
+                                        "user": None,
+                                    },
                                     "files": [
                                         {
                                             "id": file_student_response_section_2.id,

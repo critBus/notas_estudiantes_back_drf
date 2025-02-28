@@ -10,6 +10,7 @@ from apps.project.models import (
     StudentResponse,
     SubjectSection,
 )
+from apps.project.serializers.general import StudentSerializer
 
 
 class FileFolderSubjectSectionSerializer(serializers.ModelSerializer):
@@ -49,10 +50,11 @@ class FileStudentResponseSubjectSectionSerializer(serializers.ModelSerializer):
 
 class StudentResponseSubjectSectionSerializer(serializers.ModelSerializer):
     files = serializers.SerializerMethodField(read_only=True)
+    student = StudentSerializer()
 
     class Meta:
         model = StudentResponse
-        fields = ["id", "description", "files"]
+        fields = ["id", "student", "description", "files"]
 
     @extend_schema_field(
         FileStudentResponseSubjectSectionSerializer(many=True, read_only=True)
