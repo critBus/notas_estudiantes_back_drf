@@ -1095,7 +1095,7 @@ class SubjectOfUser(BaseModelAPIView):
     )
     def get(self, request, *args, **kwargs):
         user = request.user
-        if user.groups.filter(name__in=[ROL_NAME_ADMIN, ROL_NAME_PROFESSOR]):
+        if user.groups.filter(name__in=[ROL_NAME_PROFESSOR]):
             professor = Professor.objects.filter(user=user).first()
             if professor:
                 subjects = Subject.objects.filter(
@@ -1118,4 +1118,11 @@ class SubjectOfUser(BaseModelAPIView):
                     status=200,
                     safe=False,
                 )
+        elif user.groups.filter(name__in=[ROL_NAME_ADMIN]):
+            subjects = Subject.objects.order_by("name")
+            return JsonResponse(
+                SubjectRepresentationSerializer(subjects, many=True).data,
+                status=200,
+                safe=False,
+            )
         return JsonResponse({"error": "Usuario invalido"}, status=403)

@@ -129,3 +129,53 @@ class TestSubjectOfUser(StudentTestCase, ProfessorMixin):
                 },
             ],
         )
+
+        Subject.objects.filter(grade__in=[7, 9]).delete()
+        self.login_superuser()
+        response_dict = self.call_get_subject_of_user(print_json_response=False)
+        self.assertEqual(
+            response_dict,
+            [
+                {
+                    "id": subjects_cience.id,
+                    "professor": [
+                        {
+                            "id": professor.id,
+                            "ci": professor.ci,
+                            "address": professor.address,
+                            "last_name": professor.last_name,
+                            "first_name": professor.first_name,
+                            "sex": professor.sex,
+                            "user": professor_user.id,
+                        }
+                    ],
+                    "grade": 8,
+                    "name": "Cience_8",
+                    "tcp2_required": False,
+                },
+                {
+                    "id": subjects_english.id,
+                    "professor": [],
+                    "grade": 8,
+                    "name": "English_8",
+                    "tcp2_required": False,
+                },
+                {
+                    "id": subjects_math.id,
+                    "professor": [
+                        {
+                            "id": professor.id,
+                            "ci": professor.ci,
+                            "address": professor.address,
+                            "last_name": professor.last_name,
+                            "first_name": professor.first_name,
+                            "sex": professor.sex,
+                            "user": professor_user.id,
+                        }
+                    ],
+                    "grade": 8,
+                    "name": "Math_8",
+                    "tcp2_required": False,
+                },
+            ],
+        )
