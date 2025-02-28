@@ -572,6 +572,7 @@ class GrantCareer(models.Model):
 
 
 class SubjectSection(models.Model):
+    index = models.IntegerField(verbose_name="Indice", default=1)
     title = models.CharField(max_length=255, verbose_name="Titulo")
     description = models.TextField(verbose_name="Descripcion")
     subject = models.ForeignKey(
@@ -604,7 +605,7 @@ class File(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
     description = models.TextField(verbose_name="Descripcion")
     type = models.CharField(max_length=255, verbose_name="Tipo")
-    file = models.FileField(verbose_name="Archivo")
+    file = models.CharField(max_length=500, verbose_name="Archivo")
 
     class Meta:
         abstract = True
@@ -626,11 +627,11 @@ class SchoolTask(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
     description = models.TextField(verbose_name="Descripcion")
     date = models.DateField(verbose_name="Fecha")
-    is_acs = models.BooleanField(default=False, verbose_name="Acs")
-    is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
-    is_final_exam = models.BooleanField(
-        default=False, verbose_name="Examen Final"
-    )
+    # is_acs = models.BooleanField(default=False, verbose_name="Acs")
+    # is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
+    # is_final_exam = models.BooleanField(
+    #     default=False, verbose_name="Examen Final"
+    # )
     subject_section = models.ForeignKey(
         SubjectSection,
         on_delete=models.CASCADE,
@@ -655,6 +656,12 @@ class FileSchoolTask(File):
 class StudentResponse(models.Model):
     date = models.DateField(verbose_name="Fecha")
     description = models.TextField(verbose_name="Descripcion")
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+    )
+    school_task = models.ForeignKey(
+        SchoolTask, on_delete=models.CASCADE, verbose_name="Tarea Escolar"
+    )
 
     class Meta:
         verbose_name = "Respuesta del Estudiante"
@@ -673,17 +680,17 @@ class FileStudentResponse(File):
         verbose_name_plural = "Archivos De Respuestas de los Estudiantes"
 
 
-class ProfessorEvaluation(models.Model):
-    note = models.TextField(verbose_name="Nota")
-    date = models.DateField(verbose_name="Fecha")
-    description = models.TextField(verbose_name="Descripcion")
-    professor = models.ForeignKey(
-        Professor, on_delete=models.CASCADE, verbose_name="Profesor"
-    )
-
-    class Meta:
-        verbose_name = "Evaluación del Profesor"
-        verbose_name_plural = "Evaluaciones de los Profesores"
+# class ProfessorEvaluation(models.Model):
+#     note = models.TextField(verbose_name="Nota")
+#     date = models.DateField(verbose_name="Fecha")
+#     description = models.TextField(verbose_name="Descripcion")
+#     professor = models.ForeignKey(
+#         Professor, on_delete=models.CASCADE, verbose_name="Profesor"
+#     )
+#
+#     class Meta:
+#         verbose_name = "Evaluación del Profesor"
+#         verbose_name_plural = "Evaluaciones de los Profesores"
 
 
 class SchoolEvent(models.Model):

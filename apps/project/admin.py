@@ -7,6 +7,7 @@ from apps.project.models import (
     DegreeScale,
     Dropout,
     GrantCareer,
+    Professor,
     SchoolYear,
     Student,
     StudentCareer,
@@ -177,5 +178,26 @@ class ApprovedSchoolCourseAdmin(admin.ModelAdmin):
     list_display = ("date", "student", "grade", "school_year")
     list_filter = ("date", "student", "grade", "school_year")
     date_hierarchy = "date"
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(Professor)
+class ProfessorAdmin(admin.ModelAdmin):
+    list_display = (
+        "ci",
+        "last_name",
+        "first_name",
+        "sex",
+    )
+    list_filter = ("sex",)
+    search_fields = (
+        "ci",
+        "grade",
+        "last_name",
+        "first_name",
+        "registration_number",
+        "sex",
+    )
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

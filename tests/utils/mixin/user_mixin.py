@@ -19,7 +19,7 @@ class UserMixin:
             "email": settings.DJANGO_SUPERUSER_EMAIL,
             "first_name": settings.DJANGO_SUPERUSER_FIRST_NAME,
             "last_name": settings.DJANGO_SUPERUSER_LAST_NAME,
-            "groups": [],
+            "groups": [{"id": 1, "name": "admin"}],
             "is_active": True,
             "is_superuser": True,
         }

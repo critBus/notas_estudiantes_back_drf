@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import (
+from ..models import (
     ROL_NAME_STUDENT,
     ApprovedSchoolCourse,
     Career,
@@ -14,7 +14,6 @@ from .models import (
     Folder,
     GrantCareer,
     Professor,
-    ProfessorEvaluation,
     SchoolEvent,
     SchoolTask,
     SchoolYear,
@@ -25,7 +24,7 @@ from .models import (
     Subject,
     SubjectSection,
 )
-from .utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
+from ..utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 
 User = get_user_model()
 
@@ -57,10 +56,141 @@ class BallotCreateSerializer(serializers.Serializer):
         return list_career
 
 
+class AccountCreateSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+    email = serializers.EmailField()
+
+    def validate_username(self, username):
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                "Uste nombre de usuario ya existe"
+            )
+        return username
+
+    def validate_email(self, email):
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                "Uste correo de usuario ya existe"
+            )
+        return email
+
+
 class ProfessorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Professor
         fields = "__all__"
+
+
+class ProfessorCreateSerializer(serializers.ModelSerializer):
+    account = AccountCreateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Professor
+        fields = [
+            "ci",
+            "address",
+            "last_name",
+            "first_name",
+            "sex",
+            "account",
+        ]
+
+    def create(self, validated_data):
+        account = validated_data.pop("account", None)
+        if account:
+            user = User.objects.create_user(**account)
+            role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+            if not role:
+                role = Group.objects.create(name=ROL_NAME_STUDENT)
+            user.groups.add(role)
+            validated_data["user"] = user
+        instance = super().create(validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return ProfessorSerializer(instance).data
+
+
+class AccountUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(required=False, write_only=True)
+    email = serializers.EmailField(required=False)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
+    def validate_username(self, value):
+        """Valida que el username sea único si se modifica."""
+        if self.instance and self.instance.username == value:
+            return value  # No hay cambio en el username
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                "El nombre de usuario ya está en uso."
+            )
+        return value
+
+    def validate_email(self, value):
+        """Valida que el email sea único si se modifica."""
+        if self.instance and self.instance.email == value:
+            return value  # No hay cambio en el email
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "El correo electrónico ya está en uso."
+            )
+        return value
+
+    def update(self, instance, validated_data):
+        """Actualiza los campos del usuario."""
+        if "username" in validated_data:
+            instance.username = validated_data["username"]
+        if "email" in validated_data:
+            instance.email = validated_data["email"]
+        if "password" in validated_data:
+            instance.set_password(validated_data["password"])
+        instance.save()
+        return instance
+
+
+class ProfessorUpdateSerializer(serializers.ModelSerializer):
+    account = AccountUpdateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Professor
+        fields = [
+            "ci",
+            "address",
+            "last_name",
+            "first_name",
+            "sex",
+            "account",
+        ]
+
+    def update(self, instance, validated_data):
+        # Actualizar la cuenta asociada (si existe)
+        account_data = validated_data.pop("account", None)
+        if account_data is not None:
+            if instance.user:  # Si ya tiene una cuenta, actualizamos
+                user_serializer = AccountUpdateSerializer(
+                    instance.user, data=account_data, partial=True
+                )
+                user_serializer.is_valid(raise_exception=True)
+                user_serializer.save()
+            else:  # Si no tiene cuenta, creamos una nueva
+                user_serializer = AccountCreateSerializer(data=account_data)
+                user_serializer.is_valid(raise_exception=True)
+                user = User.objects.create_user(**account_data)
+                role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+                if not role:
+                    role = Group.objects.create(name=ROL_NAME_STUDENT)
+                user.groups.add(role)
+                validated_data["user"] = user
+        instance = super().update(instance, validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return ProfessorSerializer(instance).data
 
 
 class SchoolYearSerializer(serializers.ModelSerializer):
@@ -86,26 +216,6 @@ class StudentSerializer(serializers.ModelSerializer):
         if obj:
             return obj.their_notes_are_valid()
         return False
-
-
-class AccountCreateSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
-    email = serializers.EmailField()
-
-    def validate_username(self, username):
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError(
-                "Uste nombre de usuario ya existe"
-            )
-        return username
-
-    def validate_email(self, email):
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                "Uste correo de usuario ya existe"
-            )
-        return email
 
 
 class StudentCreateSerializer(serializers.ModelSerializer):
@@ -140,6 +250,48 @@ class StudentCreateSerializer(serializers.ModelSerializer):
         return StudentSerializer(instance).data
 
 
+class StudentUpdateSerializer(serializers.ModelSerializer):
+    account = AccountUpdateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Student
+        fields = [
+            "ci",
+            "address",
+            "grade",
+            "last_name",
+            "first_name",
+            "registration_number",
+            "sex",
+            "account",
+        ]
+
+    def update(self, instance, validated_data):
+        # Actualizar la cuenta asociada (si existe)
+        account_data = validated_data.pop("account", None)
+        if account_data is not None:
+            if instance.user:  # Si ya tiene una cuenta, actualizamos
+                user_serializer = AccountUpdateSerializer(
+                    instance.user, data=account_data, partial=True
+                )
+                user_serializer.is_valid(raise_exception=True)
+                user_serializer.save()
+            else:  # Si no tiene cuenta, creamos una nueva
+                user_serializer = AccountCreateSerializer(data=account_data)
+                user_serializer.is_valid(raise_exception=True)
+                user = User.objects.create_user(**account_data)
+                role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+                if not role:
+                    role = Group.objects.create(name=ROL_NAME_STUDENT)
+                user.groups.add(role)
+                validated_data["user"] = user
+        instance = super().update(instance, validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return StudentSerializer(instance).data
+
+
 class StudentBallotSerializer(StudentSerializer):
     ballot = serializers.SerializerMethodField(read_only=True)
 
@@ -157,7 +309,7 @@ class CareerSerializer(serializers.ModelSerializer):
 
 
 class SubjectRepresentationSerializer(serializers.ModelSerializer):
-    professor = ProfessorSerializer(read_only=True)
+    professor = ProfessorSerializer(read_only=True, many=True)
 
     class Meta:
         model = Subject
@@ -385,21 +537,21 @@ class FileStudentResponseSerializer(serializers.ModelSerializer):
         return FileStudentResponseRepresentationSerializer(instance).data
 
 
-class ProfessorEvaluationRepresentationSerializer(serializers.ModelSerializer):
-    professor = ProfessorSerializer(read_only=True)
-
-    class Meta:
-        model = ProfessorEvaluation
-        fields = "__all__"
-
-
-class ProfessorEvaluationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProfessorEvaluation
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        return ProfessorEvaluationRepresentationSerializer(instance).data
+# class ProfessorEvaluationRepresentationSerializer(serializers.ModelSerializer):
+#     professor = ProfessorSerializer(read_only=True)
+#
+#     class Meta:
+#         model = ProfessorEvaluation
+#         fields = "__all__"
+#
+#
+# class ProfessorEvaluationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ProfessorEvaluation
+#         fields = "__all__"
+#
+#     def to_representation(self, instance):
+#         return ProfessorEvaluationRepresentationSerializer(instance).data
 
 
 class SchoolEventSerializer(serializers.ModelSerializer):

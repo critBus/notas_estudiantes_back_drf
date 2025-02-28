@@ -41,13 +41,14 @@ entity SchoolYear {
     name : Varchar(255)
 }
 
+
 entity StudentNote {
     id : Integer PK
-    average_acs : FloatField
-    average_tcp : FloatField
-    final_exam : FloatField
-    final_grade : FloatField
-    automatic_calculation: BooleanField
+    acs : FloatField // ACS
+    final_grade : FloatField // Nota Final
+    final_exam : FloatField // Examen Final
+    tcp1 : FloatField // TCP1
+    tcp2 : FloatField // TCP2
 }
 
 
@@ -101,10 +102,6 @@ entity SchoolTask{
     date : DateField
     title : CharField
     description: CharField
-    is_acs: BooleanField
-    is_tcp: BooleanField
-    is_final_exam: BooleanField
-
 }
 entity StudentResponse{
     id : Integer PK
@@ -112,12 +109,7 @@ entity StudentResponse{
     description: CharField
 }
 
-entity ProfessorEvaluation{
-    id : Integer PK
-    note : FloatField
-    date : DateField
-    description: CharField
-}
+
 
 entity SchoolEvent {
     id : Integer PK
@@ -137,8 +129,7 @@ User "1" -- "1" Professor : Cuenta de Profesor
 User "1" -- "1" Student : Cuenta de Estudiante
 
 
-ProfessorEvaluation "1" -- "1" StudentResponse : Evaluación del Profesor  
-ProfessorEvaluation "*" -- "1" Professor : Profesor de la evaluacion
+
 
 SchoolEvent "*" -- SchoolYear : Evento de Curso Escolar
 

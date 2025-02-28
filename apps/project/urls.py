@@ -19,7 +19,6 @@ from apps.project.views import (
     FolderViewSet,
     GrantCareerCurrentView,
     GrantCareerViewSet,
-    ProfessorEvaluationViewSet,
     ProfessorViewSet,
     SchoolEventViewSet,
     SchoolTaskViewSet,
@@ -29,6 +28,8 @@ from apps.project.views import (
     StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
+    SubjectOfUser,
+    SubjectSectionCreateView,
     SubjectSectionViewSet,
     SubjectViewSet,
     Upgrading7and8,
@@ -47,14 +48,14 @@ router.register(r"school_year", SchoolYearViewSet)
 router.register(r"degree_scale", DegreeScaleViewSet)
 router.register(r"grant_career", GrantCareerViewSet)
 router.register(r"approved_school_course", ApprovedSchoolCourseViewSet)
-router.register(r"professor", ProfessorViewSet)
+router.register(r"professor", ProfessorViewSet, basename="professor")
 router.register(r"subject_section", SubjectSectionViewSet)
 router.register(r"folder", FolderViewSet)
 router.register(r"file_folder", FileFolderViewSet)
 router.register(r"school_task", SchoolTaskViewSet)
 router.register(r"file_school_task", FileSchoolTaskViewSet)
 router.register(r"student_response", StudentResponseViewSet)
-router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
+# router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
 router.register(r"school_event", SchoolEventViewSet)
 
 urlpatterns = [
@@ -117,6 +118,16 @@ urlpatterns = [
         "grant_career/grant/",
         CarryOutGrantingOfCoursesView.as_view(),
         name="grant-career-grant",
+    ),
+    path(
+        "subject_section/create/<int:id>/",
+        SubjectSectionCreateView.as_view(),
+        name="subject-section-create",
+    ),
+    path(
+        "subject_section/subjects/",
+        SubjectOfUser.as_view(),
+        name="subject-section-subjects",
     ),
     path("", include(router.urls)),
 ]
