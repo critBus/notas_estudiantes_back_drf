@@ -75,7 +75,7 @@ class TestCreateStudentResponse(StudentTestCase):
                 },
             ],
         }
-        response = self.call_create_student_response(
+        self.call_create_student_response(
             payload=payload, print_json_response=False
         )
         q = StudentResponse.objects.filter(student=student)

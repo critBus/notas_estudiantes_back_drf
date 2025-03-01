@@ -67,7 +67,6 @@ class Student(models.Model):
         verbose_name_plural = "Estudiantes"
 
     def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
         if self.user:
             self.user.first_name = self.first_name
             self.user.last_name = self.last_name
@@ -261,7 +260,6 @@ class Professor(models.Model):
         verbose_name_plural = "Profesores"
 
     def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
         if self.user:
             self.user.first_name = self.first_name
             self.user.last_name = self.last_name

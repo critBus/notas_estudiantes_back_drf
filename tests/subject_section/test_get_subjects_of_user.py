@@ -40,7 +40,7 @@ class TestSubjectOfUser(StudentTestCase, ProfessorMixin):
         )
         group_student = Group.objects.get(name=ROL_NAME_STUDENT)
         student_user.groups.add(group_student)
-        student = self.create_random_student(user=student_user, grade=8)
+        self.create_random_student(user=student_user, grade=8)
 
         self.login(username=student_user.username, password="student")
         self.put_authentication_in_the_header()
