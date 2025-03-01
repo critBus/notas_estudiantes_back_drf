@@ -120,6 +120,23 @@ class TestUpdateProfessor(ProfessorTestCase):
         self.assertEqual(professor.user.email, data["account"]["email"])
         professor.user.check_password(data["account"]["password"])
 
+        # probar con un mismo usuario y contraseña
+        data = {
+            "ci": "123214",
+            "address": "address",
+            "last_name": "last_name",
+            "first_name": "test_professor",
+            "sex": "F",
+            "account": {
+                "username": "professor2",
+                "password": "professorpassword2",
+                "email": "professor2@example.com",
+            },
+        }
+        response_dict = self.call_update_professor(
+            **data, entity_id=professor.id
+        )
+
         data_old = data
         data = {
             "ci": "123214",

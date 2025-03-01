@@ -121,6 +121,16 @@ class AccountUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = ["username", "email", "password"]
 
+
+class AccountValidateUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(required=False, write_only=True)
+    email = serializers.EmailField(required=False)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
     def validate_username(self, value):
         """Valida que el username sea único si se modifica."""
         if self.instance and self.instance.username == value:
@@ -153,6 +163,21 @@ class AccountUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ProfessorUpdateRequestSwaggerSerializer(serializers.ModelSerializer):
+    account = AccountUpdateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Professor
+        fields = [
+            "ci",
+            "address",
+            "last_name",
+            "first_name",
+            "sex",
+            "account",
+        ]
+
+
 class ProfessorUpdateSerializer(serializers.ModelSerializer):
     account = AccountUpdateSerializer(write_only=True, required=False)
 
@@ -172,7 +197,7 @@ class ProfessorUpdateSerializer(serializers.ModelSerializer):
         account_data = validated_data.pop("account", None)
         if account_data is not None:
             if instance.user:  # Si ya tiene una cuenta, actualizamos
-                user_serializer = AccountUpdateSerializer(
+                user_serializer = AccountValidateUpdateSerializer(
                     instance.user, data=account_data, partial=True
                 )
                 user_serializer.is_valid(raise_exception=True)
@@ -271,7 +296,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
         account_data = validated_data.pop("account", None)
         if account_data is not None:
             if instance.user:  # Si ya tiene una cuenta, actualizamos
-                user_serializer = AccountUpdateSerializer(
+                user_serializer = AccountValidateUpdateSerializer(
                     instance.user, data=account_data, partial=True
                 )
                 user_serializer.is_valid(raise_exception=True)
