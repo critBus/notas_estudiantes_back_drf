@@ -654,7 +654,7 @@ class FileSchoolTask(File):
 
 
 class StudentResponse(models.Model):
-    date = models.DateField(verbose_name="Fecha")
+    date = models.DateField(verbose_name="Fecha", auto_now=True)
     description = models.TextField(verbose_name="Descripcion")
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, verbose_name="Estudiante"

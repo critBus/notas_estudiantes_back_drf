@@ -54,7 +54,9 @@ router.register(r"folder", FolderViewSet)
 router.register(r"file_folder", FileFolderViewSet)
 router.register(r"school_task", SchoolTaskViewSet)
 router.register(r"file_school_task", FileSchoolTaskViewSet)
-router.register(r"student_response", StudentResponseViewSet)
+router.register(
+    r"student_response", StudentResponseViewSet, basename="student_response"
+)
 # router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
 router.register(r"school_event", SchoolEventViewSet)
 
