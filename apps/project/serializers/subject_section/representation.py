@@ -36,7 +36,7 @@ class FolderSubjectSectionSerializer(serializers.ModelSerializer):
         return instance
 
 
-class FileSchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
+class FileSchoolTaskInSubjectSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileSchoolTask
         fields = ["id", "title", "description", "file"]
@@ -70,7 +70,7 @@ class StudentResponseSubjectSectionSerializer(serializers.ModelSerializer):
         return instance
 
 
-class SchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
+class SchoolTaskInSubjectSectionSerializer(serializers.ModelSerializer):
     files = serializers.SerializerMethodField(read_only=True)
     students_responses = serializers.SerializerMethodField(read_only=True)
 
@@ -79,14 +79,14 @@ class SchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "description", "files", "students_responses"]
 
     @extend_schema_field(
-        FileSchoolTaskSubjectSectionSerializer(many=True, read_only=True)
+        FileSchoolTaskInSubjectSectionSerializer(many=True, read_only=True)
     )
     def get_files(self, instance):
         if instance:
             q = FileSchoolTask.objects.filter(school_task=instance).order_by(
                 "pk"
             )
-            return FileSchoolTaskSubjectSectionSerializer(q, many=True).data
+            return FileSchoolTaskInSubjectSectionSerializer(q, many=True).data
         return instance
 
     @extend_schema_field(
@@ -119,12 +119,12 @@ class SubjectSectionCreateRepresentationSerializer(serializers.ModelSerializer):
         return instance
 
     @extend_schema_field(
-        SchoolTaskSubjectSectionSerializer(many=True, read_only=True)
+        SchoolTaskInSubjectSectionSerializer(many=True, read_only=True)
     )
     def get_tasks(self, instance):
         if instance:
             q = SchoolTask.objects.filter(subject_section=instance).order_by(
                 "date"
             )
-            return SchoolTaskSubjectSectionSerializer(q, many=True).data
+            return SchoolTaskInSubjectSectionSerializer(q, many=True).data
         return instance

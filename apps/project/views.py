@@ -83,6 +83,8 @@ from .serializers.general import (
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
 from .serializers.subject_section.representation import (
+    SchoolTaskInSubjectSectionSerializer,
+    StudentResponseSubjectSectionSerializer,
     SubjectSectionCreateRepresentationSerializer,
 )
 from .utils.extenciones import get_extension
@@ -1163,3 +1165,58 @@ class SubjectOfUser(BaseModelAPIView):
                 safe=False,
             )
         return JsonResponse({"error": "Usuario invalido"}, status=403)
+
+
+class SubjectSectionTaskView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: SchoolTaskInSubjectSectionSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, id, *args, **kwargs):
+        subject_section = SubjectSection.objects.filter(pk=id).first()
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        if not subject_section:
+            return JsonResponse(
+                {"error": "No existe esta Seccion de Asignatura"}, status=400
+            )
+
+        tasks = SchoolTask.objects.filter(
+            subject_section=subject_section
+        ).order_by("date")
+
+        return JsonResponse(
+            SchoolTaskInSubjectSectionSerializer(
+                tasks, many=True, context={"request": request}
+            ).data,
+            safe=False,
+            status=200,
+        )
+
+
+class SubjectSectionStudentResponseView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentResponseSubjectSectionSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, pk, *args, **kwargs):
+        task = SchoolTask.objects.filter(pk=pk).first()
+        if not task:
+            return JsonResponse({"error": "No existe esta Tarea"}, status=400)
+
+        q = StudentResponse.objects.filter(school_task=task).order_by("date")
+
+        return JsonResponse(
+            StudentResponseSubjectSectionSerializer(
+                q, many=True, context={"request": request}
+            ).data,
+            safe=False,
+            status=200,
+        )

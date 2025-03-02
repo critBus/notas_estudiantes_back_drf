@@ -30,6 +30,8 @@ from apps.project.views import (
     StudentViewSet,
     SubjectOfUser,
     SubjectSectionCreateView,
+    SubjectSectionStudentResponseView,
+    SubjectSectionTaskView,
     SubjectSectionViewSet,
     SubjectViewSet,
     Upgrading7and8,
@@ -130,6 +132,16 @@ urlpatterns = [
         "subject_section/subjects/",
         SubjectOfUser.as_view(),
         name="subject-section-subjects",
+    ),
+    path(
+        "subject_section/tasks/<int:pk>/",
+        SubjectSectionTaskView.as_view(),
+        name="subject-section-taks",
+    ),
+    path(
+        "subject_section/responses/<int:pk>/",
+        SubjectSectionStudentResponseView.as_view(),
+        name="subject-section-responses",
     ),
     path("", include(router.urls)),
 ]
