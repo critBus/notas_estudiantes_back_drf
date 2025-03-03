@@ -6,12 +6,14 @@ from apps.project.models import (
     Career,
     DegreeScale,
     Dropout,
+    FileStudentResponse,
     GrantCareer,
     Professor,
     SchoolYear,
     Student,
     StudentCareer,
     StudentNote,
+    StudentResponse,
     Subject,
 )
 
@@ -199,5 +201,35 @@ class ProfessorAdmin(admin.ModelAdmin):
         "registration_number",
         "sex",
     )
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(StudentResponse)
+class StudentResponseAdmin(admin.ModelAdmin):
+    list_display = (
+        "date",
+        "student",
+        "school_task",
+    )
+    list_filter = ("date", "student", "school_task")
+    date_hierarchy = "date"
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(FileStudentResponse)
+class FileStudentResponseeAdmin(admin.ModelAdmin):
+    list_display = (
+        "student_response",
+        "title",
+        "description",
+        "type",
+    )
+    list_filter = (
+        "student_response",
+        "type",
+    )
+    search_fields = ("title",)
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

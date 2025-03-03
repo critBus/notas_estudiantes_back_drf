@@ -8,6 +8,7 @@ def config_app(sender, **kwargs):
     from django.contrib.auth.models import Group
 
     from apps.project.models import ROL_NAME_ADMIN
+    from apps.project.utils.util_reporte_d import load_automatic_reports
 
     from .utils.nomencladores import crear_roles_django_default
 
@@ -22,6 +23,13 @@ def config_app(sender, **kwargs):
             password=settings.DJANGO_SUPERUSER_PASSWORD,
         )
         user.groups.add(Group.objects.get(name=ROL_NAME_ADMIN))
+
+    load_automatic_reports()
+
+    if settings.LOAD_EXAMPLE_DATA:
+        from apps.project.utils.utils_ejemplos import crear_datos_random
+
+        crear_datos_random()
 
 
 class ProjectConfig(AppConfig):

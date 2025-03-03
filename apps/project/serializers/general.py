@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import (
+    ROL_NAME_PROFESSOR,
     ROL_NAME_STUDENT,
     ApprovedSchoolCourse,
     Career,
@@ -100,9 +101,9 @@ class ProfessorCreateSerializer(serializers.ModelSerializer):
         account = validated_data.pop("account", None)
         if account:
             user = User.objects.create_user(**account)
-            role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+            role = Group.objects.filter(name=ROL_NAME_PROFESSOR).first()
             if not role:
-                role = Group.objects.create(name=ROL_NAME_STUDENT)
+                role = Group.objects.create(name=ROL_NAME_PROFESSOR)
             user.groups.add(role)
             validated_data["user"] = user
         instance = super().create(validated_data)
@@ -206,9 +207,9 @@ class ProfessorUpdateSerializer(serializers.ModelSerializer):
                 user_serializer = AccountCreateSerializer(data=account_data)
                 user_serializer.is_valid(raise_exception=True)
                 user = User.objects.create_user(**account_data)
-                role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+                role = Group.objects.filter(name=ROL_NAME_PROFESSOR).first()
                 if not role:
-                    role = Group.objects.create(name=ROL_NAME_STUDENT)
+                    role = Group.objects.create(name=ROL_NAME_PROFESSOR)
                 user.groups.add(role)
                 validated_data["user"] = user
         instance = super().update(instance, validated_data)

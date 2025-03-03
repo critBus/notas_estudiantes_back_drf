@@ -11,6 +11,7 @@ from apps.project.views import (
     CarryOutGrantingOfCoursesView,
     CurrentCurseView,
     DegreeScaleCalculateView,
+    DegreeScaleCurrentReportView,
     DegreeScaleCurrentView,
     DegreeScaleViewSet,
     DropoutViewSet,
@@ -107,6 +108,11 @@ urlpatterns = [
         "degree_scale/current/",
         DegreeScaleCurrentView.as_view(),
         name="degree-scale-current",
+    ),
+    path(
+        "degree_scale/report/",
+        DegreeScaleCurrentReportView.as_view(),
+        name="degree-scale-report",
     ),
     path(
         "degree_scale/exist_whithout/",

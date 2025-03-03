@@ -89,6 +89,7 @@ from .serializers.subject_section.representation import (
     SubjectSectionCreateRepresentationSerializer,
 )
 from .utils.extenciones import get_extension
+from .utils.reportes import generar_reporte_escalafon_pdf
 
 
 class SchoolEventViewSet(BaseModelViewSet):
@@ -824,6 +825,12 @@ class DegreeScaleCurrentView(BaseModelAPIView):
         return JsonResponse(
             DegreeScaleSerializer(score, many=True).data, safe=False
         )
+
+
+class DegreeScaleCurrentReportView(BaseModelAPIView):
+    def get(self, request, *args, **kwargs):
+        score = DegreeScale.current()
+        return generar_reporte_escalafon_pdf(score)
 
 
 class CarryOutGrantingOfCoursesView(BaseModelAPIView):

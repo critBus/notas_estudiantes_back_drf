@@ -28,6 +28,9 @@ urlpatterns = [
     path("", include("apps.base.urls")),
     path("admin/", admin.site.urls),
     path(
+        "reportbroD/", include("django_reportbroD.urls", namespace="reportbroD")
+    ),
+    path(
         "api/",
         include(
             [
