@@ -81,6 +81,7 @@ from .serializers.general import (
     SubjectSerializer,
 )
 from .serializers.student_response.create import StudentResponseCreateSerializer
+from .serializers.student_response.update import StudentResponseUpdateSerializer
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
 from .serializers.subject_section.representation import (
     SchoolTaskInSubjectSectionSerializer,
@@ -154,9 +155,13 @@ class StudentResponseViewSet(BaseModelViewSet):
         responses=StudentResponseRepresentationSerializer,
     ),
     retrieve=extend_schema(responses=StudentResponseRepresentationSerializer),
-    update=extend_schema(responses=StudentResponseRepresentationSerializer),
+    update=extend_schema(
+        request=StudentResponseUpdateSerializer,
+        responses=StudentResponseRepresentationSerializer,
+    ),
     partial_update=extend_schema(
-        responses=StudentResponseRepresentationSerializer
+        request=StudentResponseUpdateSerializer,
+        responses=StudentResponseRepresentationSerializer,
     ),
 )
 class StudentResponseViewSet(BaseModelViewSet):
@@ -166,6 +171,8 @@ class StudentResponseViewSet(BaseModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return StudentResponseCreateSerializer
+        elif self.action in ["update", "partial_update"]:
+            return StudentResponseUpdateSerializer
         return self.serializer_class
 
 

@@ -70,7 +70,7 @@ class TestGetResponsesOfTask(StudentTestCase):
         )
 
         respose_dict = self.call_get_responses_of_task(
-            id=task_section.id, print_json_response=True
+            id=task_section.id, print_json_response=False
         )
 
         self.assertEqual(
