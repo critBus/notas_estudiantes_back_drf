@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework.reverse import reverse  # Para generar urls
 
-from apps.project.models import ROL_NAME_STUDENT, Professor
+from apps.project.models import ROL_NAME_PROFESSOR, Professor
 from tests.professor.parent_case.professor_parent_case import ProfessorTestCase
 
 User = get_user_model()
@@ -88,7 +88,7 @@ class TestCreateProfessor(ProfessorTestCase):
         professor.user.check_password(data["account"]["password"])
         self.assertTrue(
             Group.objects.filter(
-                user=professor.user, name=ROL_NAME_STUDENT
+                user=professor.user, name=ROL_NAME_PROFESSOR
             ).exists()
         )
 

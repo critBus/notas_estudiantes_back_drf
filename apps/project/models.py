@@ -67,7 +67,6 @@ class Student(models.Model):
         verbose_name_plural = "Estudiantes"
 
     def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
         if self.user:
             self.user.first_name = self.first_name
             self.user.last_name = self.last_name
@@ -261,7 +260,6 @@ class Professor(models.Model):
         verbose_name_plural = "Profesores"
 
     def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
         if self.user:
             self.user.first_name = self.first_name
             self.user.last_name = self.last_name
@@ -574,7 +572,9 @@ class GrantCareer(models.Model):
 class SubjectSection(models.Model):
     index = models.IntegerField(verbose_name="Indice", default=1)
     title = models.CharField(max_length=255, verbose_name="Titulo")
-    description = models.TextField(verbose_name="Descripcion")
+    description = models.TextField(
+        verbose_name="Descripcion", blank=True, null=True
+    )
     subject = models.ForeignKey(
         Subject, on_delete=models.CASCADE, verbose_name="Asignatura"
     )
@@ -589,7 +589,9 @@ class SubjectSection(models.Model):
 
 class Folder(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
-    description = models.TextField(verbose_name="Descripcion")
+    description = models.TextField(
+        verbose_name="Descripcion", blank=True, null=True
+    )
     subject_section = models.ForeignKey(
         SubjectSection,
         on_delete=models.CASCADE,
@@ -603,7 +605,9 @@ class Folder(models.Model):
 
 class File(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
-    description = models.TextField(verbose_name="Descripcion")
+    description = models.TextField(
+        verbose_name="Descripcion", blank=True, null=True
+    )
     type = models.CharField(max_length=255, verbose_name="Tipo")
     file = models.CharField(max_length=500, verbose_name="Archivo")
 
@@ -625,7 +629,9 @@ class FileFolder(File):
 
 class SchoolTask(models.Model):
     title = models.CharField(max_length=255, verbose_name="Titulo")
-    description = models.TextField(verbose_name="Descripcion")
+    description = models.TextField(
+        verbose_name="Descripcion", blank=True, null=True
+    )
     date = models.DateField(verbose_name="Fecha")
     # is_acs = models.BooleanField(default=False, verbose_name="Acs")
     # is_tcp = models.BooleanField(default=False, verbose_name="Tcp")
@@ -642,6 +648,9 @@ class SchoolTask(models.Model):
         verbose_name = "Tarea Escolar"
         verbose_name_plural = "Tareas Escolares"
 
+    def __str__(self):
+        return self.title
+
 
 class FileSchoolTask(File):
     school_task = models.ForeignKey(
@@ -654,8 +663,10 @@ class FileSchoolTask(File):
 
 
 class StudentResponse(models.Model):
-    date = models.DateField(verbose_name="Fecha")
-    description = models.TextField(verbose_name="Descripcion")
+    date = models.DateField(verbose_name="Fecha", auto_now=True)
+    description = models.TextField(
+        verbose_name="Descripcion", blank=True, null=True
+    )
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, verbose_name="Estudiante"
     )
@@ -666,6 +677,9 @@ class StudentResponse(models.Model):
     class Meta:
         verbose_name = "Respuesta del Estudiante"
         verbose_name_plural = "Respuestas de los Estudiantes"
+
+    def __str__(self):
+        return f"{self.school_task.title} {self.student.first_name}"
 
 
 class FileStudentResponse(File):
@@ -679,24 +693,16 @@ class FileStudentResponse(File):
         verbose_name = "Archivo De Respuesta del Estudiante"
         verbose_name_plural = "Archivos De Respuestas de los Estudiantes"
 
-
-# class ProfessorEvaluation(models.Model):
-#     note = models.TextField(verbose_name="Nota")
-#     date = models.DateField(verbose_name="Fecha")
-#     description = models.TextField(verbose_name="Descripcion")
-#     professor = models.ForeignKey(
-#         Professor, on_delete=models.CASCADE, verbose_name="Profesor"
-#     )
-#
-#     class Meta:
-#         verbose_name = "Evaluación del Profesor"
-#         verbose_name_plural = "Evaluaciones de los Profesores"
+    def __str__(self):
+        return f"{self.title} {self.student_response}"
 
 
 class SchoolEvent(models.Model):
     date = models.DateTimeField(verbose_name="Fecha")
     title = models.CharField(max_length=255, verbose_name="Titulo")
-    description = models.TextField(verbose_name="Descripcion")
+    description = models.TextField(
+        verbose_name="Descripcion", blank=True, null=True
+    )
 
     class Meta:
         verbose_name = "Evento Escolar"

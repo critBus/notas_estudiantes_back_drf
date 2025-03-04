@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import (
+    ROL_NAME_PROFESSOR,
     ROL_NAME_STUDENT,
     ApprovedSchoolCourse,
     Career,
@@ -100,9 +101,9 @@ class ProfessorCreateSerializer(serializers.ModelSerializer):
         account = validated_data.pop("account", None)
         if account:
             user = User.objects.create_user(**account)
-            role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+            role = Group.objects.filter(name=ROL_NAME_PROFESSOR).first()
             if not role:
-                role = Group.objects.create(name=ROL_NAME_STUDENT)
+                role = Group.objects.create(name=ROL_NAME_PROFESSOR)
             user.groups.add(role)
             validated_data["user"] = user
         instance = super().create(validated_data)
@@ -113,6 +114,16 @@ class ProfessorCreateSerializer(serializers.ModelSerializer):
 
 
 class AccountUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(required=False, write_only=True)
+    email = serializers.EmailField(required=False)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
+
+class AccountValidateUpdateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False)
     password = serializers.CharField(required=False, write_only=True)
     email = serializers.EmailField(required=False)
@@ -153,6 +164,21 @@ class AccountUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ProfessorUpdateRequestSwaggerSerializer(serializers.ModelSerializer):
+    account = AccountUpdateSerializer(write_only=True, required=False)
+
+    class Meta:
+        model = Professor
+        fields = [
+            "ci",
+            "address",
+            "last_name",
+            "first_name",
+            "sex",
+            "account",
+        ]
+
+
 class ProfessorUpdateSerializer(serializers.ModelSerializer):
     account = AccountUpdateSerializer(write_only=True, required=False)
 
@@ -172,7 +198,7 @@ class ProfessorUpdateSerializer(serializers.ModelSerializer):
         account_data = validated_data.pop("account", None)
         if account_data is not None:
             if instance.user:  # Si ya tiene una cuenta, actualizamos
-                user_serializer = AccountUpdateSerializer(
+                user_serializer = AccountValidateUpdateSerializer(
                     instance.user, data=account_data, partial=True
                 )
                 user_serializer.is_valid(raise_exception=True)
@@ -181,9 +207,9 @@ class ProfessorUpdateSerializer(serializers.ModelSerializer):
                 user_serializer = AccountCreateSerializer(data=account_data)
                 user_serializer.is_valid(raise_exception=True)
                 user = User.objects.create_user(**account_data)
-                role = Group.objects.filter(name=ROL_NAME_STUDENT).first()
+                role = Group.objects.filter(name=ROL_NAME_PROFESSOR).first()
                 if not role:
-                    role = Group.objects.create(name=ROL_NAME_STUDENT)
+                    role = Group.objects.create(name=ROL_NAME_PROFESSOR)
                 user.groups.add(role)
                 validated_data["user"] = user
         instance = super().update(instance, validated_data)
@@ -271,7 +297,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
         account_data = validated_data.pop("account", None)
         if account_data is not None:
             if instance.user:  # Si ya tiene una cuenta, actualizamos
-                user_serializer = AccountUpdateSerializer(
+                user_serializer = AccountValidateUpdateSerializer(
                     instance.user, data=account_data, partial=True
                 )
                 user_serializer.is_valid(raise_exception=True)

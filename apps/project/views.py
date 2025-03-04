@@ -80,11 +80,16 @@ from .serializers.general import (
     SubjectSectionSerializer,
     SubjectSerializer,
 )
+from .serializers.student_response.create import StudentResponseCreateSerializer
+from .serializers.student_response.update import StudentResponseUpdateSerializer
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
 from .serializers.subject_section.representation import (
+    SchoolTaskInSubjectSectionSerializer,
+    StudentResponseSubjectSectionSerializer,
     SubjectSectionCreateRepresentationSerializer,
 )
 from .utils.extenciones import get_extension
+from .utils.reportes import generar_reporte_escalafon_pdf
 
 
 class SchoolEventViewSet(BaseModelViewSet):
@@ -146,16 +151,30 @@ class StudentResponseViewSet(BaseModelViewSet):
     list=extend_schema(
         responses=StudentResponseRepresentationSerializer(many=True)
     ),
-    create=extend_schema(responses=StudentResponseRepresentationSerializer),
+    create=extend_schema(
+        request=StudentResponseCreateSerializer,
+        responses=StudentResponseRepresentationSerializer,
+    ),
     retrieve=extend_schema(responses=StudentResponseRepresentationSerializer),
-    update=extend_schema(responses=StudentResponseRepresentationSerializer),
+    update=extend_schema(
+        request=StudentResponseUpdateSerializer,
+        responses=StudentResponseRepresentationSerializer,
+    ),
     partial_update=extend_schema(
-        responses=StudentResponseRepresentationSerializer
+        request=StudentResponseUpdateSerializer,
+        responses=StudentResponseRepresentationSerializer,
     ),
 )
 class StudentResponseViewSet(BaseModelViewSet):
     queryset = StudentResponse.objects.all()
     serializer_class = StudentResponseSerializer
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return StudentResponseCreateSerializer
+        elif self.action in ["update", "partial_update"]:
+            return StudentResponseUpdateSerializer
+        return self.serializer_class
 
 
 @extend_schema_view(
@@ -808,6 +827,12 @@ class DegreeScaleCurrentView(BaseModelAPIView):
         )
 
 
+class DegreeScaleCurrentReportView(BaseModelAPIView):
+    def get(self, request, *args, **kwargs):
+        score = DegreeScale.current()
+        return generar_reporte_escalafon_pdf(score)
+
+
 class CarryOutGrantingOfCoursesView(BaseModelAPIView):
     @extend_schema(
         responses={
@@ -941,13 +966,15 @@ class SubjectSectionCreateView(BaseModelAPIView):
         )
         if not serializer.is_valid():
             return JsonResponse(serializer.errors, safe=False, status=400)
+        sections_ids = []
         for data_section in serializer.validated_data:
             section_index = data_section["index"]
             section_title = data_section["title"]
             section_description = data_section["description"]
-
             if "id" in data_section:
-                section = SubjectSection.objects.get(id=data_section["id"])
+                section = data_section[
+                    "id"
+                ]  # SubjectSection.objects.get(id=data_section["id"])
                 section.index = section_index
                 section.title = section_title
                 section.description = section_description
@@ -960,14 +987,18 @@ class SubjectSectionCreateView(BaseModelAPIView):
                     subject=subject,
                     school_year=course,
                 )
+            sections_ids.append(section.id)
+            folders_ids = []
             if "folders" in data_section:
                 section_folders = data_section["folders"]
                 for data_folder in section_folders:
                     folder_title = data_folder["title"]
                     folder_description = data_folder["description"]
                     if "id" in data_folder:
-                        folder_id = data_folder["id"]
-                        folder = Folder.objects.get(id=folder_id)
+                        # folder_id = data_folder["id"]
+                        folder = data_folder[
+                            "id"
+                        ]  # Folder.objects.get(id=folder_id)
                         folder.title = folder_title
                         folder.description = folder_description
                         folder.save()
@@ -977,7 +1008,8 @@ class SubjectSectionCreateView(BaseModelAPIView):
                             description=folder_description,
                             subject_section=section,
                         )
-
+                    folders_ids.append(folder.id)
+                    folder_files_ids = []
                     if "files" in data_folder:
                         folder_files = data_folder["files"]
 
@@ -987,9 +1019,10 @@ class SubjectSectionCreateView(BaseModelAPIView):
                             file_file = data_file["file"]
 
                             if "id" in data_file:
-                                file = FileFolder.objects.get(
-                                    id=data_file["id"]
-                                )
+                                # file = FileFolder.objects.get(
+                                #     id=data_file["id"]
+                                # )
+                                file = data_file["id"]
                                 file.title = file_title
                                 file.description = file_description
                                 file.type = get_extension(file_file)
@@ -997,14 +1030,21 @@ class SubjectSectionCreateView(BaseModelAPIView):
                                 file.folder = folder
                                 file.save()
                             else:
-                                FileFolder.objects.create(
+                                file = FileFolder.objects.create(
                                     file=file_file,
                                     title=file_title,
                                     description=file_description,
                                     type=get_extension(file_file),
                                     folder=folder,
                                 )
-
+                            folder_files_ids.append(file.id)
+                    FileFolder.objects.filter(folder=folder).exclude(
+                        id__in=folders_ids
+                    ).delete()
+            Folder.objects.filter(subject_section=section).exclude(
+                id__in=folders_ids
+            ).delete()
+            tasks_ids = []
             if "tasks" in data_section:
                 section_tasks = data_section["tasks"]
                 for data_task in section_tasks:
@@ -1012,7 +1052,9 @@ class SubjectSectionCreateView(BaseModelAPIView):
                     task_description = data_task["description"]
 
                     if "id" in data_task:
-                        task = SchoolTask.objects.get(id=data_task["id"])
+                        task = data_task[
+                            "id"
+                        ]  # SchoolTask.objects.get(id=data_task["id"])
                         task.title = task_title
                         task.description = task_description
                         task.subject_section = section
@@ -1024,7 +1066,8 @@ class SubjectSectionCreateView(BaseModelAPIView):
                             subject_section=section,
                             date=timezone.now(),
                         )
-
+                    tasks_ids.append(task.id)
+                    task_file_ids = []
                     if "files" in data_task:
                         task_files = data_task["files"]
 
@@ -1036,9 +1079,10 @@ class SubjectSectionCreateView(BaseModelAPIView):
                             task_file_file = data_task_file["file"]
 
                             if "id" in data_task_file:
-                                file = FileSchoolTask.objects.get(
-                                    id=data_task_file["id"]
-                                )
+                                # file = FileSchoolTask.objects.get(
+                                #     id=data_task_file["id"]
+                                # )
+                                file = data_task_file["id"]
                                 file.title = task_file_title
                                 file.description = task_file_description
                                 file.type = get_extension(task_file_file)
@@ -1046,14 +1090,23 @@ class SubjectSectionCreateView(BaseModelAPIView):
                                 file.school_task = task
                                 file.save()
                             else:
-                                FileSchoolTask.objects.create(
+                                file = FileSchoolTask.objects.create(
                                     file=task_file_file,
                                     title=task_file_title,
                                     description=task_file_description,
                                     type=get_extension(task_file_file),
                                     school_task=task,
                                 )
-
+                            task_file_ids.append(file.id)
+                    FileSchoolTask.objects.filter(school_task=task).exclude(
+                        id__in=task_file_ids
+                    ).delete()
+            SchoolTask.objects.filter(subject_section=section).exclude(
+                id__in=tasks_ids
+            ).delete()
+        SubjectSection.objects.filter(subject=subject).exclude(
+            id__in=sections_ids
+        ).delete()
         return Response({"message": "success"}, status=200)
 
     @extend_schema(
@@ -1095,7 +1148,7 @@ class SubjectOfUser(BaseModelAPIView):
     )
     def get(self, request, *args, **kwargs):
         user = request.user
-        if user.groups.filter(name__in=[ROL_NAME_ADMIN, ROL_NAME_PROFESSOR]):
+        if user.groups.filter(name__in=[ROL_NAME_PROFESSOR]):
             professor = Professor.objects.filter(user=user).first()
             if professor:
                 subjects = Subject.objects.filter(
@@ -1118,4 +1171,66 @@ class SubjectOfUser(BaseModelAPIView):
                     status=200,
                     safe=False,
                 )
+        elif user.groups.filter(name__in=[ROL_NAME_ADMIN]):
+            subjects = Subject.objects.order_by("name")
+            return JsonResponse(
+                SubjectRepresentationSerializer(subjects, many=True).data,
+                status=200,
+                safe=False,
+            )
         return JsonResponse({"error": "Usuario invalido"}, status=403)
+
+
+class SubjectSectionTaskView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: SchoolTaskInSubjectSectionSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, id, *args, **kwargs):
+        subject_section = SubjectSection.objects.filter(pk=id).first()
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        if not subject_section:
+            return JsonResponse(
+                {"error": "No existe esta Seccion de Asignatura"}, status=400
+            )
+
+        tasks = SchoolTask.objects.filter(
+            subject_section=subject_section
+        ).order_by("date")
+
+        return JsonResponse(
+            SchoolTaskInSubjectSectionSerializer(
+                tasks, many=True, context={"request": request}
+            ).data,
+            safe=False,
+            status=200,
+        )
+
+
+class SubjectSectionStudentResponseView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentResponseSubjectSectionSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, pk, *args, **kwargs):
+        task = SchoolTask.objects.filter(pk=pk).first()
+        if not task:
+            return JsonResponse({"error": "No existe esta Tarea"}, status=400)
+
+        q = StudentResponse.objects.filter(school_task=task).order_by("date")
+
+        return JsonResponse(
+            StudentResponseSubjectSectionSerializer(
+                q, many=True, context={"request": request}
+            ).data,
+            safe=False,
+            status=200,
+        )

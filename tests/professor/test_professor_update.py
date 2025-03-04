@@ -1,9 +1,10 @@
 from typing import Dict, Optional
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from rest_framework.reverse import reverse  # Para generar urls
 
-from apps.project.models import Professor
+from apps.project.models import ROL_NAME_PROFESSOR, Professor
 from tests.professor.parent_case.professor_parent_case import ProfessorTestCase
 
 User = get_user_model()
@@ -93,6 +94,11 @@ class TestUpdateProfessor(ProfessorTestCase):
         self.assertEqual(professor.user.username, data["account"]["username"])
         self.assertEqual(professor.user.email, data["account"]["email"])
         professor.user.check_password(data["account"]["password"])
+        self.assertTrue(
+            Group.objects.filter(
+                user=professor.user, name=ROL_NAME_PROFESSOR
+            ).exists()
+        )
 
         data = {
             "ci": "123214",
@@ -119,6 +125,23 @@ class TestUpdateProfessor(ProfessorTestCase):
         self.assertEqual(professor.user.username, data["account"]["username"])
         self.assertEqual(professor.user.email, data["account"]["email"])
         professor.user.check_password(data["account"]["password"])
+
+        # probar con un mismo usuario y contraseña
+        data = {
+            "ci": "123214",
+            "address": "address",
+            "last_name": "last_name",
+            "first_name": "test_professor",
+            "sex": "F",
+            "account": {
+                "username": "professor2",
+                "password": "professorpassword2",
+                "email": "professor2@example.com",
+            },
+        }
+        response_dict = self.call_update_professor(
+            **data, entity_id=professor.id
+        )
 
         data_old = data
         data = {

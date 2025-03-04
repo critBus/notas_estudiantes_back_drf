@@ -106,13 +106,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
-    "default": {
+USE_SQLITE = str(os.environ.get("USE_SQLITE", default=False)).lower() == "true"
+DATABASES = {}
+if USE_SQLITE:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+else:
+    DATABASES["default"] = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("DATABASE_NAME"),
         "USER": os.environ.get("DATABASE_USER"),
@@ -120,7 +122,6 @@ DATABASES = {
         "HOST": os.environ.get("POSTGRES_HOST"),
         "PORT": int(os.environ.get("POSTGRES_PORT")),
     }
-}
 
 
 # Password validation
@@ -190,6 +191,23 @@ JAZZMIN_SETTINGS = {
     "site_logo_classes": "",
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",
+    "topmenu_links": [
+        # Url that gets reversed (Permissions can be added)
+        {
+            "name": "Plantillas Reportes",
+            "url": "/reportbroD",
+            "permissions": [
+                "reportbroD.view_reportrequest",
+                "reportbroD.delete_reportrequest",
+                "reportbroD.change_reportrequest",
+                "reportbroD.add_reportrequest",
+                "reportbroD.view_reportdefinition",
+                "reportbroD.delete_reportdefinition",
+                "reportbroD.change_reportdefinition",
+                "reportbroD.add_reportdefinition",
+            ],
+        },
+    ],
 }
 JAZZMIN_UI_TWEAKS = {
     "theme": "default",
@@ -286,3 +304,7 @@ LOGGING = {
         },
     },
 }
+
+LOAD_EXAMPLE_DATA = (
+    str(os.environ.get("LOAD_EXAMPLE_DATA", default=False)).lower() == "true"
+)

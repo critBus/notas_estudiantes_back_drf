@@ -11,6 +11,7 @@ from apps.project.views import (
     CarryOutGrantingOfCoursesView,
     CurrentCurseView,
     DegreeScaleCalculateView,
+    DegreeScaleCurrentReportView,
     DegreeScaleCurrentView,
     DegreeScaleViewSet,
     DropoutViewSet,
@@ -30,6 +31,8 @@ from apps.project.views import (
     StudentViewSet,
     SubjectOfUser,
     SubjectSectionCreateView,
+    SubjectSectionStudentResponseView,
+    SubjectSectionTaskView,
     SubjectSectionViewSet,
     SubjectViewSet,
     Upgrading7and8,
@@ -54,7 +57,9 @@ router.register(r"folder", FolderViewSet)
 router.register(r"file_folder", FileFolderViewSet)
 router.register(r"school_task", SchoolTaskViewSet)
 router.register(r"file_school_task", FileSchoolTaskViewSet)
-router.register(r"student_response", StudentResponseViewSet)
+router.register(
+    r"student_response", StudentResponseViewSet, basename="student_response"
+)
 # router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
 router.register(r"school_event", SchoolEventViewSet)
 
@@ -105,6 +110,11 @@ urlpatterns = [
         name="degree-scale-current",
     ),
     path(
+        "degree_scale/report/",
+        DegreeScaleCurrentReportView.as_view(),
+        name="degree-scale-report",
+    ),
+    path(
         "degree_scale/exist_whithout/",
         AreStudentsWhithoutRankingView.as_view(),
         name="degree-scale-exist-whithout",
@@ -128,6 +138,16 @@ urlpatterns = [
         "subject_section/subjects/",
         SubjectOfUser.as_view(),
         name="subject-section-subjects",
+    ),
+    path(
+        "subject_section/tasks/<int:pk>/",
+        SubjectSectionTaskView.as_view(),
+        name="subject-section-taks",
+    ),
+    path(
+        "subject_section/responses/<int:pk>/",
+        SubjectSectionStudentResponseView.as_view(),
+        name="subject-section-responses",
     ),
     path("", include(router.urls)),
 ]

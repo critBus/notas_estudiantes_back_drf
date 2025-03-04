@@ -10,6 +10,9 @@ from apps.project.models import (
 
 
 class FileFolderSubjectSectionSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=FileFolder.objects.all(), required=False
+    )
     file = serializers.CharField()
 
     class Meta:
@@ -18,6 +21,9 @@ class FileFolderSubjectSectionSerializer(serializers.ModelSerializer):
 
 
 class FolderSubjectSectionSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Folder.objects.all(), required=False
+    )
     files = FileFolderSubjectSectionSerializer(many=True, required=False)
 
     class Meta:
@@ -26,6 +32,9 @@ class FolderSubjectSectionSerializer(serializers.ModelSerializer):
 
 
 class FileSchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=FileSchoolTask.objects.all(), required=False
+    )
     file = serializers.CharField()
 
     class Meta:
@@ -34,6 +43,9 @@ class FileSchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
 
 
 class SchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=SchoolTask.objects.all(), required=False
+    )
     files = FileSchoolTaskSubjectSectionSerializer(many=True, required=False)
 
     class Meta:
@@ -42,6 +54,9 @@ class SchoolTaskSubjectSectionSerializer(serializers.ModelSerializer):
 
 
 class SubjectSectionCreateSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=SubjectSection.objects.all(), required=False
+    )
     folders = FolderSubjectSectionSerializer(many=True, required=False)
     tasks = SchoolTaskSubjectSectionSerializer(many=True, required=False)
 

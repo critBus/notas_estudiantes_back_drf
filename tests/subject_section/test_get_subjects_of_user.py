@@ -40,7 +40,7 @@ class TestSubjectOfUser(StudentTestCase, ProfessorMixin):
         )
         group_student = Group.objects.get(name=ROL_NAME_STUDENT)
         student_user.groups.add(group_student)
-        student = self.create_random_student(user=student_user, grade=8)
+        self.create_random_student(user=student_user, grade=8)
 
         self.login(username=student_user.username, password="student")
         self.put_authentication_in_the_header()
@@ -108,6 +108,56 @@ class TestSubjectOfUser(StudentTestCase, ProfessorMixin):
                     ],
                     "grade": 8,
                     "name": "Cience_8",
+                    "tcp2_required": False,
+                },
+                {
+                    "id": subjects_math.id,
+                    "professor": [
+                        {
+                            "id": professor.id,
+                            "ci": professor.ci,
+                            "address": professor.address,
+                            "last_name": professor.last_name,
+                            "first_name": professor.first_name,
+                            "sex": professor.sex,
+                            "user": professor_user.id,
+                        }
+                    ],
+                    "grade": 8,
+                    "name": "Math_8",
+                    "tcp2_required": False,
+                },
+            ],
+        )
+
+        Subject.objects.filter(grade__in=[7, 9]).delete()
+        self.login_superuser()
+        response_dict = self.call_get_subject_of_user(print_json_response=False)
+        self.assertEqual(
+            response_dict,
+            [
+                {
+                    "id": subjects_cience.id,
+                    "professor": [
+                        {
+                            "id": professor.id,
+                            "ci": professor.ci,
+                            "address": professor.address,
+                            "last_name": professor.last_name,
+                            "first_name": professor.first_name,
+                            "sex": professor.sex,
+                            "user": professor_user.id,
+                        }
+                    ],
+                    "grade": 8,
+                    "name": "Cience_8",
+                    "tcp2_required": False,
+                },
+                {
+                    "id": subjects_english.id,
+                    "professor": [],
+                    "grade": 8,
+                    "name": "English_8",
                     "tcp2_required": False,
                 },
                 {
