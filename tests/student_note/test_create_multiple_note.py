@@ -23,7 +23,7 @@ class TestCreateMultipleNotes(StudentTestCase):
         not_found: bool = False,
         print_json_response: bool = False,
     ):
-        URL = reverse("student-note-multiple")
+        URL = reverse("student-note-create-multiple")
         response_dict = self.call_post(
             payload=payload,
             url=URL,
@@ -96,7 +96,7 @@ class TestCreateMultipleNotes(StudentTestCase):
             },
         ]
         self.call_create_multiple_note(
-            payload=payload, print_json_response=True
+            payload=payload, print_json_response=False
         )
 
         self.assertEqual(3, StudentNote.objects.count())

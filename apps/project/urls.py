@@ -27,6 +27,7 @@ from apps.project.views import (
     StudentCareerViewSet,
     StudentGroupViewSet,
     StudentNoteMultipleCreateView,
+    StudentNoteMultipleView,
     StudentNoteReportView,
     StudentNoteViewSet,
     StudentResponseViewSet,
@@ -77,6 +78,11 @@ urlpatterns = [
     path(
         "student_note/multiple/",
         StudentNoteMultipleCreateView.as_view(),
+        name="student-note-create-multiple",
+    ),
+    path(
+        "student_note/multiple/<int:pk>/",
+        StudentNoteMultipleView.as_view(),
         name="student-note-multiple",
     ),
     path(

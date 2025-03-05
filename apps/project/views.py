@@ -86,6 +86,9 @@ from .serializers.general import (
 from .serializers.student_note.multiple.create import (
     StudentNoteCreateMultipleSerializer,
 )
+from .serializers.student_note.multiple.list import (
+    StudentNoteSimpleMultipleSerializer,
+)
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.student_response.update import StudentResponseUpdateSerializer
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
@@ -1377,3 +1380,46 @@ class StudentNoteMultipleCreateView(BaseModelAPIView):
             StudentNote(**data_note).save()
 
         return Response({"message": "success"}, status=200)
+
+
+class StudentNoteMultipleView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentNoteSimpleMultipleSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, pk, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        subject: Subject = Subject.objects.filter(pk=pk).first()
+        if not subject:
+            return JsonResponse(
+                {"error": "No existe esta asignatura"}, status=400
+            )
+
+        students = Student.objects.filter(
+            grade=subject.grade, is_graduated=False, is_dropped_out=False
+        )
+        response = []
+        for student in students:
+            note = StudentNote.objects.filter(
+                student=student, subject=subject
+            ).first()
+            if note:
+                response.append(StudentNoteSimpleMultipleSerializer(note).data)
+            else:
+                response.append(
+                    {
+                        "student": student.id,
+                        "subject": subject.id,
+                        "asc": None,
+                        "final_exam": None,
+                        "tcp1": None,
+                        "tcp2": None,
+                    }
+                )
+        return JsonResponse(response, safe=False, status=200)
