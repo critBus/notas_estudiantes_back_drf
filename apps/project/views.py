@@ -1083,7 +1083,7 @@ class SubjectSectionCreateView(BaseModelAPIView):
                                 )
                             folder_files_ids.append(file.id)
                     FileFolder.objects.filter(folder=folder).exclude(
-                        id__in=folders_ids
+                        id__in=folder_files_ids
                     ).delete()
             Folder.objects.filter(subject_section=section).exclude(
                 id__in=folders_ids
