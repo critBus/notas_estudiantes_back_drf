@@ -3,6 +3,7 @@ from typing import Optional, TypeVar
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.urls import reverse
 from rest_framework import status
 
@@ -13,13 +14,19 @@ T = TypeVar("T")
 
 class UserMixin:
     def get_admin_data(self):
+        user_admin = User.objects.filter(
+            username=settings.DJANGO_SUPERUSER_USERNAME
+        ).first()
+        self.assertIsNotNone(user_admin)
+        role_admin = Group.objects.filter(name="admin").first()
+        self.assertIsNotNone(role_admin)
         return {
-            "id": 1,
+            "id": user_admin.id,
             "username": settings.DJANGO_SUPERUSER_USERNAME,
             "email": settings.DJANGO_SUPERUSER_EMAIL,
             "first_name": settings.DJANGO_SUPERUSER_FIRST_NAME,
             "last_name": settings.DJANGO_SUPERUSER_LAST_NAME,
-            "groups": [{"id": 1, "name": "admin"}],
+            "groups": [{"id": role_admin.id, "name": "admin"}],
             "is_active": True,
             "is_superuser": True,
         }
