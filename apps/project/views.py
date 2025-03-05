@@ -83,6 +83,9 @@ from .serializers.general import (
     SubjectSectionSerializer,
     SubjectSerializer,
 )
+from .serializers.student_note.multiple.create import (
+    StudentNoteCreateMultipleSerializer,
+)
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.student_response.update import StudentResponseUpdateSerializer
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
@@ -1339,3 +1342,38 @@ class StudentNoteReportView(BaseModelAPIView):
             student=student, subject__grade=grado
         ).order_by("school_year__start_date")
         return generar_reporte_certificacion_notas_pdf(student, notes)
+
+
+class StudentNoteMultipleCreateView(BaseModelAPIView):
+    @extend_schema(
+        request=StudentNoteCreateMultipleSerializer(many=True),
+        responses={
+            200: inline_serializer(
+                "StudentNoteCreateResponse",
+                fields={
+                    "message": serializers.CharField(default="success"),
+                },
+            ),
+            400: ErrorSerializer,
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+
+        serializer = StudentNoteCreateMultipleSerializer(
+            data=request.data, many=True
+        )
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, safe=False, status=400)
+        for data_note in serializer.validated_data:
+            if "id" in data_note:
+                data_note["id"] = data_note["id"].id
+            if "school_year" not in data_note:
+                data_note["school_year"] = course
+            StudentNote(**data_note).save()
+
+        return Response({"message": "success"}, status=200)
