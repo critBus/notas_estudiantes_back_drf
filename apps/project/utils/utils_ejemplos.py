@@ -47,7 +47,7 @@ class Factory(
 
 
 def crear_datos_random():
-    if Student.objects.count()==0:
+    if Student.objects.count() == 0:
         print("Cargando datos de ejemplo ...")
         factory = Factory()
         factory.create_current_school_year()
@@ -77,9 +77,16 @@ def crear_datos_random():
                             ["Jaruco", "Santa Cruz", "San Jose", "Guines"]
                         ),
                         province=random.choice(
-                            ["Mayabeque", "La Habana", "Pinar del Rio", "Granma"]
+                            [
+                                "Mayabeque",
+                                "La Habana",
+                                "Pinar del Rio",
+                                "Granma",
+                            ]
                         ),
-                        school=random.choice(["Giteras", "Pedron", "Juilo Soler"]),
+                        school=random.choice(
+                            ["Giteras", "Pedron", "Juilo Soler"]
+                        ),
                     )
 
             aprobar = random.randint(1, 15) > 3
