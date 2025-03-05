@@ -125,6 +125,16 @@ entity User{
     password: CharField
 }
 
+entity StudentGroup {
+    id : Integer PK
+    name: CharField
+    grade : IntegerField 
+}
+
+StudentGroup "*" -- "*" Student: Grupo del estudiante
+StudentGroup "*" -- "*" Professor: Grupo del profesor
+StudentGroup "*" -- "1" SchoolYear : Curso del Grupo
+
 User "1" -- "1" Professor : Cuenta de Profesor
 User "1" -- "1" Student : Cuenta de Estudiante
 

@@ -174,6 +174,8 @@ class StudentResponseViewSet(BaseModelViewSet):
             return StudentResponseCreateSerializer
         elif self.action in ["update", "partial_update"]:
             return StudentResponseUpdateSerializer
+        # elif self.action in ["retrieve"]: # "list"
+        #     return
         return self.serializer_class
 
 
@@ -1230,6 +1232,53 @@ class SubjectSectionStudentResponseView(BaseModelAPIView):
         return JsonResponse(
             StudentResponseSubjectSectionSerializer(
                 q, many=True, context={"request": request}
+            ).data,
+            safe=False,
+            status=200,
+        )
+
+
+class SubjectSectionStudentResponseOfUserView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentResponseSubjectSectionSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, pk, *args, **kwargs):
+        task = SchoolTask.objects.filter(pk=pk).first()
+        if not task:
+            return JsonResponse({"error": "No existe esta Tarea"}, status=400)
+        user = request.user
+        student = Student.objects.filter(user=user).first()
+        if not student:
+            return JsonResponse(
+                {
+                    "error": "No existe una cuenta de estudiante para este usuario"
+                },
+                status=400,
+            )
+        student_response = StudentResponse.objects.filter(
+            school_task=task, student=student
+        ).first()
+        if not student_response:
+            return JsonResponse(
+                {
+                    "description": "",
+                    "student": StudentSerializer(student).data,
+                    "school_task": task.id,
+                    "files": [],
+                },
+                status=200,
+            )
+            # student_response=StudentResponse.objects.create(
+            #     student=student,
+            #     school_task=task
+            # )
+
+        return JsonResponse(
+            StudentResponseSubjectSectionSerializer(
+                student_response, context={"request": request}
             ).data,
             safe=False,
             status=200,

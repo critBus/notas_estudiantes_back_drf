@@ -37,6 +37,7 @@ from apps.project.views import (
     SubjectViewSet,
     Upgrading7and8,
     UpgradingAllView,
+    SubjectSectionStudentResponseOfUserView,
 )
 
 router = DefaultRouter()
@@ -148,6 +149,11 @@ urlpatterns = [
         "subject_section/responses/<int:pk>/",
         SubjectSectionStudentResponseView.as_view(),
         name="subject-section-responses",
+    ),
+    path(
+        "student_response/of_student/<int:pk>/",
+        SubjectSectionStudentResponseOfUserView.as_view(),
+        name="student-response-user",
     ),
     path("", include(router.urls)),
 ]
