@@ -39,6 +39,7 @@ from .models import (
     StudentResponse,
     Subject,
     SubjectSection,
+    StudentGroup,
 )
 from .serializers.general import (
     ApprovedSchoolCourseRepresentationSerializer,
@@ -79,6 +80,7 @@ from .serializers.general import (
     SubjectSectionRepresentationSerializer,
     SubjectSectionSerializer,
     SubjectSerializer,
+    StudentGroupSerializer,
 )
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.student_response.update import StudentResponseUpdateSerializer
@@ -90,6 +92,11 @@ from .serializers.subject_section.representation import (
 )
 from .utils.extenciones import get_extension
 from .utils.reportes import generar_reporte_escalafon_pdf
+
+
+class StudentGroupViewSet(BaseModelViewSet):
+    queryset = StudentGroup.objects.all()
+    serializer_class = StudentGroupSerializer
 
 
 class SchoolEventViewSet(BaseModelViewSet):

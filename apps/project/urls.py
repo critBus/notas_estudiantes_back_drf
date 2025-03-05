@@ -38,6 +38,7 @@ from apps.project.views import (
     Upgrading7and8,
     UpgradingAllView,
     SubjectSectionStudentResponseOfUserView,
+    StudentGroupViewSet,
 )
 
 router = DefaultRouter()
@@ -63,6 +64,7 @@ router.register(
 )
 # router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
 router.register(r"school_event", SchoolEventViewSet)
+router.register(r"student_group", StudentGroupViewSet)
 
 urlpatterns = [
     path(
