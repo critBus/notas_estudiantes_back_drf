@@ -711,6 +711,7 @@ class SchoolEvent(models.Model):
 
 class StudentGroup(models.Model):
     name = models.CharField(max_length=255, verbose_name="Nombre")
+    grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
     students = models.ManyToManyField(Student, verbose_name="Estudiantes")
     professors = models.ManyToManyField(Professor, verbose_name="Profesores")
     school_year = models.ForeignKey(

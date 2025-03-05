@@ -81,6 +81,7 @@ from .serializers.general import (
     SubjectSectionSerializer,
     SubjectSerializer,
     StudentGroupSerializer,
+    StudentGroupRepresentationSerializer,
 )
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.student_response.update import StudentResponseUpdateSerializer
@@ -94,9 +95,40 @@ from .utils.extenciones import get_extension
 from .utils.reportes import generar_reporte_escalafon_pdf
 
 
+@extend_schema_view(
+    list=extend_schema(
+        responses=StudentGroupRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=StudentGroupRepresentationSerializer),
+    retrieve=extend_schema(responses=StudentGroupRepresentationSerializer),
+    update=extend_schema(responses=StudentGroupRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=StudentGroupRepresentationSerializer
+    ),
+)
 class StudentGroupViewSet(BaseModelViewSet):
     queryset = StudentGroup.objects.all()
     serializer_class = StudentGroupSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["contains", "exact", "icontains", "search"],
+        "grade": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year": ["isnull"],
+        "school_year__id": ["exact"],
+        "school_year__name": ["contains", "exact", "icontains", "search"],
+        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
+    }
+    search_fields = ["name"]
+    ordering_fields = [
+        "pk",
+        "name",
+        "grade",
+        "school_year__start_date",
+        "school_year__end_date",
+    ]
+    ordering = ["grade", "name"]
 
 
 class SchoolEventViewSet(BaseModelViewSet):

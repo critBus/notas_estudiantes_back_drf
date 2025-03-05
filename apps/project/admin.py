@@ -15,6 +15,7 @@ from apps.project.models import (
     StudentNote,
     StudentResponse,
     Subject,
+    StudentGroup,
 )
 
 
@@ -87,6 +88,7 @@ class SubjectAdmin(admin.ModelAdmin):
         "tcp2_required",
     )
     search_fields = ("name",)
+    filter_horizontal = ("professor",)
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()
 
@@ -231,5 +233,22 @@ class FileStudentResponseeAdmin(admin.ModelAdmin):
         "type",
     )
     search_fields = ("title",)
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(StudentGroup)
+class StudentGroupResponseeAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "grade",
+        "school_year",
+    )
+    list_filter = ("grade", "school_year")
+    search_fields = ("name",)
+    filter_horizontal = (
+        "students",
+        "professors",
+    )
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

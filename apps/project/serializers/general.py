@@ -570,7 +570,20 @@ class SchoolEventSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
+    professors = ProfessorSerializer(many=True)
+    students = StudentSerializer(many=True)
+    school_year = SchoolYearSerializer(many=True)
+
+    class Meta:
+        model = StudentGroup
+        fields = "__all__"
+
+
 class StudentGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentGroup
         fields = "__all__"
+
+    def to_representation(self, instance):
+        return StudentGroupRepresentationSerializer(instance).data
