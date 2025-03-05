@@ -4,13 +4,13 @@ from django.utils import timezone
 from rest_framework.reverse import reverse  # Para generar urls
 
 from apps.project.models import (
+    ROL_NAME_STUDENT,
     FileStudentResponse,
     SchoolTask,
     SchoolYear,
     StudentResponse,
     Subject,
     SubjectSection,
-    ROL_NAME_STUDENT,
 )
 from tests.student.parent_case.student_test_case import StudentTestCase
 

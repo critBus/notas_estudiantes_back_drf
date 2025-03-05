@@ -20,11 +20,11 @@ from ..models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentNote,
     StudentResponse,
     Subject,
     SubjectSection,
-    StudentGroup,
 )
 from ..utils.consts import AMOUNT_OF_CAREER_ON_BALLOT
 

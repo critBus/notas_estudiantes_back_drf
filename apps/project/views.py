@@ -35,11 +35,11 @@ from .models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentNote,
     StudentResponse,
     Subject,
     SubjectSection,
-    StudentGroup,
 )
 from .serializers.general import (
     ApprovedSchoolCourseRepresentationSerializer,
@@ -70,6 +70,8 @@ from .serializers.general import (
     StudentBallotSerializer,
     StudentCareerSerializer,
     StudentCreateSerializer,
+    StudentGroupRepresentationSerializer,
+    StudentGroupSerializer,
     StudentNoteRepresentationSerializer,
     StudentNoteSerializer,
     StudentResponseRepresentationSerializer,
@@ -80,8 +82,6 @@ from .serializers.general import (
     SubjectSectionRepresentationSerializer,
     SubjectSectionSerializer,
     SubjectSerializer,
-    StudentGroupSerializer,
-    StudentGroupRepresentationSerializer,
 )
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.student_response.update import StudentResponseUpdateSerializer
@@ -92,7 +92,10 @@ from .serializers.subject_section.representation import (
     SubjectSectionCreateRepresentationSerializer,
 )
 from .utils.extenciones import get_extension
-from .utils.reportes import generar_reporte_escalafon_pdf
+from .utils.reportes import (
+    generar_reporte_certificacion_notas_pdf,
+    generar_reporte_escalafon_pdf,
+)
 
 
 @extend_schema_view(
@@ -1322,3 +1325,17 @@ class SubjectSectionStudentResponseOfUserView(BaseModelAPIView):
             safe=False,
             status=200,
         )
+
+
+class StudentNoteReportView(BaseModelAPIView):
+    def get(self, request, id_estudiante, grado, *args, **kwargs):
+        student = Student.objects.filter(id=id_estudiante).first()
+        if not student:
+            return JsonResponse(
+                {"error": "No existe este estudiante"},
+                status=400,
+            )
+        notes = StudentNote.objects.filter(
+            student=student, subject__grade=grado
+        ).order_by("school_year__start_date")
+        return generar_reporte_certificacion_notas_pdf(student, notes)

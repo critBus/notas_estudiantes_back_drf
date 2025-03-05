@@ -12,10 +12,10 @@ from apps.project.models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentNote,
     StudentResponse,
     Subject,
-    StudentGroup,
 )
 
 
@@ -39,6 +39,7 @@ class SchoolYearAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "ci",
         "grade",
         "last_name",
@@ -55,6 +56,7 @@ class StudentAdmin(admin.ModelAdmin):
         "is_dropped_out",
     )
     search_fields = (
+        "id",
         "ci",
         "grade",
         "last_name",
