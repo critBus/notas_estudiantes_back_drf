@@ -1,10 +1,9 @@
-import os
 import traceback
-from django.core.management.base import BaseCommand
-from django.db import connection
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.core.management.base import BaseCommand
 
 from apps.project.models import ROL_NAME_ADMIN
 from apps.project.utils.nomencladores import crear_roles_django_default
@@ -39,5 +38,5 @@ class Command(BaseCommand):
 
                 crear_datos_random()
 
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc())

@@ -20,6 +20,7 @@ from ..models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentNote,
     StudentResponse,
     Subject,
@@ -563,24 +564,26 @@ class FileStudentResponseSerializer(serializers.ModelSerializer):
         return FileStudentResponseRepresentationSerializer(instance).data
 
 
-# class ProfessorEvaluationRepresentationSerializer(serializers.ModelSerializer):
-#     professor = ProfessorSerializer(read_only=True)
-#
-#     class Meta:
-#         model = ProfessorEvaluation
-#         fields = "__all__"
-#
-#
-# class ProfessorEvaluationSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ProfessorEvaluation
-#         fields = "__all__"
-#
-#     def to_representation(self, instance):
-#         return ProfessorEvaluationRepresentationSerializer(instance).data
-
-
 class SchoolEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolEvent
         fields = "__all__"
+
+
+class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
+    professors = ProfessorSerializer(many=True)
+    students = StudentSerializer(many=True)
+    school_year = SchoolYearSerializer(many=True)
+
+    class Meta:
+        model = StudentGroup
+        fields = "__all__"
+
+
+class StudentGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentGroup
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return StudentGroupRepresentationSerializer(instance).data

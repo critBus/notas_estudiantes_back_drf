@@ -4,6 +4,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse  # Para generar urls
 from rest_framework.test import APITestCase
 
+from apps.project.management.commands.init_data import (
+    creat_first_superuser_and_roles,
+)
 from tests.utils.mixin.user_mixin import UserMixin
 
 User = get_user_model()
@@ -11,6 +14,7 @@ User = get_user_model()
 
 class UserViewSetTests(APITestCase, UserMixin):
     def setUp(self):
+        creat_first_superuser_and_roles()
         self.group1 = Group.objects.create(name="group1")
         self.group2 = Group.objects.create(name="group2")
         self.user_data = {

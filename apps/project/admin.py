@@ -12,6 +12,7 @@ from apps.project.models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentNote,
     StudentResponse,
     Subject,
@@ -38,6 +39,7 @@ class SchoolYearAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "ci",
         "grade",
         "last_name",
@@ -54,6 +56,7 @@ class StudentAdmin(admin.ModelAdmin):
         "is_dropped_out",
     )
     search_fields = (
+        "id",
         "ci",
         "grade",
         "last_name",
@@ -87,6 +90,7 @@ class SubjectAdmin(admin.ModelAdmin):
         "tcp2_required",
     )
     search_fields = ("name",)
+    filter_horizontal = ("professor",)
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()
 
@@ -231,5 +235,22 @@ class FileStudentResponseeAdmin(admin.ModelAdmin):
         "type",
     )
     search_fields = ("title",)
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(StudentGroup)
+class StudentGroupResponseeAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "grade",
+        "school_year",
+    )
+    list_filter = ("grade", "school_year")
+    search_fields = ("name",)
+    filter_horizontal = (
+        "students",
+        "professors",
+    )
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

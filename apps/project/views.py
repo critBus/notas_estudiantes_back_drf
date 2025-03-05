@@ -35,6 +35,7 @@ from .models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentNote,
     StudentResponse,
     Subject,
@@ -69,6 +70,8 @@ from .serializers.general import (
     StudentBallotSerializer,
     StudentCareerSerializer,
     StudentCreateSerializer,
+    StudentGroupRepresentationSerializer,
+    StudentGroupSerializer,
     StudentNoteRepresentationSerializer,
     StudentNoteSerializer,
     StudentResponseRepresentationSerializer,
@@ -80,6 +83,12 @@ from .serializers.general import (
     SubjectSectionSerializer,
     SubjectSerializer,
 )
+from .serializers.student_note.multiple.create import (
+    StudentNoteCreateMultipleSerializer,
+)
+from .serializers.student_note.multiple.list import (
+    StudentNoteSimpleMultipleSerializer,
+)
 from .serializers.student_response.create import StudentResponseCreateSerializer
 from .serializers.student_response.update import StudentResponseUpdateSerializer
 from .serializers.subject_section.create import SubjectSectionCreateSerializer
@@ -89,7 +98,46 @@ from .serializers.subject_section.representation import (
     SubjectSectionCreateRepresentationSerializer,
 )
 from .utils.extenciones import get_extension
-from .utils.reportes import generar_reporte_escalafon_pdf
+from .utils.reportes import (
+    generar_reporte_certificacion_notas_pdf,
+    generar_reporte_escalafon_pdf,
+)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses=StudentGroupRepresentationSerializer(many=True)
+    ),
+    create=extend_schema(responses=StudentGroupRepresentationSerializer),
+    retrieve=extend_schema(responses=StudentGroupRepresentationSerializer),
+    update=extend_schema(responses=StudentGroupRepresentationSerializer),
+    partial_update=extend_schema(
+        responses=StudentGroupRepresentationSerializer
+    ),
+)
+class StudentGroupViewSet(BaseModelViewSet):
+    queryset = StudentGroup.objects.all()
+    serializer_class = StudentGroupSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["contains", "exact", "icontains", "search"],
+        "grade": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year": ["isnull"],
+        "school_year__id": ["exact"],
+        "school_year__name": ["contains", "exact", "icontains", "search"],
+        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
+    }
+    search_fields = ["name"]
+    ordering_fields = [
+        "pk",
+        "name",
+        "grade",
+        "school_year__start_date",
+        "school_year__end_date",
+    ]
+    ordering = ["grade", "name"]
 
 
 class SchoolEventViewSet(BaseModelViewSet):
@@ -1041,7 +1089,7 @@ class SubjectSectionCreateView(BaseModelAPIView):
                                 )
                             folder_files_ids.append(file.id)
                     FileFolder.objects.filter(folder=folder).exclude(
-                        id__in=folders_ids
+                        id__in=folder_files_ids
                     ).delete()
             Folder.objects.filter(subject_section=section).exclude(
                 id__in=folders_ids
@@ -1283,3 +1331,95 @@ class SubjectSectionStudentResponseOfUserView(BaseModelAPIView):
             safe=False,
             status=200,
         )
+
+
+class StudentNoteReportView(BaseModelAPIView):
+    def get(self, request, id_estudiante, grado, *args, **kwargs):
+        student = Student.objects.filter(id=id_estudiante).first()
+        if not student:
+            return JsonResponse(
+                {"error": "No existe este estudiante"},
+                status=400,
+            )
+        notes = StudentNote.objects.filter(
+            student=student, subject__grade=grado
+        ).order_by("school_year__start_date")
+        return generar_reporte_certificacion_notas_pdf(student, notes)
+
+
+class StudentNoteMultipleCreateView(BaseModelAPIView):
+    @extend_schema(
+        request=StudentNoteCreateMultipleSerializer(many=True),
+        responses={
+            200: inline_serializer(
+                "StudentNoteCreateResponse",
+                fields={
+                    "message": serializers.CharField(default="success"),
+                },
+            ),
+            400: ErrorSerializer,
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+
+        serializer = StudentNoteCreateMultipleSerializer(
+            data=request.data, many=True
+        )
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, safe=False, status=400)
+        for data_note in serializer.validated_data:
+            if "id" in data_note:
+                data_note["id"] = data_note["id"].id
+            if "school_year" not in data_note:
+                data_note["school_year"] = course
+            StudentNote(**data_note).save()
+
+        return Response({"message": "success"}, status=200)
+
+
+class StudentNoteMultipleView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentNoteSimpleMultipleSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, pk, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        subject: Subject = Subject.objects.filter(pk=pk).first()
+        if not subject:
+            return JsonResponse(
+                {"error": "No existe esta asignatura"}, status=400
+            )
+
+        students = Student.objects.filter(
+            grade=subject.grade, is_graduated=False, is_dropped_out=False
+        )
+        response = []
+        for student in students:
+            note = StudentNote.objects.filter(
+                student=student, subject=subject
+            ).first()
+            if note:
+                response.append(StudentNoteSimpleMultipleSerializer(note).data)
+            else:
+                response.append(
+                    {
+                        "student": student.id,
+                        "subject": subject.id,
+                        "asc": None,
+                        "final_exam": None,
+                        "tcp1": None,
+                        "tcp2": None,
+                    }
+                )
+        return JsonResponse(response, safe=False, status=200)

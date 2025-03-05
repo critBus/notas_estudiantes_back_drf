@@ -1,10 +1,15 @@
 import json
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
+
+from apps.project.management.commands.init_data import (
+    creat_first_superuser_and_roles,
+)
 
 from ..utils.mixin.user_mixin import UserMixin
 
@@ -13,6 +18,7 @@ User = get_user_model()
 
 class UserViewSetTests(APITestCase, UserMixin):
     def setUp(self):
+        creat_first_superuser_and_roles()
         self.group1 = Group.objects.create(name="group1")
         self.group2 = Group.objects.create(name="group2")
         self.user_data = {
@@ -142,7 +148,11 @@ class UserViewSetTests(APITestCase, UserMixin):
         self.assertDictEqual(expected_data, response_dict)
 
         # Prueba con el usuario admin
-        url = reverse("user-detail", kwargs={"pk": 1})
+        user_admin = User.objects.filter(
+            username=settings.DJANGO_SUPERUSER_USERNAME
+        ).first()
+        self.assertIsNotNone(user_admin)
+        url = reverse("user-detail", kwargs={"pk": user_admin.id})
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

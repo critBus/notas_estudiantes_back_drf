@@ -25,19 +25,23 @@ from apps.project.views import (
     SchoolTaskViewSet,
     SchoolYearViewSet,
     StudentCareerViewSet,
+    StudentGroupViewSet,
+    StudentNoteMultipleCreateView,
+    StudentNoteMultipleView,
+    StudentNoteReportView,
     StudentNoteViewSet,
     StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
     SubjectOfUser,
     SubjectSectionCreateView,
+    SubjectSectionStudentResponseOfUserView,
     SubjectSectionStudentResponseView,
     SubjectSectionTaskView,
     SubjectSectionViewSet,
     SubjectViewSet,
     Upgrading7and8,
     UpgradingAllView,
-    SubjectSectionStudentResponseOfUserView,
 )
 
 router = DefaultRouter()
@@ -63,8 +67,24 @@ router.register(
 )
 # router.register(r"professor_evaluation", ProfessorEvaluationViewSet)
 router.register(r"school_event", SchoolEventViewSet)
+router.register(r"student_group", StudentGroupViewSet)
 
 urlpatterns = [
+    path(
+        "student_note/report/certification/<int:id_estudiante>/<int:grado>/",
+        StudentNoteReportView.as_view(),
+        name="student-note-certification-report",
+    ),
+    path(
+        "student_note/multiple/",
+        StudentNoteMultipleCreateView.as_view(),
+        name="student-note-create-multiple",
+    ),
+    path(
+        "student_note/multiple/<int:pk>/",
+        StudentNoteMultipleView.as_view(),
+        name="student-note-multiple",
+    ),
     path(
         "students/upgrading_all/",
         UpgradingAllView.as_view(),
