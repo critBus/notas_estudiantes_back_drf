@@ -30,6 +30,7 @@ from apps.project.views import (
     StudentNoteMultipleView,
     StudentNoteReportView,
     StudentNoteViewSet,
+    StudentReportView,
     StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
@@ -70,6 +71,11 @@ router.register(r"school_event", SchoolEventViewSet)
 router.register(r"student_group", StudentGroupViewSet)
 
 urlpatterns = [
+    path(
+        "students/report/",
+        StudentReportView.as_view(),
+        name="student-report",
+    ),
     path(
         "student_note/report/certification/<int:id_estudiante>/<int:grado>/",
         StudentNoteReportView.as_view(),

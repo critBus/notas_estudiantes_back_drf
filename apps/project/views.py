@@ -100,7 +100,9 @@ from .serializers.subject_section.representation import (
 from .utils.extenciones import get_extension
 from .utils.reportes import (
     generar_reporte_certificacion_notas_pdf,
-    generar_reporte_escalafon_pdf, generar_reporte_notas_de_asignatura_pdf,
+    generar_reporte_escalafon_pdf,
+    generar_reporte_estudiantes_pdf,
+    generar_reporte_notas_de_asignatura_pdf,
 )
 
 
@@ -1346,6 +1348,7 @@ class StudentNoteReportView(BaseModelAPIView):
         ).order_by("school_year__start_date")
         return generar_reporte_certificacion_notas_pdf(student, notes)
 
+
 class StudentNoteReportSubjectView(BaseModelAPIView):
     def get(self, request, pk, *args, **kwargs):
         course = SchoolYear.get_current_course()
@@ -1360,9 +1363,10 @@ class StudentNoteReportSubjectView(BaseModelAPIView):
                 status=400,
             )
         notes = StudentNote.objects.filter(
-            subject=subject,school_year=course
+            subject=subject, school_year=course
         ).order_by("student__ci")
         return generar_reporte_notas_de_asignatura_pdf(subject, notes)
+
 
 class StudentNoteMultipleCreateView(BaseModelAPIView):
     @extend_schema(
@@ -1440,3 +1444,48 @@ class StudentNoteMultipleView(BaseModelAPIView):
                     }
                 )
         return JsonResponse(response, safe=False, status=200)
+
+
+class StudentReportView(BaseListAPIView):
+    queryset = Student.objects.filter(
+        is_graduated=False,
+        is_dropped_out=False,
+    ).order_by("grade", "ci")
+    serializer_class = StudentBallotSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "ci": ["contains", "exact", "icontains", "search"],
+        "address": ["contains", "exact", "icontains", "search"],
+        "grade": ["exact"],
+        "first_name": ["contains", "exact", "icontains", "search"],
+        "last_name": ["contains", "exact", "icontains", "search"],
+        "registration_number": ["contains", "exact", "icontains", "search"],
+        "sex": ["exact"],
+        "is_graduated": ["exact"],
+        "is_dropped_out": ["exact"],
+    }
+    search_fields = [
+        "address",
+        "registration_number",
+        "first_name",
+        "last_name",
+    ]
+    ordering_fields = [
+        "pk",
+        "ci",
+        "address",
+        "grade",
+        "first_name",
+        "last_name",
+        "registration_number",
+        "sex",
+        "is_graduated",
+        "is_dropped_out",
+    ]
+    ordering = ["ci"]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        return generar_reporte_estudiantes_pdf(queryset)

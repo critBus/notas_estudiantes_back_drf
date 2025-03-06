@@ -30,7 +30,6 @@ def generar_reporte_escalafon_pdf(queryset):
     return custom_export_report_by_name("Escalafon", data, file="Escalafon")
 
 
-
 def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
     entidades: List[StudentNote] = queryset
     lista = []
@@ -56,16 +55,13 @@ def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
     )
 
 
-
-
-
-def generar_reporte_notas_de_asignatura_pdf(subject:Subject, queryset):
+def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
     entidades: List[StudentNote] = queryset
     lista = []
     for entidad in entidades:
         data_entidad = {
             "ci": entidad.student.ci,
-            "nombre_completo": f"{entidad.student.first_name} {entidad.student.last_name if student.last_name else ''}".strip(),
+            "nombre_completo": f"{entidad.student.first_name} {entidad.student.last_name if entidad.student.last_name else ''}".strip(),
             "asc": format_float(entidad.asc),
             "tcp1": format_float(entidad.tcp1),
             "tcp2": format_float(entidad.tcp2),
@@ -84,3 +80,25 @@ def generar_reporte_notas_de_asignatura_pdf(subject:Subject, queryset):
     )
 
 
+def generar_reporte_estudiantes_pdf(queryset):
+    entidades: List[Student] = queryset
+    lista = []
+    for entidad in entidades:
+        data_entidad = {
+            "first_name": entidad.first_name,
+            "last_name": entidad.last_name if entidad.last_name else "-",
+            "ci": entidad.ci,
+            "grade": str(entidad.grade),
+            "registration_number": str(entidad.registration_number),
+            "sex": entidad.sex,
+            "is_graduated": "Si" if entidad.is_graduated else "No",
+            "is_dropped_out": "Si" if entidad.is_dropped_out else "No",
+            "address": entidad.address if entidad.address else "-",
+            "group": "-",
+        }
+        lista.append(data_entidad)
+
+    data = {
+        "lista": lista,
+    }
+    return custom_export_report_by_name("Estudiantes", data, file="Escalafon")
