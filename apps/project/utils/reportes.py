@@ -1,6 +1,12 @@
 from typing import List
 
-from apps.project.models import DegreeScale, Student, StudentNote, Subject
+from apps.project.models import (
+    DegreeScale,
+    Dropout,
+    Student,
+    StudentNote,
+    Subject,
+)
 from apps.project.utils.util_reporte_d import custom_export_report_by_name
 
 
@@ -102,3 +108,37 @@ def generar_reporte_estudiantes_pdf(queryset):
         "lista": lista,
     }
     return custom_export_report_by_name("Estudiantes", data, file="Escalafon")
+
+
+def generar_reporte_bajas_pdf(queryset):
+    entidades: List[Dropout] = queryset
+    lista = []
+    for entidad in entidades:
+        data_entidad = {
+            "first_name": entidad.student.first_name,
+            "last_name": entidad.student.last_name
+            if entidad.student.last_name
+            else "-",
+            "ci": entidad.student.ci,
+            "grade": str(entidad.student.grade),
+            "registration_number": str(entidad.student.registration_number),
+            "sex": entidad.student.sex,
+            "is_graduated": "Si" if entidad.student.is_graduated else "No",
+            "is_dropped_out": "Si" if entidad.student.is_dropped_out else "No",
+            "address": entidad.student.address
+            if entidad.student.address
+            else "-",
+            "group": "-",
+            "municipality": entidad.municipality,
+            "province": entidad.province,
+            "school": entidad.school,
+            "year_mount": f"{entidad.date.year}-{entidad.date.month}",
+            "year": str(entidad.date.year),
+            "mes": str(entidad.date.month),
+        }
+        lista.append(data_entidad)
+
+    data = {
+        "lista": lista,
+    }
+    return custom_export_report_by_name("Altas Bajas", data, file="Escalafon")

@@ -14,6 +14,7 @@ from apps.project.views import (
     DegreeScaleCurrentReportView,
     DegreeScaleCurrentView,
     DegreeScaleViewSet,
+    DropoutReportView,
     DropoutViewSet,
     FileFolderViewSet,
     FileSchoolTaskViewSet,
@@ -75,6 +76,11 @@ urlpatterns = [
         "students/report/",
         StudentReportView.as_view(),
         name="student-report",
+    ),
+    path(
+        "dropouts/report/",
+        DropoutReportView.as_view(),
+        name="dropouts-report",
     ),
     path(
         "student_note/report/certification/<int:id_estudiante>/<int:grado>/",

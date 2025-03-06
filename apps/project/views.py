@@ -99,6 +99,7 @@ from .serializers.subject_section.representation import (
 )
 from .utils.extenciones import get_extension
 from .utils.reportes import (
+    generar_reporte_bajas_pdf,
     generar_reporte_certificacion_notas_pdf,
     generar_reporte_escalafon_pdf,
     generar_reporte_estudiantes_pdf,
@@ -1489,3 +1490,50 @@ class StudentReportView(BaseListAPIView):
         queryset = self.filter_queryset(self.get_queryset())
 
         return generar_reporte_estudiantes_pdf(queryset)
+
+
+class DropoutReportView(BaseListAPIView):
+    queryset = Dropout.objects.order_by("date")
+    serializer_class = DropoutSerializer
+
+    filterset_fields = {
+        "id": ["exact"],
+        "municipality": ["contains", "exact", "icontains", "search"],
+        "date": ["gte", "lte", "gt", "lt", "exact"],
+        "province": ["contains", "exact", "icontains", "search"],
+        "school": ["contains", "exact", "icontains", "search"],
+        "student": ["isnull"],
+        "student__id": ["exact"],
+        "student__ci": ["contains", "exact", "icontains", "search"],
+        "student__address": ["contains", "exact", "icontains", "search"],
+        "student__grade": ["exact"],
+        "student__first_name": ["contains", "exact", "icontains", "search"],
+        "student__last_name": ["contains", "exact", "icontains", "search"],
+        "student__registration_number": [
+            "contains",
+            "exact",
+            "icontains",
+            "search",
+        ],
+        "student__sex": ["exact"],
+        "student__is_graduated": ["exact"],
+        "student__is_dropped_out": ["exact"],
+    }
+    search_fields = [
+        "student__ci",
+    ]
+    ordering_fields = [
+        "pk",
+        "municipality",
+        "province",
+        "school",
+        "student__ci",
+        "student__first_name",
+        "student__last_name",
+    ]
+    ordering = ["student__ci"]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        return generar_reporte_bajas_pdf(queryset)
