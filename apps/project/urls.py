@@ -76,6 +76,11 @@ urlpatterns = [
         name="student-note-certification-report",
     ),
     path(
+        "student_note/report/subject/<int:pk>/",
+        StudentNoteReportView.as_view(),
+        name="student-note-subject-report",
+    ),
+    path(
         "student_note/multiple/",
         StudentNoteMultipleCreateView.as_view(),
         name="student-note-create-multiple",

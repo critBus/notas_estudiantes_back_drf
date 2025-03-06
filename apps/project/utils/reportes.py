@@ -1,6 +1,6 @@
 from typing import List
 
-from apps.project.models import DegreeScale, Student, StudentNote
+from apps.project.models import DegreeScale, Student, StudentNote, Subject
 from apps.project.utils.util_reporte_d import custom_export_report_by_name
 
 
@@ -30,8 +30,6 @@ def generar_reporte_escalafon_pdf(queryset):
     return custom_export_report_by_name("Escalafon", data, file="Escalafon")
 
 
-generar_reporte_escalafon_pdf.short_description = "Generar Reporte Escalafón"
-
 
 def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
     entidades: List[StudentNote] = queryset
@@ -58,6 +56,31 @@ def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
     )
 
 
-generar_reporte_certificacion_notas_pdf.short_description = (
-    "Generar Reporte Escalafón"
-)
+
+
+
+def generar_reporte_notas_de_asignatura_pdf(subject:Subject, queryset):
+    entidades: List[StudentNote] = queryset
+    lista = []
+    for entidad in entidades:
+        data_entidad = {
+            "ci": entidad.student.ci,
+            "nombre_completo": f"{entidad.student.first_name} {entidad.student.last_name if student.last_name else ''}".strip(),
+            "asc": format_float(entidad.asc),
+            "tcp1": format_float(entidad.tcp1),
+            "tcp2": format_float(entidad.tcp2),
+            "final_exam": format_float(entidad.final_exam),
+            "final_grade": format_float(entidad.final_grade),
+        }
+        lista.append(data_entidad)
+
+    data = {
+        "lista": lista,
+        "grade": subject.grade,
+        "name": subject.name,
+    }
+    return custom_export_report_by_name(
+        "Notas De Asignatura", data, file="Escalafon"
+    )
+
+

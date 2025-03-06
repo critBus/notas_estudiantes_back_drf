@@ -100,7 +100,7 @@ from .serializers.subject_section.representation import (
 from .utils.extenciones import get_extension
 from .utils.reportes import (
     generar_reporte_certificacion_notas_pdf,
-    generar_reporte_escalafon_pdf,
+    generar_reporte_escalafon_pdf, generar_reporte_notas_de_asignatura_pdf,
 )
 
 
@@ -1346,6 +1346,23 @@ class StudentNoteReportView(BaseModelAPIView):
         ).order_by("school_year__start_date")
         return generar_reporte_certificacion_notas_pdf(student, notes)
 
+class StudentNoteReportSubjectView(BaseModelAPIView):
+    def get(self, request, pk, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        subject = Subject.objects.filter(id=pk).first()
+        if not subject:
+            return JsonResponse(
+                {"error": "No existe esta asignatura"},
+                status=400,
+            )
+        notes = StudentNote.objects.filter(
+            subject=subject,school_year=course
+        ).order_by("student__ci")
+        return generar_reporte_notas_de_asignatura_pdf(subject, notes)
 
 class StudentNoteMultipleCreateView(BaseModelAPIView):
     @extend_schema(
