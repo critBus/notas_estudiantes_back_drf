@@ -66,14 +66,14 @@ class AccountCreateSerializer(serializers.Serializer):
     def validate_username(self, username):
         if User.objects.filter(username=username).exists():
             raise serializers.ValidationError(
-                "Uste nombre de usuario ya existe"
+                "Este nombre de usuario ya existe"
             )
         return username
 
     def validate_email(self, email):
         if User.objects.filter(email=email).exists():
             raise serializers.ValidationError(
-                "Uste correo de usuario ya existe"
+                "Este correo de usuario ya existe"
             )
         return email
 
@@ -366,6 +366,31 @@ class StudentNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentNote
         fields = "__all__"
+
+    def validate(self, attrs):
+        student = attrs["student"]
+        subject = attrs["subject"]
+        school_year = attrs["school_year"]
+        if self.instance:
+            if (
+                self.instance.student != student
+                or self.instance.subject != subject
+                or self.instance.school_year != school_year
+            ):
+                if StudentNote.objects.filter(
+                    student=student, subject=subject, school_year=school_year
+                ).exists():
+                    raise serializers.ValidationError(
+                        "Ya existe esta nota para este estudiante en esta asignatura en este curso"
+                    )
+        else:
+            if StudentNote.objects.filter(
+                student=student, subject=subject, school_year=school_year
+            ).exists():
+                raise serializers.ValidationError(
+                    "Ya existe esta nota para este estudiante en esta asignatura en este curso"
+                )
+        return attrs
 
     def to_representation(self, instance):
         return StudentNoteRepresentationSerializer(instance).data
