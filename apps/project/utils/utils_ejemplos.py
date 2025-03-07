@@ -1,16 +1,32 @@
 import random
 from datetime import timedelta
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.utils import timezone
+from django.utils.datetime_safe import datetime
 
+User = get_user_model()
 from apps.project.models import (
+    ROL_NAME_PROFESSOR,
+    ROL_NAME_SECRETARY,
+    ROL_NAME_STUDENT,
     Career,
     DegreeScale,
     Dropout,
+    FileFolder,
+    FileSchoolTask,
+    FileStudentResponse,
+    Folder,
     GrantCareer,
+    SchoolEvent,
+    SchoolTask,
     SchoolYear,
     Student,
-    StudentCareer, Subject, Professor, SubjectSection, Folder, FileFolder,
+    StudentCareer,
+    StudentResponse,
+    Subject,
+    SubjectSection,
 )
 from tests.professor.mixin.professor_mixin import ProfessorMixin
 from tests.student.mixin.school_year_mixin import SchoolYearMixin
@@ -107,10 +123,10 @@ def crear_datos_random():
         students_8 = [student for student in students_7]
         students_7 = []
 
-        course: SchoolYear = SchoolYear.get_current_course()
-        SchoolYear.objects.create(
-            start_date=course.start_date + timedelta(days=365),
-            end_date=course.end_date + timedelta(days=365),
+        course_old: SchoolYear = SchoolYear.get_current_course()
+        course = SchoolYear.objects.create(
+            start_date=course_old.start_date + timedelta(days=365),
+            end_date=course_old.end_date + timedelta(days=365),
             name="2026-2027",
         )
 
@@ -137,10 +153,11 @@ def crear_datos_random():
 
         DegreeScale.calculate_all_ranking_number()
 
-        professors=[]
+        print("crear secciones ...")
+        professors = []
         for subject in Subject.objects.all():
-            professor=factory.create_random_professor()
-            subject.professors.append(professor)
+            professor = factory.create_random_professor()
+            subject.professor.add(professor)
             professors.append(professor)
 
             subject_section_1 = SubjectSection.objects.create(
@@ -178,52 +195,145 @@ def crear_datos_random():
             )
 
             file_folder_2_section_1 = FileFolder.objects.create(
-                title="title_subject_section_2",
-                description="description_subject_section_2",
+                title="Libro 1",
+                description="lo quieres",
                 type="TIPO",
                 file="/path/to.tipo",
                 folder=folder_1_section_1,
             )
 
             folder_1_section_2 = Folder.objects.create(
-                title="folder 2 section 2",
-                description="descripcion",
+                title="Archivos Necesarios",
+                description="utilizalos",
                 subject_section=subject_section_2,
             )
             file_folder_1_section_2 = FileFolder.objects.create(
-                title="title_subject_section_1",
-                description="description_subject_section_2",
+                title="Ejmplo",
+                description="miralo",
                 type="TIPO",
                 file="/path/to.tipo",
                 folder=folder_1_section_2,
             )
 
             task_section_2 = SchoolTask.objects.create(
-                title="title_subject_section_2",
-                description="description_subject_section_2",
+                title="Tarea para esta semana",
+                description="tienen que aprobar",
                 date=timezone.now(),
                 subject_section=subject_section_2,
             )
             file_task_1_section_2 = FileSchoolTask.objects.create(
-                title="title_subject_section_2",
-                description="description_subject_section_2",
+                title="La tarea",
+                description="esta dificil",
                 type="TIPO",
                 file="/path2/to.tipo",
                 school_task=task_section_2,
             )
-            student = self.create_random_student()
-            student_response_section_2 = StudentResponse.objects.create(
-                date=timezone.now(),
-                description="description_subject_section_2",
-                school_task=task_section_2,
-                student=student,
+            for student in Student.objects.filter(
+                grade=subject.grade, is_graduated=False, is_dropped_out=False
+            ):
+                student_response_section_2 = StudentResponse.objects.create(
+                    date=timezone.now(),
+                    description="esta es mi respuesta",
+                    school_task=task_section_2,
+                    student=student,
+                )
+                file_student_response_section_2 = (
+                    FileStudentResponse.objects.create(
+                        title="Archivo de mi respuesta",
+                        description="Me esforce",
+                        student_response=student_response_section_2,
+                        type="TIPO",
+                        file="/path2/to.tipo",
+                    )
+                )
+        print("crear eventos ...")
+        events_data = [
+            {
+                "title": "Día del Deporte",
+                "description": "Competencias deportivas y actividades recreativas.",
+            },
+            {
+                "title": "Feria de Ciencias",
+                "description": "Exposición de proyectos científicos realizados por los estudiantes.",
+            },
+            {
+                "title": "Concierto de Primavera",
+                "description": "Presentaciones musicales de los estudiantes.",
+            },
+            {
+                "title": "Día de la Lectura",
+                "description": "Actividades para fomentar la lectura y el amor por los libros.",
+            },
+            {
+                "title": "Excursión al Museo",
+                "description": "Visita guiada al museo local para aprender sobre la historia.",
+            },
+            {
+                "title": "Taller de Arte",
+                "description": "Clases de pintura y manualidades para todos los niveles.",
+            },
+            {
+                "title": "Día de la Familia",
+                "description": "Actividades para involucrar a las familias en la vida escolar.",
+            },
+            {
+                "title": "Competencia de Matemáticas",
+                "description": "Concurso de habilidades matemáticas para estudiantes.",
+            },
+            {
+                "title": "Festival de Cine",
+                "description": "Proyección de cortometrajes realizados por los estudiantes.",
+            },
+            {
+                "title": "Día del Medio Ambiente",
+                "description": "Actividades para promover la conciencia ambiental.",
+            },
+        ]
+
+        # Año actual
+        current_year = timezone.now().year
+
+        for event_data in events_data:
+            # Generar una fecha aleatoria en el año actual
+            start_date = datetime(current_year, 1, 1)
+            end_date = datetime(current_year, 12, 31)
+            random_date = start_date + timedelta(
+                days=random.randint(0, (end_date - start_date).days)
             )
-            file_student_response_section_2 = FileStudentResponse.objects.create(
-                title="title_subject_section_2",
-                description="description_subject_section_2",
-                student_response=student_response_section_2,
-                type="TIPO",
-                file="/path2/to.tipo",
+
+            # Crear el evento
+            SchoolEvent.objects.create(
+                date=random_date,
+                title=event_data["title"],
+                description=event_data["description"],
             )
+
+        secretary: User = User.objects.create_user(
+            username="secretaria", password="123", email="estudiante@test.com"
+        )
+        secretary.groups.add(
+            Group.objects.filter(name=ROL_NAME_SECRETARY).first()
+        )
+
+        student_user = User.objects.create_user(
+            username="estudiante", password="123", email="estudiante@test.com"
+        )
+        student_account = factory.create_random_student(
+            user=student_user, grade=7
+        )
+        student_user.groups.add(
+            Group.objects.filter(name=ROL_NAME_STUDENT).first()
+        )
+
+        professor_user = User.objects.create_user(
+            username="profesor", password="123", email="profesor@test.com"
+        )
+        professor_user.groups.add(
+            Group.objects.filter(name=ROL_NAME_PROFESSOR).first()
+        )
+        professor_account = factory.create_random_professor(user=professor_user)
+
+        for subject in Subject.objects.all():
+            subject.professor.add(professor_account)
 
         print("datos cargados")
