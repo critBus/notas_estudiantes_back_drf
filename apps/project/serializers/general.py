@@ -225,6 +225,15 @@ class SchoolYearSerializer(serializers.ModelSerializer):
         model = SchoolYear
         fields = "__all__"
 
+    def validate(self, attrs):
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+        if start_date >= end_date:
+            raise serializers.ValidationError(
+                "La fecha de nacimiento debe ser inferior a la fecha de fin"
+            )
+        return attrs
+
 
 class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
     professors = ProfessorSerializer(many=True)
