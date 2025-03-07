@@ -1037,6 +1037,15 @@ class SubjectSectionCreateView(BaseModelAPIView):
         )
         if not serializer.is_valid():
             return JsonResponse(serializer.errors, safe=False, status=400)
+
+        titles = []
+        for data_section in serializer.validated_data:
+            section_title = data_section["title"]
+            if section_title in titles:
+                return JsonResponse(
+                    {"error": "Hay nombres de secciones repetidas"}, status=400
+                )
+            titles.append(section_title)
         sections_ids = []
         for data_section in serializer.validated_data:
             section_index = data_section["index"]

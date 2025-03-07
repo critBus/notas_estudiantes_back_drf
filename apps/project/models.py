@@ -19,7 +19,10 @@ class SchoolYear(models.Model):
     start_date = models.DateField(verbose_name="Fecha de inicio")
     end_date = models.DateField(verbose_name="Fecha de fin")
     name = models.CharField(
-        max_length=255, verbose_name="Nombre", help_text="ejemplo: 2024-2025"
+        max_length=255,
+        verbose_name="Nombre",
+        help_text="ejemplo: 2024-2025",
+        unique=True,
     )
 
     def __str__(self):
