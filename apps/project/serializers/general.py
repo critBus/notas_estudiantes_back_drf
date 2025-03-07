@@ -463,6 +463,7 @@ class DropoutSerializer(serializers.ModelSerializer):
         model = Dropout
         fields = "__all__"
 
+
     def to_representation(self, instance):
         return DropoutRepresentationSerializer(instance).data
 

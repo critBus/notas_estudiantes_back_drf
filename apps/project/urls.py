@@ -49,7 +49,7 @@ from apps.project.views import (
 router = DefaultRouter()
 
 router.register(r"students", StudentViewSet, basename="students")
-router.register(r"dropouts", DropoutViewSet)
+router.register(r"dropouts", DropoutViewSet, basename="dropouts")
 router.register(r"careers", CareerViewSet)
 router.register(r"subjects", SubjectViewSet, basename="subjects")
 router.register(r"student_note", StudentNoteViewSet, basename="student_note")

@@ -197,7 +197,7 @@ class Dropout(models.Model):
     province = models.CharField(max_length=255, verbose_name="Provincia")
     school = models.CharField(max_length=255, verbose_name="Escuela")
     student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, verbose_name="Estudiante"
+        Student, on_delete=models.CASCADE, verbose_name="Estudiante",unique=True
     )
 
     class Meta:
