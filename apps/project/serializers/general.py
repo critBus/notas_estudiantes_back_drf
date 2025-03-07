@@ -237,7 +237,7 @@ class SchoolYearSerializer(serializers.ModelSerializer):
 
 class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
     professors = ProfessorSerializer(many=True)
-    school_year = SchoolYearSerializer(many=True)
+    school_year = SchoolYearSerializer()
 
     class Meta:
         model = StudentGroup

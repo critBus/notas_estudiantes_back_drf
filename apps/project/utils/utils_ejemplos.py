@@ -10,7 +10,7 @@ from apps.project.models import (
     GrantCareer,
     SchoolYear,
     Student,
-    StudentCareer,
+    StudentCareer, Subject, Professor, SubjectSection, Folder, FileFolder,
 )
 from tests.professor.mixin.professor_mixin import ProfessorMixin
 from tests.student.mixin.school_year_mixin import SchoolYearMixin
@@ -136,5 +136,94 @@ def crear_datos_random():
             factory.ponerle_notas_validas_al_estudiante(student)
 
         DegreeScale.calculate_all_ranking_number()
+
+        professors=[]
+        for subject in Subject.objects.all():
+            professor=factory.create_random_professor()
+            subject.professors.append(professor)
+            professors.append(professor)
+
+            subject_section_1 = SubjectSection.objects.create(
+                subject=subject,
+                index=1,
+                title="Primera Semana ",
+                description="primeras clases",
+                school_year=course,
+            )
+            subject_section_2 = SubjectSection.objects.create(
+                subject=subject,
+                index=2,
+                title="Segunda Semana",
+                description="mas clases",
+                school_year=course,
+            )
+            folder_1_section_1 = Folder.objects.create(
+                title="Bibliografia",
+                description="todo lo necesario",
+                subject_section=subject_section_1,
+            )
+
+            folder_2_section_1 = Folder.objects.create(
+                title="Libros",
+                description="lo necesitas",
+                subject_section=subject_section_1,
+            )
+
+            file_folder_1_section_1 = FileFolder.objects.create(
+                title="Libro 1",
+                description="Es interesante",
+                type="TIPO",
+                file="/path/to.tipo",
+                folder=folder_1_section_1,
+            )
+
+            file_folder_2_section_1 = FileFolder.objects.create(
+                title="title_subject_section_2",
+                description="description_subject_section_2",
+                type="TIPO",
+                file="/path/to.tipo",
+                folder=folder_1_section_1,
+            )
+
+            folder_1_section_2 = Folder.objects.create(
+                title="folder 2 section 2",
+                description="descripcion",
+                subject_section=subject_section_2,
+            )
+            file_folder_1_section_2 = FileFolder.objects.create(
+                title="title_subject_section_1",
+                description="description_subject_section_2",
+                type="TIPO",
+                file="/path/to.tipo",
+                folder=folder_1_section_2,
+            )
+
+            task_section_2 = SchoolTask.objects.create(
+                title="title_subject_section_2",
+                description="description_subject_section_2",
+                date=timezone.now(),
+                subject_section=subject_section_2,
+            )
+            file_task_1_section_2 = FileSchoolTask.objects.create(
+                title="title_subject_section_2",
+                description="description_subject_section_2",
+                type="TIPO",
+                file="/path2/to.tipo",
+                school_task=task_section_2,
+            )
+            student = self.create_random_student()
+            student_response_section_2 = StudentResponse.objects.create(
+                date=timezone.now(),
+                description="description_subject_section_2",
+                school_task=task_section_2,
+                student=student,
+            )
+            file_student_response_section_2 = FileStudentResponse.objects.create(
+                title="title_subject_section_2",
+                description="description_subject_section_2",
+                student_response=student_response_section_2,
+                type="TIPO",
+                file="/path2/to.tipo",
+            )
 
         print("datos cargados")
