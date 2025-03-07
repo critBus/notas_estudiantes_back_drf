@@ -14,6 +14,7 @@ from apps.project.views import (
     DegreeScaleCurrentReportView,
     DegreeScaleCurrentView,
     DegreeScaleViewSet,
+    DropoutReportView,
     DropoutViewSet,
     FileFolderViewSet,
     FileSchoolTaskViewSet,
@@ -30,6 +31,7 @@ from apps.project.views import (
     StudentNoteMultipleView,
     StudentNoteReportView,
     StudentNoteViewSet,
+    StudentReportView,
     StudentResponseViewSet,
     StudentsWithoutBallotsView,
     StudentViewSet,
@@ -47,10 +49,10 @@ from apps.project.views import (
 router = DefaultRouter()
 
 router.register(r"students", StudentViewSet, basename="students")
-router.register(r"dropouts", DropoutViewSet)
+router.register(r"dropouts", DropoutViewSet, basename="dropouts")
 router.register(r"careers", CareerViewSet)
-router.register(r"subjects", SubjectViewSet)
-router.register(r"student_note", StudentNoteViewSet)
+router.register(r"subjects", SubjectViewSet, basename="subjects")
+router.register(r"student_note", StudentNoteViewSet, basename="student_note")
 router.register(r"student_careers", StudentCareerViewSet)
 router.register(r"school_year", SchoolYearViewSet)
 router.register(r"degree_scale", DegreeScaleViewSet)
@@ -71,9 +73,24 @@ router.register(r"student_group", StudentGroupViewSet)
 
 urlpatterns = [
     path(
+        "students/report/",
+        StudentReportView.as_view(),
+        name="student-report",
+    ),
+    path(
+        "dropouts/report/",
+        DropoutReportView.as_view(),
+        name="dropouts-report",
+    ),
+    path(
         "student_note/report/certification/<int:id_estudiante>/<int:grado>/",
         StudentNoteReportView.as_view(),
         name="student-note-certification-report",
+    ),
+    path(
+        "student_note/report/subject/<int:pk>/",
+        StudentNoteReportView.as_view(),
+        name="student-note-subject-report",
     ),
     path(
         "student_note/multiple/",
