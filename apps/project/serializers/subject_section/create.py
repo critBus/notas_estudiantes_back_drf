@@ -63,3 +63,29 @@ class SubjectSectionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubjectSection
         fields = ["id", "index", "title", "description", "folders", "tasks"]
+
+    def validate(self, attrs):
+        section_title = attrs["title"]
+        folders = attrs.get("folders", None)
+        tasks = attrs.get("tasks", None)
+
+        if folders:
+            folders_titles = []
+            for data_folder in folders:
+                title = data_folder["title"]
+                if title in folders_titles:
+                    raise serializers.ValidationError(
+                        f"Hay carpetas con nombres repetidos en la seccion {section_title}: {title}"
+                    )
+                folders_titles.append(title)
+
+        if tasks:
+            tasks_titles = []
+            for data_task in tasks:
+                title = data_task["title"]
+                if title in tasks_titles:
+                    raise serializers.ValidationError(
+                        f"Hay tareas con nombres repetidos en la seccion {section_title}: {title}"
+                    )
+                tasks_titles.append(title)
+        return attrs

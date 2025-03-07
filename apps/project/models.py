@@ -19,7 +19,10 @@ class SchoolYear(models.Model):
     start_date = models.DateField(verbose_name="Fecha de inicio")
     end_date = models.DateField(verbose_name="Fecha de fin")
     name = models.CharField(
-        max_length=255, verbose_name="Nombre", help_text="ejemplo: 2024-2025"
+        max_length=255,
+        verbose_name="Nombre",
+        help_text="ejemplo: 2024-2025",
+        unique=True,
     )
 
     def __str__(self):
@@ -31,6 +34,57 @@ class SchoolYear(models.Model):
     @staticmethod
     def get_current_course():
         return SchoolYear.objects.order_by("-start_date").first()
+
+
+class Professor(models.Model):
+    ci = models.CharField(
+        max_length=20, verbose_name="Carnet de Identidad", unique=True
+    )
+    address = models.CharField(max_length=255, verbose_name="Dirección")
+    last_name = models.CharField(max_length=255, verbose_name="Apellidos")
+    first_name = models.CharField(max_length=255, verbose_name="Nombres")
+    sex = models.CharField(
+        max_length=10,
+        verbose_name="Sexo",
+        choices=[("F", "Femenino"), ("M", "Masculino")],
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Cuenta",
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Profesor"
+        verbose_name_plural = "Profesores"
+
+    def save(self, *args, **kwargs):
+        if self.user:
+            self.user.first_name = self.first_name
+            self.user.last_name = self.last_name
+            self.user.save()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.user:
+            self.user.delete()
+            self.user = None
+        return super().delete(*args, **kwargs)
+
+
+class StudentGroup(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Nombre")
+    grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
+    professors = models.ManyToManyField(Professor, verbose_name="Profesores")
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
+    )
+
+    class Meta:
+        verbose_name = "Grupo de Estudiante"
+        verbose_name_plural = "Grupos de Estudiantes"
 
 
 class Student(models.Model):
@@ -55,6 +109,13 @@ class Student(models.Model):
         User,
         on_delete=models.SET_NULL,
         verbose_name="Cuenta",
+        blank=True,
+        null=True,
+    )
+    group = models.ForeignKey(
+        StudentGroup,
+        on_delete=models.SET_NULL,
+        verbose_name="Grupo",
         blank=True,
         null=True,
     )
@@ -197,7 +258,10 @@ class Dropout(models.Model):
     province = models.CharField(max_length=255, verbose_name="Provincia")
     school = models.CharField(max_length=255, verbose_name="Escuela")
     student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, verbose_name="Estudiante",unique=True
+        Student,
+        on_delete=models.CASCADE,
+        verbose_name="Estudiante",
+        unique=True,
     )
 
     class Meta:
@@ -233,44 +297,6 @@ class Career(models.Model):
     class Meta:
         verbose_name = "Carrera"
         verbose_name_plural = "Carreras"
-
-
-class Professor(models.Model):
-    ci = models.CharField(
-        max_length=20, verbose_name="Carnet de Identidad", unique=True
-    )
-    address = models.CharField(max_length=255, verbose_name="Dirección")
-    last_name = models.CharField(max_length=255, verbose_name="Apellidos")
-    first_name = models.CharField(max_length=255, verbose_name="Nombres")
-    sex = models.CharField(
-        max_length=10,
-        verbose_name="Sexo",
-        choices=[("F", "Femenino"), ("M", "Masculino")],
-    )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="Cuenta",
-        blank=True,
-        null=True,
-    )
-
-    class Meta:
-        verbose_name = "Profesor"
-        verbose_name_plural = "Profesores"
-
-    def save(self, *args, **kwargs):
-        if self.user:
-            self.user.first_name = self.first_name
-            self.user.last_name = self.last_name
-            self.user.save()
-        return super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.user:
-            self.user.delete()
-            self.user = None
-        return super().delete(*args, **kwargs)
 
 
 class Subject(models.Model):
@@ -707,17 +733,3 @@ class SchoolEvent(models.Model):
     class Meta:
         verbose_name = "Evento Escolar"
         verbose_name_plural = "Eventos Escolares"
-
-
-class StudentGroup(models.Model):
-    name = models.CharField(max_length=255, verbose_name="Nombre")
-    grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
-    students = models.ManyToManyField(Student, verbose_name="Estudiantes")
-    professors = models.ManyToManyField(Professor, verbose_name="Profesores")
-    school_year = models.ForeignKey(
-        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
-    )
-
-    class Meta:
-        verbose_name = "Grupo de Estudiante"
-        verbose_name_plural = "Grupos de Estudiantes"

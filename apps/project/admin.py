@@ -16,6 +16,7 @@ from apps.project.models import (
     StudentNote,
     StudentResponse,
     Subject,
+    SubjectSection,
 )
 
 
@@ -248,9 +249,19 @@ class StudentGroupResponseeAdmin(admin.ModelAdmin):
     )
     list_filter = ("grade", "school_year")
     search_fields = ("name",)
-    filter_horizontal = (
-        "students",
-        "professors",
+    filter_horizontal = ("professors",)
+    ordering = list(list_display).copy()
+    list_display_links = list(list_display).copy()
+
+
+@admin.register(SubjectSection)
+class SubjectSectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "index",
+        "title",
+        "subject",
+        "school_year",
     )
+    list_filter = ("index", "school_year", "subject")
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

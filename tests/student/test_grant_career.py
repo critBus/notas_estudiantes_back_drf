@@ -134,6 +134,7 @@ class TestGrantCareer(DegreeEscaleTestCase):
                         "is_graduated": True,
                         "is_dropped_out": False,
                         "user": None,
+                        "group": None,
                     },
                     "approved_school_course": {
                         "id": grant.approved_school_course.id,
@@ -150,6 +151,7 @@ class TestGrantCareer(DegreeEscaleTestCase):
                             "is_graduated": True,
                             "is_dropped_out": False,
                             "user": None,
+                            "group": None,
                         },
                         "school_year": {
                             "id": grant.approved_school_course.school_year.id,
@@ -236,6 +238,7 @@ class TestGrantCareer(DegreeEscaleTestCase):
                         "is_graduated": True,
                         "is_dropped_out": False,
                         "user": None,
+                        "group": None,
                     },
                     "approved_school_course": {
                         "id": grant.approved_school_course.id,
@@ -252,6 +255,7 @@ class TestGrantCareer(DegreeEscaleTestCase):
                             "is_graduated": True,
                             "is_dropped_out": False,
                             "user": None,
+                            "group": None,
                         },
                         "school_year": {
                             "id": grant.approved_school_course.school_year.id,
