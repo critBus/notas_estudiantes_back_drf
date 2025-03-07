@@ -87,6 +87,7 @@ class TestGetResponseOfStudent(StudentTestCase):
                     "is_graduated": False,
                     "is_dropped_out": False,
                     "user": student_user.id,
+                    "group": None,
                 },
                 "school_task": task_section.id,
                 "files": [],
@@ -128,6 +129,7 @@ class TestGetResponseOfStudent(StudentTestCase):
                     "is_graduated": False,
                     "is_dropped_out": False,
                     "user": student_user.id,
+                    "group": None,
                 },
                 "description": student_response_section.description,
                 "files": [

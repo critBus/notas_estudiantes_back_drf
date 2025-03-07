@@ -422,6 +422,20 @@ class StudentViewSet(BaseModelViewSet):
         "user__is_staff": ["exact"],
         "user__groups__id": ["exact"],
         "user__groups__name": ["contains", "exact", "icontains", "search"],
+        "group": ["isnull"],
+        "group__id": ["exact"],
+        "group__name": ["contains", "exact", "icontains", "search"],
+        "group__grade": ["gte", "lte", "gt", "lt", "exact"],
+        "group__school_year": ["isnull"],
+        "group__school_year__id": ["exact"],
+        "group__school_year__name": [
+            "contains",
+            "exact",
+            "icontains",
+            "search",
+        ],
+        "group__school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "group__school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
     }
     search_fields = [
         "address",
@@ -444,6 +458,10 @@ class StudentViewSet(BaseModelViewSet):
         "is_dropped_out",
         "user__username",
         "user__email",
+        "group__id",
+        "group__name",
+        "group__grade",
+        "group__school_year",
     ]
     ordering = ["ci"]
 

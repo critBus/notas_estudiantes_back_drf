@@ -91,6 +91,7 @@ class TestGetResponsesOfTask(StudentTestCase):
                         "is_graduated": False,
                         "is_dropped_out": False,
                         "user": None,
+                        "group": None,
                     },
                     "description": student_response_section.description,
                     "files": [

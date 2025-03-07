@@ -226,8 +226,27 @@ class SchoolYearSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
+    professors = ProfessorSerializer(many=True)
+    school_year = SchoolYearSerializer(many=True)
+
+    class Meta:
+        model = StudentGroup
+        fields = "__all__"
+
+
+class StudentGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentGroup
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        return StudentGroupRepresentationSerializer(instance).data
+
+
 class StudentSerializer(serializers.ModelSerializer):
     is_approved = serializers.SerializerMethodField(read_only=True)
+    group = StudentGroupRepresentationSerializer()
 
     class Meta:
         model = Student
@@ -259,6 +278,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             "registration_number",
             "sex",
             "account",
+            "group",
         ]
 
     def create(self, validated_data):
@@ -291,6 +311,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
             "registration_number",
             "sex",
             "account",
+            "group",
         ]
 
     def update(self, instance, validated_data):
@@ -463,7 +484,6 @@ class DropoutSerializer(serializers.ModelSerializer):
         model = Dropout
         fields = "__all__"
 
-
     def to_representation(self, instance):
         return DropoutRepresentationSerializer(instance).data
 
@@ -594,22 +614,3 @@ class SchoolEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolEvent
         fields = "__all__"
-
-
-class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
-    professors = ProfessorSerializer(many=True)
-    students = StudentSerializer(many=True)
-    school_year = SchoolYearSerializer(many=True)
-
-    class Meta:
-        model = StudentGroup
-        fields = "__all__"
-
-
-class StudentGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StudentGroup
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        return StudentGroupRepresentationSerializer(instance).data

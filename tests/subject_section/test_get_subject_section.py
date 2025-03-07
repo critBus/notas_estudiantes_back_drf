@@ -218,6 +218,7 @@ class TestGetSubjectSection(StudentTestCase):
                                         "is_graduated": False,
                                         "is_dropped_out": False,
                                         "user": None,
+                                        "group": None,
                                     },
                                     "files": [
                                         {
