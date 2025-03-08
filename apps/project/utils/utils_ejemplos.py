@@ -24,6 +24,7 @@ from apps.project.models import (
     SchoolYear,
     Student,
     StudentCareer,
+    StudentGroup,
     StudentResponse,
     Subject,
     SubjectSection,
@@ -180,13 +181,13 @@ def crear_datos_random():
                 subject_section=subject_section_1,
             )
 
-            folder_2_section_1 = Folder.objects.create(
+            Folder.objects.create(
                 title="Libros",
                 description="lo necesitas",
                 subject_section=subject_section_1,
             )
 
-            file_folder_1_section_1 = FileFolder.objects.create(
+            FileFolder.objects.create(
                 title="Libro 1",
                 description="Es interesante",
                 type="TIPO",
@@ -194,7 +195,7 @@ def crear_datos_random():
                 folder=folder_1_section_1,
             )
 
-            file_folder_2_section_1 = FileFolder.objects.create(
+            FileFolder.objects.create(
                 title="Libro 1",
                 description="lo quieres",
                 type="TIPO",
@@ -207,7 +208,7 @@ def crear_datos_random():
                 description="utilizalos",
                 subject_section=subject_section_2,
             )
-            file_folder_1_section_2 = FileFolder.objects.create(
+            FileFolder.objects.create(
                 title="Ejmplo",
                 description="miralo",
                 type="TIPO",
@@ -221,7 +222,7 @@ def crear_datos_random():
                 date=timezone.now(),
                 subject_section=subject_section_2,
             )
-            file_task_1_section_2 = FileSchoolTask.objects.create(
+            FileSchoolTask.objects.create(
                 title="La tarea",
                 description="esta dificil",
                 type="TIPO",
@@ -237,7 +238,7 @@ def crear_datos_random():
                     school_task=task_section_2,
                     student=student,
                 )
-                file_student_response_section_2 = (
+                (
                     FileStudentResponse.objects.create(
                         title="Archivo de mi respuesta",
                         description="Me esforce",
@@ -290,6 +291,7 @@ def crear_datos_random():
             },
         ]
 
+        print("Creando Eventos ...")
         # Año actual
         current_year = timezone.now().year
 
@@ -308,6 +310,7 @@ def crear_datos_random():
                 description=event_data["description"],
             )
 
+        print("Creando cuentas por defecto ...")
         secretary: User = User.objects.create_user(
             username="secretaria", password="123", email="estudiante@test.com"
         )
@@ -318,9 +321,7 @@ def crear_datos_random():
         student_user = User.objects.create_user(
             username="estudiante", password="123", email="estudiante@test.com"
         )
-        student_account = factory.create_random_student(
-            user=student_user, grade=7
-        )
+        factory.create_random_student(user=student_user, grade=7)
         student_user.groups.add(
             Group.objects.filter(name=ROL_NAME_STUDENT).first()
         )
@@ -336,4 +337,66 @@ def crear_datos_random():
         for subject in Subject.objects.all():
             subject.professor.add(professor_account)
 
+        print("Creando profesores ...")
+        group_7_1 = StudentGroup.objects.create(
+            name="7MO1",
+            grade=7,
+        )
+        group_7_1.professors.add(professors[0])
+        middle = int(len(students_7) / 2)
+        for student in students_7[:middle]:
+            student.refresh_from_db()
+            student.group = group_7_1
+            student.save()
+
+        group_7_2 = StudentGroup.objects.create(
+            name="7MO2",
+            grade=7,
+        )
+        for student in students_7[middle:]:
+            student.refresh_from_db()
+            student.group = group_7_2
+            student.save()
+
+        group_8_1 = StudentGroup.objects.create(
+            name="8MO1",
+            grade=8,
+        )
+        group_8_1.professors.add(professors[2])
+        middle = int(len(students_8) / 2)
+        for student in students_8[:middle]:
+            student.refresh_from_db()
+            student.group = group_8_1
+            student.save()
+
+        group_8_2 = StudentGroup.objects.create(
+            name="8MO2",
+            grade=8,
+        )
+        group_8_2.professors.add(professors[3])
+        for student in students_8[middle:]:
+            student.refresh_from_db()
+            student.group = group_8_2
+            student.save()
+
+        group_9_1 = StudentGroup.objects.create(
+            name="9MO1",
+            grade=9,
+        )
+        group_9_1.professors.add(professors[4])
+        middle = int(len(students_9) / 2)
+        for student in students_9[:middle]:
+            student.refresh_from_db()
+            student.group = group_9_1
+            student.save()
+
+        group_9_2 = StudentGroup.objects.create(
+            name="9MO2",
+            grade=9,
+        )
+        group_9_2.professors.add(professors[5])
+        for student in students_9[middle:]:
+            student.refresh_from_db()
+            student.group = group_9_2
+            student.save()
         print("datos cargados")

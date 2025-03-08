@@ -57,7 +57,7 @@ def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
         "nombre_completo": f"{student.first_name} {student.last_name if student.last_name else ''}".strip(),
     }
     return custom_export_report_by_name(
-        "Certificacion De Notas", data, file="Escalafon"
+        "Certificacion De Notas", data, file="Certificacion De Notas"
     )
 
 
@@ -82,7 +82,7 @@ def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
         "name": subject.name,
     }
     return custom_export_report_by_name(
-        "Notas De Asignatura", data, file="Escalafon"
+        "Notas De Asignatura", data, file="Notas De Asignatura"
     )
 
 
@@ -107,7 +107,7 @@ def generar_reporte_estudiantes_pdf(queryset):
     data = {
         "lista": lista,
     }
-    return custom_export_report_by_name("Estudiantes", data, file="Escalafon")
+    return custom_export_report_by_name("Estudiantes", data, file="Estudiantes")
 
 
 def generar_reporte_bajas_pdf(queryset):
@@ -141,4 +141,4 @@ def generar_reporte_bajas_pdf(queryset):
     data = {
         "lista": lista,
     }
-    return custom_export_report_by_name("Altas Bajas", data, file="Escalafon")
+    return custom_export_report_by_name("Altas Bajas", data, file="Altas Bajas")
