@@ -126,19 +126,12 @@ class StudentGroupViewSet(BaseModelViewSet):
         "id": ["exact"],
         "name": ["contains", "exact", "icontains", "search"],
         "grade": ["gte", "lte", "gt", "lt", "exact"],
-        "school_year": ["isnull"],
-        "school_year__id": ["exact"],
-        "school_year__name": ["contains", "exact", "icontains", "search"],
-        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
-        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
     }
     search_fields = ["name"]
     ordering_fields = [
         "pk",
         "name",
         "grade",
-        "school_year__start_date",
-        "school_year__end_date",
     ]
     ordering = ["grade", "name"]
 
@@ -426,16 +419,6 @@ class StudentViewSet(BaseModelViewSet):
         "group__id": ["exact"],
         "group__name": ["contains", "exact", "icontains", "search"],
         "group__grade": ["gte", "lte", "gt", "lt", "exact"],
-        "group__school_year": ["isnull"],
-        "group__school_year__id": ["exact"],
-        "group__school_year__name": [
-            "contains",
-            "exact",
-            "icontains",
-            "search",
-        ],
-        "group__school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
-        "group__school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
     }
     search_fields = [
         "address",
@@ -461,7 +444,6 @@ class StudentViewSet(BaseModelViewSet):
         "group__id",
         "group__name",
         "group__grade",
-        "group__school_year",
     ]
     ordering = ["ci"]
 

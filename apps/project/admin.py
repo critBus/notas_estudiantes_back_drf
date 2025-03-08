@@ -245,9 +245,8 @@ class StudentGroupResponseeAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "grade",
-        "school_year",
     )
-    list_filter = ("grade", "school_year")
+    list_filter = ("grade",)
     search_fields = ("name",)
     filter_horizontal = ("professors",)
     ordering = list(list_display).copy()

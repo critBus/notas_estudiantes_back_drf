@@ -78,9 +78,6 @@ class StudentGroup(models.Model):
     name = models.CharField(max_length=255, verbose_name="Nombre")
     grade = models.IntegerField(choices=GRADES_CHOICES, verbose_name="Grado")
     professors = models.ManyToManyField(Professor, verbose_name="Profesores")
-    school_year = models.ForeignKey(
-        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
-    )
 
     class Meta:
         verbose_name = "Grupo de Estudiante"
