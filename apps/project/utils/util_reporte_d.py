@@ -60,13 +60,14 @@ def load_json(filename):
         if ReportDefinition.objects.filter(name=name).first() is None
         else name + " " + actual.isoformat()
     )
-    ReportDefinition.objects.create(
-        name=namereport,
-        report_definition=file["report_definition"],
-        remark=file["remark"],
-        last_modified_at=actual,
-    )
-    print(f"reporte cargado: {name}")
+    if not ReportDefinition.objects.filter(name=namereport).exists():
+        ReportDefinition.objects.create(
+            name=namereport,
+            report_definition=file["report_definition"],
+            remark=file["remark"],
+            last_modified_at=actual,
+        )
+        print(f"reporte cargado: {name}")
 
 
 def load_automatic_reports(folder="reportes"):
