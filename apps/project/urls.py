@@ -29,6 +29,7 @@ from apps.project.views import (
     StudentGroupViewSet,
     StudentNoteMultipleCreateView,
     StudentNoteMultipleView,
+    StudentNoteReportSubjectView,
     StudentNoteReportView,
     StudentNoteViewSet,
     StudentReportView,
@@ -89,7 +90,7 @@ urlpatterns = [
     ),
     path(
         "student_note/report/subject/<int:pk>/",
-        StudentNoteReportView.as_view(),
+        StudentNoteReportSubjectView.as_view(),
         name="student-note-subject-report",
     ),
     path(

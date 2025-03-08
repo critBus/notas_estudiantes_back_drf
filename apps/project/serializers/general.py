@@ -238,7 +238,6 @@ class SchoolYearSerializer(serializers.ModelSerializer):
 class StudentGroupRepresentationSerializer(serializers.ModelSerializer):
     professors = ProfessorSerializer(many=True)
 
-
     class Meta:
         model = StudentGroup
         fields = "__all__"

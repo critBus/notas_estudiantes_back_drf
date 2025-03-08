@@ -135,6 +135,7 @@ def generar_reporte_bajas_pdf(queryset):
             "year_mount": f"{entidad.date.year}-{entidad.date.month}",
             "year": str(entidad.date.year),
             "mes": str(entidad.date.month),
+            "is_dropout": "Si" if entidad.is_dropout else "No",
         }
         lista.append(data_entidad)
 

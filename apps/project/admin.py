@@ -163,13 +163,15 @@ class GrantCareerAdmin(admin.ModelAdmin):
 
 @admin.register(Dropout)
 class DropoutAdmin(admin.ModelAdmin):
-    list_display = ("date", "municipality", "province", "school", "student")
-    list_filter = (
+    list_display = (
         "date",
         "municipality",
         "province",
         "school",
+        "student",
+        "is_dropout",
     )
+    list_filter = ("date", "municipality", "province", "school", "is_dropout")
     search_fields = (
         "municipality",
         "province",
