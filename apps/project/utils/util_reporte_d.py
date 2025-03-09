@@ -55,14 +55,9 @@ def load_json(filename):
     actual = timezone.now()
     file = json.load(open(filename, "r"))
     name = file["name"]
-    namereport = (
-        name
-        if ReportDefinition.objects.filter(name=name).first() is None
-        else name + " " + actual.isoformat()
-    )
-    if not ReportDefinition.objects.filter(name=namereport).exists():
+    if not ReportDefinition.objects.filter(name=name).exists():
         ReportDefinition.objects.create(
-            name=namereport,
+            name=name,
             report_definition=file["report_definition"],
             remark=file["remark"],
             last_modified_at=actual,

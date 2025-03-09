@@ -163,14 +163,14 @@ def crear_datos_random():
 
             subject_section_1 = SubjectSection.objects.create(
                 subject=subject,
-                index=1,
+                index=0,
                 title="Primera Semana ",
                 description="primeras clases",
                 school_year=course,
             )
             subject_section_2 = SubjectSection.objects.create(
                 subject=subject,
-                index=2,
+                index=1,
                 title="Segunda Semana",
                 description="mas clases",
                 school_year=course,
