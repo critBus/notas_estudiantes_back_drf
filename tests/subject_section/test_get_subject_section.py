@@ -219,6 +219,7 @@ class TestGetSubjectSection(StudentTestCase):
                                         "is_dropped_out": False,
                                         "user": None,
                                         "group": None,
+                                        "can_edit_bullet": False,
                                     },
                                     "files": [
                                         {

@@ -41,6 +41,7 @@ from .models import (
     Subject,
     SubjectSection,
 )
+from .serializers.can_edit_bullet import CanEditBulletSerializer
 from .serializers.general import (
     ApprovedSchoolCourseRepresentationSerializer,
     ApprovedSchoolCourseSerializer,
@@ -1613,3 +1614,42 @@ class DropoutReportView(BaseListAPIView):
         queryset = self.filter_queryset(self.get_queryset())
 
         return generar_reporte_bajas_pdf(queryset)
+
+
+class CanEditBulletView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: CanEditBulletSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(
+            {
+                "can_edit_bullet": not Student.objects.filter(
+                    can_edit_bullet=False
+                ).exists()
+            },
+            safe=False,
+            status=200,
+        )
+
+    @extend_schema(
+        request=CanEditBulletSerializer(many=True),
+        responses={
+            200: inline_serializer(
+                "SubjectCanEditBulletResponse",
+                fields={
+                    "message": serializers.CharField(default="success"),
+                },
+            ),
+            400: ErrorSerializer,
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = CanEditBulletSerializer(data=request.data)
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, safe=False, status=400)
+        can_edit_bullet = serializer.validated_data["can_edit_bullet"]
+        Student.objects.update(can_edit_bullet=can_edit_bullet)
+        return JsonResponse({"message": "success"}, safe=False, status=200)

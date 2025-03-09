@@ -56,6 +56,7 @@ class TestListBallot(BallotParentCase):
                         "is_dropped_out": False,
                         "user": None,
                         "group": None,
+                        "can_edit_bullet": False,
                     }
                     for student in Student.objects.order_by("ci")[:10]
                 ],

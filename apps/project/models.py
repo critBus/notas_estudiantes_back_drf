@@ -116,6 +116,9 @@ class Student(models.Model):
         blank=True,
         null=True,
     )
+    can_edit_bullet = models.BooleanField(
+        default=False, verbose_name="Puede Editar Su Boleta"
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
