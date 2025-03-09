@@ -362,9 +362,6 @@ class GrantCareerViewSet(BaseModelViewSet):
 
     filterset_fields = {
         "id": ["exact"],
-
-
-
         "student": ["isnull"],
         "student__id": ["exact"],
         "student__ci": ["contains", "exact", "icontains", "search"],
@@ -381,21 +378,36 @@ class GrantCareerViewSet(BaseModelViewSet):
         "student__sex": ["exact"],
         "student__is_graduated": ["exact"],
         "student__is_dropped_out": ["exact"],
-
         "career": ["isnull"],
         "career__id": ["exact"],
         "career__name": ["contains", "exact", "icontains", "search"],
         "career__amount": ["gte", "lte", "gt", "lt", "exact"],
-
         "approved_school_course": ["isnull"],
         "approved_school_course__id": ["exact"],
         "approved_school_course__date": ["gte", "lte", "gt", "lt", "exact"],
         "approved_school_course__grade": ["gte", "lte", "gt", "lt", "exact"],
         "approved_school_course__school_year": ["isnull"],
         "approved_school_course__school_year__id": ["exact"],
-        "approved_school_course__school_year__name": ["contains", "exact", "icontains", "search"],
-        "approved_school_course__school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course__school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
+        "approved_school_course__school_year__name": [
+            "contains",
+            "exact",
+            "icontains",
+            "search",
+        ],
+        "approved_school_course__school_year__start_date": [
+            "gte",
+            "lte",
+            "gt",
+            "lt",
+            "exact",
+        ],
+        "approved_school_course__school_year__end_date": [
+            "gte",
+            "lte",
+            "gt",
+            "lt",
+            "exact",
+        ],
     }
     search_fields = [
         "student__ci",
