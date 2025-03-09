@@ -472,6 +472,7 @@ class DropoutViewSet(BaseModelViewSet):
         "date": ["gte", "lte", "gt", "lt", "exact"],
         "province": ["contains", "exact", "icontains", "search"],
         "school": ["contains", "exact", "icontains", "search"],
+        "is_dropout": ["exact"],
         "student": ["isnull"],
         "student__id": ["exact"],
         "student__ci": ["contains", "exact", "icontains", "search"],

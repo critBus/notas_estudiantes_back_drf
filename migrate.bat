@@ -1,2 +1,2 @@
 @echo
-cd /D C:\_Cosas\TRABAJO\Jonantan ISCA\entornos && venv2\Scripts\activate.bat && cd /D C:\_Cosas\TRABAJO\Jonantan ISCA\notas_estudiantes_back_drf && py manage.py migrate && py manage.py init_data && py manage.py runserver
+cd /D D:\TRABAJO\NotasEstudiantes\Tesis\entornos && pcharm\Scripts\activate.bat && cd /D D:\TRABAJO\NotasEstudiantes\Tesis\notas_estudiantes_back_drf && py manage.py migrate && py manage.py init_data && py manage.py runserver

@@ -260,6 +260,7 @@ class Dropout(models.Model):
         verbose_name="Estudiante",
         unique=True,
     )
+    is_dropout = models.BooleanField(verbose_name="Es Baja", default=True)
 
     class Meta:
         verbose_name = "Baja"
@@ -268,11 +269,18 @@ class Dropout(models.Model):
     def save(self, *args, **kwargs):
         es_nuevo = self.pk is None
         if not es_nuevo:
-            old: Dropout = Dropout.objects.get(id=self.id)
-            if old.student != self.student:
-                old.student.is_dropped_out = False
-                old.student.save()
-        if self.student:
+            old: Dropout = Dropout.objects.filter(
+                id=self.id, is_dropout=True
+            ).first()
+            if old:
+                if old.student != self.student:
+                    old.student.is_dropped_out = False
+                    old.student.save()
+                elif old.is_dropout and not self.is_dropout:
+                    old.student.is_dropped_out = False
+                    old.student.save()
+
+        if self.student and self.is_dropout:
             self.student.is_dropped_out = True
             self.student.save()
         return super().save(*args, **kwargs)
