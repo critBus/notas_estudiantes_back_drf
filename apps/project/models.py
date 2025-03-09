@@ -272,12 +272,13 @@ class Dropout(models.Model):
             old: Dropout = Dropout.objects.filter(
                 id=self.id, is_dropout=True
             ).first()
-            if old.student != self.student:
-                old.student.is_dropped_out = False
-                old.student.save()
-            elif old.is_dropout and not self.is_dropout:
-                old.student.is_dropped_out = False
-                old.student.save()
+            if old:
+                if old.student != self.student:
+                    old.student.is_dropped_out = False
+                    old.student.save()
+                elif old.is_dropout and not self.is_dropout:
+                    old.student.is_dropped_out = False
+                    old.student.save()
 
         if self.student and self.is_dropout:
             self.student.is_dropped_out = True
