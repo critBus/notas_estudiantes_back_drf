@@ -397,7 +397,11 @@ class StudentNoteSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-        student = attrs["student"]
+        student = None
+        if "student" in attrs:
+            student = attrs["student"]
+        elif self.instance:
+            student = self.instance.student
         subject = attrs["subject"]
         school_year = attrs["school_year"]
         if self.instance:
@@ -412,7 +416,7 @@ class StudentNoteSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         "Ya existe esta nota para este estudiante en esta asignatura en este curso"
                     )
-        else:
+        elif student:
             if StudentNote.objects.filter(
                 student=student, subject=subject, school_year=school_year
             ).exists():
