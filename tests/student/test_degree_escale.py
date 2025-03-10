@@ -54,6 +54,45 @@ class TestDegreeEscale(DegreeEscaleTestCase):
         nota.calculate_final_grade()
         self.assertEqual(nota.final_grade, final_grade)
 
+    def test_calculate_final_grade_save(self):
+        student = self.create_random_student(grade=9)
+        curso = SchoolYear.get_current_course()
+        subject = Subject.objects.create(
+            grade=9, name="test", tcp2_required=True
+        )
+        nota = StudentNote.objects.create(
+            subject=subject, student=student, school_year=curso
+        )
+        nota.tcp1 = 70
+        nota.tcp2 = 80
+        nota.asc = 8
+        nota.final_exam = 65
+
+        final_grade = 8 + ((70 * 0.4) + (80 * 0.4)) / 2 + 65 / 2
+        # print(f"final_grade {final_grade}")
+        nota.save()
+        self.assertEqual(nota.final_grade, final_grade)
+
+        subject.tcp2_required = False
+        subject.save()
+        final_grade = 8 + 70 * 0.4 + 65 / 2
+        nota.save()
+        self.assertEqual(nota.final_grade, final_grade)
+
+        subject.grade = 8
+        subject.save()
+        student.grade = 8
+        student.save()
+        final_grade = (8 + 70 * 0.4) * 2
+        nota.save()
+        self.assertEqual(nota.final_grade, final_grade)
+
+        subject.tcp2_required = True
+        subject.save()
+        final_grade = (8 + ((70 * 0.4) + (80 * 0.4)) / 2) * 2
+        nota.save()
+        self.assertEqual(nota.final_grade, final_grade)
+
     def test_calculate_ranking_score(self):
         student = self.create_random_student(grade=9)
         curse_7, curse_8, curse_9 = self.create_3_school_year(2022)
