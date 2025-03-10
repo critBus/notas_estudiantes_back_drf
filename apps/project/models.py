@@ -116,6 +116,9 @@ class Student(models.Model):
         blank=True,
         null=True,
     )
+    can_edit_bullet = models.BooleanField(
+        default=False, verbose_name="Puede Editar Su Boleta"
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -342,9 +345,14 @@ class StudentNote(models.Model):
         verbose_name = "Nota"
         verbose_name_plural = "Notas"
 
+    def save(self, *args, **kwargs):
+        self.calculate_final_grade()
+        return super().save(*args, **kwargs)
+
     def calculate_final_grade(self):
         if self.tcp1 is None or self.asc is None or self.final_exam is None:
-            return
+            self.final_grade = 0
+            return self.final_grade
 
         prom_asc = self.asc  # en base a 10
         prom_tcp = self.tcp1 * 0.4  # * 0.4; //en base a 40
@@ -426,8 +434,8 @@ class DegreeScale(models.Model):
         sume = 0
         notes = StudentNote.objects.filter(student=self.student)
         for note in notes:
-            if note.final_grade is None:
-                note.calculate_final_grade()
+            note.calculate_final_grade()
+
             sume += note.final_grade
         if sume == 0 or notes.count() == 0:
             return 0

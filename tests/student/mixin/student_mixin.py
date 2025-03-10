@@ -17,6 +17,7 @@ class StudentMixin:
         is_graduated=False,
         is_dropped_out=False,
         user: Optional[User] = None,
+        can_edit_bullet: bool = False,
     ) -> Student:
         return Student.objects.create(
             first_name=fake.first_name(),
@@ -33,4 +34,5 @@ class StudentMixin:
             if is_dropped_out is not None
             else random.choices([True, False]),
             user=user,
+            can_edit_bullet=can_edit_bullet,
         )

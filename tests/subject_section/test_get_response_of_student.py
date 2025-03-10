@@ -88,6 +88,7 @@ class TestGetResponseOfStudent(StudentTestCase):
                     "is_dropped_out": False,
                     "user": student_user.id,
                     "group": None,
+                    "can_edit_bullet": False,
                 },
                 "school_task": task_section.id,
                 "files": [],
@@ -130,6 +131,7 @@ class TestGetResponseOfStudent(StudentTestCase):
                     "is_dropped_out": False,
                     "user": student_user.id,
                     "group": None,
+                    "can_edit_bullet": False,
                 },
                 "description": student_response_section.description,
                 "files": [

@@ -7,6 +7,7 @@ from apps.project.views import (
     AreStudentsWhithoutRankingView,
     BallotCreateView,
     BallotListView,
+    CanEditBulletView,
     CareerViewSet,
     CarryOutGrantingOfCoursesView,
     CurrentCurseView,
@@ -122,6 +123,11 @@ urlpatterns = [
         "students/ballot/without/",
         StudentsWithoutBallotsView.as_view(),
         name="ballot-are-without",
+    ),
+    path(
+        "students/can_edit/",
+        CanEditBulletView.as_view(),
+        name="ballot-can-edit",
     ),
     path(
         "students/ballot/<int:pk>/",
