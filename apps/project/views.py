@@ -1653,3 +1653,21 @@ class CanEditBulletView(BaseModelAPIView):
         can_edit_bullet = serializer.validated_data["can_edit_bullet"]
         Student.objects.update(can_edit_bullet=can_edit_bullet)
         return JsonResponse({"message": "success"}, safe=False, status=200)
+
+
+class StudentMeView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        student = Student.objects.filter(user=user).first()
+        if not student:
+            return JsonResponse(
+                {"error": "Esta cuenta no tiene un estudiante"}, status=400
+            )
+
+        return JsonResponse(StudentSerializer(student).data, status=200)

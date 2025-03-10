@@ -28,6 +28,7 @@ from apps.project.views import (
     SchoolYearViewSet,
     StudentCareerViewSet,
     StudentGroupViewSet,
+    StudentMeView,
     StudentNoteMultipleCreateView,
     StudentNoteMultipleView,
     StudentNoteReportSubjectView,
@@ -128,6 +129,11 @@ urlpatterns = [
         "students/can_edit/",
         CanEditBulletView.as_view(),
         name="ballot-can-edit",
+    ),
+    path(
+        "students/me/",
+        StudentMeView.as_view(),
+        name="ballot-can-me",
     ),
     path(
         "students/ballot/<int:pk>/",
