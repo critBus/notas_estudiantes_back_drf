@@ -1424,7 +1424,7 @@ class StudentNoteReportView(BaseModelAPIView):
         notes = StudentNote.objects.filter(
             student=student, subject__grade=grado
         ).order_by("school_year__start_date")
-        return generar_reporte_certificacion_notas_pdf(student, notes)
+        return generar_reporte_certificacion_notas_pdf(student, notes, grado)
 
 
 class StudentNoteReportSubjectView(BaseModelAPIView):
