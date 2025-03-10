@@ -187,7 +187,7 @@ class SchoolEventViewSet(BaseModelViewSet):
         responses=FileStudentResponseRepresentationSerializer
     ),
 )
-class StudentResponseViewSet(BaseModelViewSet):
+class FileStudentResponseViewSet(BaseModelViewSet):
     queryset = FileStudentResponse.objects.all()
     serializer_class = FileStudentResponseSerializer
 
