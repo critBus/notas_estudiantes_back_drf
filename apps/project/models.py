@@ -31,6 +31,15 @@ class SchoolYear(models.Model):
     def get_subjects(self, grade: int):
         return Subject.objects.filter(grade=grade)
 
+    def get_previus_course(self):
+        previus_course = None
+        for course in SchoolYear.objects.order_by("start_date"):
+            if previus_course is not None:
+                if course.id == self.id:
+                    break
+            previus_course = course
+        return previus_course
+
     @staticmethod
     def get_current_course():
         return SchoolYear.objects.order_by("-start_date").first()

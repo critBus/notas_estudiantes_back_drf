@@ -67,7 +67,7 @@ def crear_datos_random():
     if Student.objects.count() == 0:
         print("Cargando datos de ejemplo ...")
         factory = Factory()
-        factory.create_current_school_year()
+        factory.create_current_school_year(create_3=True)
         factory.crear_asignaturas()
         factory.crear_carreras()
 
@@ -109,8 +109,12 @@ def crear_datos_random():
             aprobar = random.randint(1, 15) > 3
             if aprobar:
                 factory.ponerle_notas_validas_al_estudiante(student_7)
-                factory.ponerle_notas_validas_al_estudiante(student_8)
-                factory.ponerle_notas_validas_al_estudiante(student_9)
+                factory.ponerle_notas_validas_al_estudiante(
+                    student_8, ponerle_notas_grados_anteriores=True
+                )
+                factory.ponerle_notas_validas_al_estudiante(
+                    student_9, ponerle_notas_grados_anteriores=True
+                )
 
             if not baja:
                 factory.add_ballot_to_student(student_9, i % 10)

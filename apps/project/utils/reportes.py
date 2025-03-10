@@ -36,7 +36,9 @@ def generar_reporte_escalafon_pdf(queryset):
     return custom_export_report_by_name("Escalafon", data, file="Escalafon")
 
 
-def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
+def generar_reporte_certificacion_notas_pdf(
+    student: Student, queryset, grade: int
+):
     entidades: List[StudentNote] = queryset
     lista = []
     for entidad in entidades:
@@ -53,7 +55,7 @@ def generar_reporte_certificacion_notas_pdf(student: Student, queryset):
     data = {
         "lista": lista,
         "ci": student.ci,
-        "grade": student.grade,
+        "grade": grade,
         "nombre_completo": f"{student.first_name} {student.last_name if student.last_name else ''}".strip(),
     }
     return custom_export_report_by_name(
