@@ -11,6 +11,7 @@ entity Student {
     sex : CharField(10) // Sexo
     is_graduated : BooleanField // Graduado
     is_dropped_out : BooleanField // Baja
+    can_edit_bullet : BooleanField
 }
 
 entity Dropout {
@@ -32,6 +33,7 @@ entity Subject {
     id : Integer PK // id
     grade : IntegerField // Grado
     name : CharField // Nombre
+    tcp2_required : BooleanField // Requiere TCP2
 }
 
 entity SchoolYear {
