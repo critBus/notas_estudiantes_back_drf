@@ -92,6 +92,7 @@ class TestGetResponseOfStudent(StudentTestCase):
                 },
                 "school_task": task_section.id,
                 "files": [],
+                "subject_id": subject.id,
             },
         )
 
@@ -110,7 +111,7 @@ class TestGetResponseOfStudent(StudentTestCase):
         )
 
         response_dict = self.call_get_response_of_student(
-            id=task_section.id, print_json_response=True
+            id=task_section.id, print_json_response=False
         )
 
         self.assertDictEqual(
@@ -142,5 +143,6 @@ class TestGetResponseOfStudent(StudentTestCase):
                         "file": file_student_response_section.file,
                     }
                 ],
+                "subject_id": subject.id,
             },
         )

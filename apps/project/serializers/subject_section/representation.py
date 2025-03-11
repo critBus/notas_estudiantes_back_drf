@@ -51,10 +51,11 @@ class FileStudentResponseSubjectSectionSerializer(serializers.ModelSerializer):
 class StudentResponseSubjectSectionSerializer(serializers.ModelSerializer):
     files = serializers.SerializerMethodField(read_only=True)
     student = StudentSerializer()
+    subject_id = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = StudentResponse
-        fields = ["id", "student", "description", "files"]
+        fields = ["id", "student", "description", "files", "subject_id"]
 
     @extend_schema_field(
         FileStudentResponseSubjectSectionSerializer(many=True, read_only=True)
@@ -68,6 +69,15 @@ class StudentResponseSubjectSectionSerializer(serializers.ModelSerializer):
                 q, many=True
             ).data
         return instance
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_subject_id(self, instance: StudentResponse):
+        try:
+            if instance:
+                return instance.school_task.subject_section.subject.id
+        except:
+            pass
+        return None
 
 
 class SchoolTaskInSubjectSectionSerializer(serializers.ModelSerializer):

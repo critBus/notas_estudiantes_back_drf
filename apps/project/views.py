@@ -1375,7 +1375,7 @@ class SubjectSectionStudentResponseOfUserView(BaseModelAPIView):
         },
     )
     def get(self, request, pk, *args, **kwargs):
-        task = SchoolTask.objects.filter(pk=pk).first()
+        task: SchoolTask = SchoolTask.objects.filter(pk=pk).first()
         if not task:
             return JsonResponse({"error": "No existe esta Tarea"}, status=400)
         user = request.user
@@ -1397,6 +1397,7 @@ class SubjectSectionStudentResponseOfUserView(BaseModelAPIView):
                     "student": StudentSerializer(student).data,
                     "school_task": task.id,
                     "files": [],
+                    "subject_id": task.subject_section.subject.id,
                 },
                 status=200,
             )

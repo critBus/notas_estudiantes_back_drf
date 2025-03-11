@@ -103,6 +103,7 @@ class TestGetResponsesOfTask(StudentTestCase):
                             "file": file_student_response_section.file,
                         }
                     ],
+                    "subject_id": subject.id,
                 }
             ],
         )
