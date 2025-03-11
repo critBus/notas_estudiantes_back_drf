@@ -514,7 +514,7 @@ class StudentViewSet(BaseModelViewSet):
         "group__name",
         "group__grade",
     ]
-    ordering = ["ci"]
+    ordering = ["grade", "ci"]
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -620,7 +620,7 @@ class SubjectViewSet(BaseModelViewSet):
         "grade",
         "tcp2_required",
     ]
-    ordering = ["name"]
+    ordering = ["-grade", "name"]
 
 
 @extend_schema_view(
