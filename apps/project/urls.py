@@ -24,6 +24,7 @@ from apps.project.views import (
     GrantCareerViewSet,
     ProfessorViewSet,
     SchoolEventViewSet,
+    SchoolStatisticsView,
     SchoolTaskViewSet,
     SchoolYearViewSet,
     StudentCareerViewSet,
@@ -75,6 +76,11 @@ router.register(r"school_event", SchoolEventViewSet)
 router.register(r"student_group", StudentGroupViewSet)
 
 urlpatterns = [
+    path(
+        "school/statistics/",
+        SchoolStatisticsView.as_view(),
+        name="school-statistics",
+    ),
     path(
         "students/report/",
         StudentReportView.as_view(),

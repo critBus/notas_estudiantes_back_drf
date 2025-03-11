@@ -84,6 +84,7 @@ from .serializers.general import (
     SubjectSectionSerializer,
     SubjectSerializer,
 )
+from .serializers.school_statistics import SchoolStatisticsSerializer
 from .serializers.student_note.multiple.create import (
     StudentNoteCreateMultipleSerializer,
 )
@@ -1671,3 +1672,40 @@ class StudentMeView(BaseModelAPIView):
             )
 
         return JsonResponse(StudentSerializer(student).data, status=200)
+
+
+class SchoolStatisticsView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: SchoolStatisticsSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        course = SchoolYear.get_current_course()
+        if not course:
+            return JsonResponse(
+                {"error": "No existe el curso escolar actual"}, status=400
+            )
+        amount_of_students_7 = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=7
+        ).count()
+        amount_of_students_8 = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=8
+        ).count()
+        amount_of_students_9 = Student.objects.filter(
+            is_graduated=False, is_dropped_out=False, grade=9
+        ).count()
+        amount_of_professor = Professor.objects.count()
+        return JsonResponse(
+            {
+                "amount_of_students": amount_of_students_7
+                + amount_of_students_8
+                + amount_of_students_9,
+                "amount_of_students_7": amount_of_students_7,
+                "amount_of_students_8": amount_of_students_8,
+                "amount_of_students_9": amount_of_students_9,
+                "amount_of_professor": amount_of_professor,
+            },
+            status=200,
+        )
