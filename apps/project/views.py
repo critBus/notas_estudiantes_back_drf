@@ -103,6 +103,7 @@ from .utils.extenciones import get_extension
 from .utils.reportes import (
     generar_reporte_bajas_pdf,
     generar_reporte_certificacion_notas_pdf,
+    generar_reporte_certificacion_notas_todas_pdf,
     generar_reporte_escalafon_pdf,
     generar_reporte_estudiantes_pdf,
     generar_reporte_notas_de_asignatura_pdf,
@@ -513,7 +514,7 @@ class StudentViewSet(BaseModelViewSet):
         "group__name",
         "group__grade",
     ]
-    ordering = ["ci"]
+    ordering = ["grade", "ci"]
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -619,7 +620,7 @@ class SubjectViewSet(BaseModelViewSet):
         "grade",
         "tcp2_required",
     ]
-    ordering = ["name"]
+    ordering = ["-grade", "name"]
 
 
 @extend_schema_view(
@@ -1427,6 +1428,17 @@ class StudentNoteReportView(BaseModelAPIView):
             student=student, subject__grade=grado
         ).order_by("school_year__start_date")
         return generar_reporte_certificacion_notas_pdf(student, notes, grado)
+
+
+class StudentNoteAllReportView(BaseModelAPIView):
+    def get(self, request, pk, *args, **kwargs):
+        student = Student.objects.filter(id=pk).first()
+        if not student:
+            return JsonResponse(
+                {"error": "No existe este estudiante"},
+                status=400,
+            )
+        return generar_reporte_certificacion_notas_todas_pdf(student)
 
 
 class StudentNoteReportSubjectView(BaseModelAPIView):

@@ -63,6 +63,35 @@ def generar_reporte_certificacion_notas_pdf(
     )
 
 
+def generar_reporte_certificacion_notas_todas_pdf(student: Student):
+    entidades: List[StudentNote] = StudentNote.objects.filter(
+        student=student
+    ).order_by("subject__grade", "subject")
+    lista = []
+    for entidad in entidades:
+        data_entidad = {
+            "name": entidad.subject.name,
+            "asc": format_float(entidad.asc),
+            "tcp1": format_float(entidad.tcp1),
+            "tcp2": format_float(entidad.tcp2),
+            "final_exam": format_float(entidad.final_exam),
+            "final_grade": format_float(entidad.final_grade),
+            "grade": str(entidad.subject.grade),
+        }
+        lista.append(data_entidad)
+
+    data = {
+        "lista": lista,
+        "ci": student.ci,
+        "nombre_completo": f"{student.first_name} {student.last_name if student.last_name else ''}".strip(),
+    }
+    return custom_export_report_by_name(
+        "Certificacion De Notas Por Estudiante",
+        data,
+        file="Certificacion De Notas Por Estudiante",
+    )
+
+
 def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
     entidades: List[StudentNote] = queryset
     lista = []
