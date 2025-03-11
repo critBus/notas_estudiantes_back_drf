@@ -229,6 +229,7 @@ class TestGetSubjectSection(StudentTestCase):
                                             "file": file_student_response_section_2.file,
                                         }
                                     ],
+                                    "subject_id": subject.id,
                                 }
                             ],
                         }
