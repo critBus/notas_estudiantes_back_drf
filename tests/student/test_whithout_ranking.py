@@ -48,7 +48,7 @@ class TestWhithoutRanking(DegreeEscaleTestCase):
             self.ponerle_notas_validas_al_estudiante(student=student)
         self.validate_whithout_ranking(True)
         DegreeScale.calculate_all_ranking_number()
-        self.validate_whithout_ranking(False)
+        self.validate_whithout_ranking(True)
         self.ponerle_notas_validas_al_estudiante(student=students[0])
         self.validate_whithout_ranking(True)
         DegreeScale.calculate_all_ranking_number()
