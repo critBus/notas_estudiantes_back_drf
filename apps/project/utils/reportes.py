@@ -1,5 +1,7 @@
 from typing import List
 
+from django.utils import timezone
+
 from apps.project.models import (
     DegreeScale,
     Dropout,
@@ -30,9 +32,7 @@ def generar_reporte_escalafon_pdf(queryset):
         }
         lista.append(data_entidad)
 
-    data = {
-        "lista": lista,
-    }
+    data = {"lista": lista, "fecha": timezone.now().date()}
     return custom_export_report_by_name("Escalafon", data, file="Escalafon")
 
 
@@ -57,6 +57,7 @@ def generar_reporte_certificacion_notas_pdf(
         "ci": student.ci,
         "grade": grade,
         "nombre_completo": f"{student.first_name} {student.last_name if student.last_name else ''}".strip(),
+        "fecha": timezone.now().date(),
     }
     return custom_export_report_by_name(
         "Certificacion De Notas", data, file="Certificacion De Notas"
@@ -84,6 +85,7 @@ def generar_reporte_certificacion_notas_todas_pdf(student: Student):
         "lista": lista,
         "ci": student.ci,
         "nombre_completo": f"{student.first_name} {student.last_name if student.last_name else ''}".strip(),
+        "fecha": timezone.now().date(),
     }
     return custom_export_report_by_name(
         "Certificacion De Notas Por Estudiante",
@@ -111,6 +113,7 @@ def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
         "lista": lista,
         "grade": subject.grade,
         "name": subject.name,
+        "fecha": timezone.now().date(),
     }
     return custom_export_report_by_name(
         "Notas De Asignatura", data, file="Notas De Asignatura"
@@ -135,9 +138,7 @@ def generar_reporte_estudiantes_pdf(queryset):
         }
         lista.append(data_entidad)
 
-    data = {
-        "lista": lista,
-    }
+    data = {"lista": lista, "fecha": timezone.now().date()}
     return custom_export_report_by_name("Estudiantes", data, file="Estudiantes")
 
 
@@ -170,7 +171,5 @@ def generar_reporte_bajas_pdf(queryset):
         }
         lista.append(data_entidad)
 
-    data = {
-        "lista": lista,
-    }
+    data = {"lista": lista, "fecha": timezone.now().date()}
     return custom_export_report_by_name("Altas Bajas", data, file="Altas Bajas")

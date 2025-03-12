@@ -135,7 +135,7 @@ class TestDegreeEscale(DegreeEscaleTestCase):
         note_9.asc = 9
         note_9.final_exam = 96
         note_9.save()
-        final_grade_9 = 9 + ((98 * 0.3) + (79 * 0.3)) / 2 + 96 / 2
+        final_grade_9 = (9 + ((98 * 0.3) + (79 * 0.3)) / 2) * 2
 
         ranking = (final_grade_7 + final_grade_8 + final_grade_9) / 3
         # print(f"ranking {ranking}")
