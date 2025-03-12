@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from drf_spectacular.utils import extend_schema_field
@@ -397,7 +399,7 @@ class StudentNoteSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-        student = None
+        student: Optional[Student] = None
         if "student" in attrs:
             student = attrs["student"]
         elif self.instance:
@@ -423,6 +425,13 @@ class StudentNoteSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Ya existe esta nota para este estudiante en esta asignatura en este curso"
                 )
+
+        if student and subject:
+            if subject.grade > student.grade:
+                raise serializers.ValidationError(
+                    "La asignatura debe de ser de un grado igual o inferior al del estudiante"
+                )
+
         return attrs
 
     def to_representation(self, instance):
