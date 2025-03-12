@@ -379,6 +379,28 @@ class StudentNote(models.Model):
 
         return self.final_grade
 
+    def calculate_ranking_score(self):
+
+        if self.tcp1 is None or self.asc is None or self.final_exam is None:
+            self.final_grade = 0
+            return self.final_grade
+        ranking = 0
+        prom_asc = self.asc  # en base a 20
+        prom_tcp = self.tcp1 * 0.3  # en base a 30
+        if (self.tcp2 is not None) and self.subject.tcp2_required:
+            prom_tcp += self.tcp2 * 0.3
+            prom_tcp /= 2
+
+        if self.subject.grade != 9:
+            acumulado_base_50 = prom_asc + prom_tcp
+            pf_base_50 = self.final_exam / 2
+            ranking = acumulado_base_50 + pf_base_50
+        else:
+            acumulado_base_50 = prom_asc + prom_tcp
+            ranking = acumulado_base_50 * 2
+
+        return ranking
+
     @staticmethod
     def are_valid(notes):
         if not notes:
@@ -444,8 +466,8 @@ class DegreeScale(models.Model):
         sume = 0
         notes = StudentNote.objects.filter(student=self.student)
         for note in notes:
-            note.calculate_final_grade()
-            sume += note.final_grade
+            sume += note.calculate_ranking_score()
+
         if sume == 0 or notes.count() == 0:
             return 0
         self.ranking_score = sume / notes.count()
