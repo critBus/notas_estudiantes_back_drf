@@ -363,19 +363,19 @@ class StudentNote(models.Model):
             self.final_grade = 0
             return self.final_grade
 
-        prom_asc = self.asc  # en base a 10
-        prom_tcp = self.tcp1 * 0.4  # * 0.4; //en base a 40
+        prom_asc = self.asc  # en base a 20
+        prom_tcp = self.tcp1 * 0.3  # en base a 30
         if (self.tcp2 is not None) and self.subject.tcp2_required:
-            prom_tcp += self.tcp2 * 0.4  # * 0.4;
+            prom_tcp += self.tcp2 * 0.3
             prom_tcp /= 2
 
-        if self.subject.grade == 9:
-            acumulado_base_50 = prom_asc + prom_tcp
-            pf_base_50 = self.final_exam / 2
-            self.final_grade = acumulado_base_50 + pf_base_50
-        else:
-            acumulado_base_50 = prom_asc + prom_tcp
-            self.final_grade = acumulado_base_50 * 2
+        # if self.subject.grade == 9:
+        acumulado_base_50 = prom_asc + prom_tcp
+        pf_base_50 = self.final_exam / 2
+        self.final_grade = acumulado_base_50 + pf_base_50
+        # else:
+        #     acumulado_base_50 = prom_asc + prom_tcp
+        #     self.final_grade = acumulado_base_50 * 2
 
         return self.final_grade
 
@@ -440,11 +440,11 @@ class DegreeScale(models.Model):
         return f"{self.ranking_number} - {self.ranking_score} - {self.student.first_name} {self.student.last_name}"
 
     def calculate_ranking_score(self) -> float:
+        self.ranking_score = 0
         sume = 0
         notes = StudentNote.objects.filter(student=self.student)
         for note in notes:
             note.calculate_final_grade()
-
             sume += note.final_grade
         if sume == 0 or notes.count() == 0:
             return 0
@@ -454,43 +454,43 @@ class DegreeScale(models.Model):
     @staticmethod
     def current():
         students = Student.get_students_current_9()
-        approved_students = []
-        for student in students:
-            if student.their_notes_are_valid():
-                approved_students.append(student)
-        return DegreeScale.objects.filter(
-            student__in=approved_students
-        ).order_by("ranking_number")
+        # approved_students = []
+        # for student in students:
+        #     if student.their_notes_are_valid():
+        #         approved_students.append(student)
+        return DegreeScale.objects.filter(student__in=students).order_by(
+            "ranking_number"
+        )
 
     @staticmethod
     def calculate_all_ranking_number():
         school_year = SchoolYear.get_current_course()
-        approved_students_ranking: List[DegreeScale] = []
+        students_ranking: List[DegreeScale] = []
         students = Student.get_students_current_9()
 
         for student in students:
-            if student.their_notes_are_valid():
-                student_degree_scale = DegreeScale.objects.filter(
-                    student=student
-                ).first()
-                if not student_degree_scale:
-                    student_degree_scale = DegreeScale.objects.create(
-                        student=student, school_year=school_year
-                    )
-                student_degree_scale.calculate_ranking_score()
-                student_degree_scale.save()
-                approved_students_ranking.append(student_degree_scale)
+            # if student.their_notes_are_valid():
+            student_degree_scale = DegreeScale.objects.filter(
+                student=student
+            ).first()
+            if not student_degree_scale:
+                student_degree_scale = DegreeScale.objects.create(
+                    student=student, school_year=school_year
+                )
+            student_degree_scale.calculate_ranking_score()
+            student_degree_scale.save()
+            students_ranking.append(student_degree_scale)
 
-        approved_students_ranking = sorted(
-            approved_students_ranking,
+        students_ranking = sorted(
+            students_ranking,
             key=lambda v: v.ranking_score,
             reverse=True,
         )
-        for i, ranking in enumerate(approved_students_ranking):
+        for i, ranking in enumerate(students_ranking):
             ranking.ranking_number = i + 1
             ranking.save()
 
-        return approved_students_ranking
+        return students_ranking
 
     @staticmethod
     def there_are_students_whithout_ranking(course=None):
@@ -499,20 +499,21 @@ class DegreeScale(models.Model):
         q = Student.get_students_current_9()
         if q.count() == 0:
             return True
-        count_with_notes_valid = 0
+        # count_with_notes_valid = 0
         for student in q:
-            if student.their_notes_are_valid():
-                count_with_notes_valid += 1
-                degree_scale = DegreeScale.objects.filter(
-                    student=student, school_year=course
-                ).first()
-                if (
-                    (not degree_scale)
-                    or (not degree_scale.ranking_score)
-                    or (not degree_scale.ranking_number)
-                ):
-                    return True
-        return count_with_notes_valid == 0
+            # if student.their_notes_are_valid():
+            #     count_with_notes_valid += 1
+            degree_scale = DegreeScale.objects.filter(
+                student=student, school_year=course
+            ).first()
+            if (
+                (not degree_scale)
+                or (not degree_scale.ranking_score)
+                or (not degree_scale.ranking_number)
+            ):
+                return True
+        return False
+        # return count_with_notes_valid == 0
 
 
 class GrantCareer(models.Model):
@@ -563,50 +564,51 @@ class GrantCareer(models.Model):
         grant_career_list: List[GrantCareer] = []
         for rank in ranking:
             student = rank.student
-            ballot = StudentCareer.objects.filter(student=student).order_by(
-                "index"
-            )
-            for student_career in ballot:
-                career = student_career.career
+            if student.their_notes_are_valid():
+                ballot = StudentCareer.objects.filter(student=student).order_by(
+                    "index"
+                )
+                for student_career in ballot:
+                    career = student_career.career
 
-                places_available = careers_amount[career]
+                    places_available = careers_amount[career]
 
-                if places_available:
-                    grant_career: GrantCareer = GrantCareer.objects.filter(
-                        student=student
-                    ).first()
-                    if not grant_career:
-                        approved_school_course = (
-                            ApprovedSchoolCourse.objects.filter(
-                                student=student, grade=9
-                            ).first()
-                        )
-                        if not approved_school_course:
+                    if places_available:
+                        grant_career: GrantCareer = GrantCareer.objects.filter(
+                            student=student
+                        ).first()
+                        if not grant_career:
                             approved_school_course = (
-                                ApprovedSchoolCourse.objects.create(
-                                    student=student,
-                                    school_year=school_year,
-                                    date=today,
-                                    grade=9,
-                                )
+                                ApprovedSchoolCourse.objects.filter(
+                                    student=student, grade=9
+                                ).first()
                             )
+                            if not approved_school_course:
+                                approved_school_course = (
+                                    ApprovedSchoolCourse.objects.create(
+                                        student=student,
+                                        school_year=school_year,
+                                        date=today,
+                                        grade=9,
+                                    )
+                                )
 
-                        grant_career = GrantCareer.objects.create(
-                            student=student,
-                            career=career,
-                            approved_school_course=approved_school_course,
-                        )
-                    else:
-                        grant_career.career = career
-                        grant_career.school_year = school_year
-                        grant_career.save()
+                            grant_career = GrantCareer.objects.create(
+                                student=student,
+                                career=career,
+                                approved_school_course=approved_school_course,
+                            )
+                        else:
+                            grant_career.career = career
+                            grant_career.school_year = school_year
+                            grant_career.save()
 
-                    places_available -= 1
-                    careers_amount[career] = places_available
-                    career.amount = places_available
-                    career.save()
-                    grant_career_list.append(grant_career)
-                    break
+                        places_available -= 1
+                        careers_amount[career] = places_available
+                        career.amount = places_available
+                        career.save()
+                        grant_career_list.append(grant_career)
+                        break
         return grant_career_list
 
     @staticmethod
