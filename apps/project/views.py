@@ -804,9 +804,7 @@ class CurrentCurseView(BaseModelAPIView):
 
 
 class BallotCreateView(BaseGenericAPIView):
-    queryset = Student.objects.filter(
-             grade=9
-        )
+    queryset = Student.objects.filter(grade=9)
     serializer_class = BallotCreateSerializer
 
     @extend_schema(
@@ -852,7 +850,7 @@ class BallotCreateView(BaseGenericAPIView):
 
 
 class BallotListView(BaseListAPIView):
-    queryset = Student.objects.filter( grade=9)
+    queryset = Student.objects.filter(grade=9)
     serializer_class = StudentBallotSerializer
 
     filterset_fields = {
