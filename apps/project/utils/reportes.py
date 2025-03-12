@@ -46,7 +46,7 @@ def generar_reporte_certificacion_notas_pdf(
             "name": entidad.subject.name,
             "asc": format_float(entidad.asc),
             "tcp1": format_float(entidad.tcp1),
-            "tcp2": format_float(entidad.tcp2),
+            "tcp2": format_float(entidad.tcp2) if entidad.subject.tcp2_required else "-",
             "final_exam": format_float(entidad.final_exam),
             "final_grade": format_float(entidad.final_grade),
         }
@@ -74,7 +74,7 @@ def generar_reporte_certificacion_notas_todas_pdf(student: Student):
             "name": entidad.subject.name,
             "asc": format_float(entidad.asc),
             "tcp1": format_float(entidad.tcp1),
-            "tcp2": format_float(entidad.tcp2),
+            "tcp2": format_float(entidad.tcp2) if entidad.subject.tcp2_required else "-",
             "final_exam": format_float(entidad.final_exam),
             "final_grade": format_float(entidad.final_grade),
             "grade": str(entidad.subject.grade),
@@ -103,7 +103,7 @@ def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
             "nombre_completo": f"{entidad.student.first_name} {entidad.student.last_name if entidad.student.last_name else ''}".strip(),
             "asc": format_float(entidad.asc),
             "tcp1": format_float(entidad.tcp1),
-            "tcp2": format_float(entidad.tcp2),
+            "tcp2": format_float(entidad.tcp2) if entidad.subject.tcp2_required else "-",
             "final_exam": format_float(entidad.final_exam),
             "final_grade": format_float(entidad.final_grade),
         }
