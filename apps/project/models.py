@@ -491,14 +491,18 @@ class DegreeScale(models.Model):
         students = Student.get_students_current_9()
 
         for student in students:
+            # if student.ci == "51791253302":
+            #     print("estudiante invalido")
             # if student.their_notes_are_valid():
-            student_degree_scale = DegreeScale.objects.filter(
+            student_degree_scale:DegreeScale = DegreeScale.objects.filter(
                 student=student
             ).first()
             if not student_degree_scale:
                 student_degree_scale = DegreeScale.objects.create(
                     student=student, school_year=school_year
                 )
+            else:
+                student_degree_scale.school_year=school_year
             student_degree_scale.calculate_ranking_score()
             student_degree_scale.save()
             students_ranking.append(student_degree_scale)
@@ -530,9 +534,14 @@ class DegreeScale(models.Model):
             ).first()
             if (
                 (not degree_scale)
-                or (not degree_scale.ranking_score)
-                or (not degree_scale.ranking_number)
+                or (degree_scale.ranking_score is None)
+                or (degree_scale.ranking_number is None)
             ):
+                print(degree_scale)
+                if degree_scale:
+                    print(f"degree_scale.ranking_score {degree_scale.ranking_score}")
+                    print(f"degree_scale.ranking_number {degree_scale.ranking_number}")
+                print(f"ci {student.ci}")
                 return True
         return False
         # return count_with_notes_valid == 0
@@ -578,7 +587,7 @@ class GrantCareer(models.Model):
         if today is None:
             today = timezone.now().date()
         careers_amount: Dict[Career, int] = {
-            v: v.amount for v in Career.objects.filter(amount__gt=0)
+            v: v.amount for v in Career.objects.all()
         }
         ranking = DegreeScale.current()
         school_year = SchoolYear.get_current_course()
