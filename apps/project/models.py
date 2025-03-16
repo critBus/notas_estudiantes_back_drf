@@ -584,33 +584,23 @@ class GrantCareer(models.Model):
     school_year = models.ForeignKey(
         SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
     )
-    # approved_school_course = models.ForeignKey(
-    #     ApprovedSchoolCourse,
-    #     on_delete=models.CASCADE,
-    #     verbose_name="Curso Escolar Aprobado",
-    # )
 
     class Meta:
         verbose_name = "Carrera Otorgada"
         verbose_name_plural = "Carreras Otorgadas"
 
-    # def save(self, *args, **kwargs):
-    #     es_nuevo = self.pk is None
-    #     if not es_nuevo:
-    #         old: GrantCareer = GrantCareer.objects.get(id=self.id)
-    #         if old.student != self.student:
-    #             old.student.is_graduated = False
-    #             old.student.save()
-    #     if self.student:
-    #         self.student.is_graduated = True
-    #         self.student.save()
-    #     return super().save(*args, **kwargs)
-    #
-    # def delete(self, *args, **kwargs):
-    #     if self.student:
-    #         self.student.is_graduated = False
-    #         self.student.save()
-    #     return super().delete(*args, **kwargs)
+    @staticmethod
+    def there_are_students_with_no_careers_awarded():
+        students = Student.get_students_current_9()
+        if students.count() == 0:
+            return True
+        for student in students:
+            if (
+                student.their_notes_are_valid()
+                and not student.has_career_awarded()
+            ):
+                return True
+        return False
 
     @staticmethod
     def grant(today=None):
