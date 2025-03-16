@@ -385,32 +385,11 @@ class GrantCareerViewSet(BaseModelViewSet):
         "career__id": ["exact"],
         "career__name": ["contains", "exact", "icontains", "search"],
         "career__amount": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course": ["isnull"],
-        "approved_school_course__id": ["exact"],
-        "approved_school_course__date": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course__grade": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course__school_year": ["isnull"],
-        "approved_school_course__school_year__id": ["exact"],
-        "approved_school_course__school_year__name": [
-            "contains",
-            "exact",
-            "icontains",
-            "search",
-        ],
-        "approved_school_course__school_year__start_date": [
-            "gte",
-            "lte",
-            "gt",
-            "lt",
-            "exact",
-        ],
-        "approved_school_course__school_year__end_date": [
-            "gte",
-            "lte",
-            "gt",
-            "lt",
-            "exact",
-        ],
+        "school_year": ["isnull"],
+        "school_year__id": ["exact"],
+        "school_year__name": ["contains", "exact", "icontains", "search"],
+        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
     }
     search_fields = [
         "student__ci",
@@ -419,15 +398,13 @@ class GrantCareerViewSet(BaseModelViewSet):
     ]
     ordering_fields = [
         "pk",
-        "approved_school_course__date",
-        "approved_school_course__grade",
-        "approved_school_course__school_year__start_date",
-        "approved_school_course__school_year__end_date",
+        "school_year__start_date",
+        "school_year__end_date",
         "student__ci",
         "student__first_name",
         "student__last_name",
     ]
-    ordering = ["school_year__start_date"]
+    ordering = ["school_year__start_date", "student__ci"]
 
 
 class SchoolYearViewSet(BaseModelViewSet):
@@ -1045,6 +1022,7 @@ class UpgradingAllView(BaseModelAPIView):
                     status=400,
                 )
             GrantCareer.grant()
+            Student.graduate_all()
             Student.upgrading_7_8_all(grade=8)
             Student.upgrading_7_8_all(grade=7)
             approved_students = ApprovedSchoolCourse.objects.order_by(

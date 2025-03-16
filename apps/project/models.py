@@ -206,6 +206,31 @@ class Student(models.Model):
         return False
 
     @staticmethod
+    def graduate_all(today=None):
+        if today is None:
+            today = timezone.now().date()
+        school_year = SchoolYear.get_current_course()
+        students_9 = Student.get_students_current_9()
+        graduate_students = []
+        for student in students_9:
+            if student.has_career_awarded():
+                student.is_graduated = True
+                student.save()
+
+                approved_school_course = ApprovedSchoolCourse.objects.filter(
+                    student=student, grade=9
+                ).first()
+                if not approved_school_course:
+                    ApprovedSchoolCourse.objects.create(
+                        student=student,
+                        school_year=school_year,
+                        date=today,
+                        grade=9,
+                    )
+                graduate_students.append(student)
+        return graduate_students
+
+    @staticmethod
     def upgrading_7_8_all(grade=7, today=None):
         if grade not in [7, 8]:
             raise serializers.ValidationError("El grado tiene que ser 7 o 8")
@@ -556,33 +581,36 @@ class GrantCareer(models.Model):
     career = models.ForeignKey(
         Career, on_delete=models.CASCADE, verbose_name="Carrera"
     )
-    approved_school_course = models.ForeignKey(
-        ApprovedSchoolCourse,
-        on_delete=models.CASCADE,
-        verbose_name="Curso Escolar Aprobado",
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
     )
+    # approved_school_course = models.ForeignKey(
+    #     ApprovedSchoolCourse,
+    #     on_delete=models.CASCADE,
+    #     verbose_name="Curso Escolar Aprobado",
+    # )
 
     class Meta:
         verbose_name = "Carrera Otorgada"
         verbose_name_plural = "Carreras Otorgadas"
 
-    def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
-        if not es_nuevo:
-            old: GrantCareer = GrantCareer.objects.get(id=self.id)
-            if old.student != self.student:
-                old.student.is_graduated = False
-                old.student.save()
-        if self.student:
-            self.student.is_graduated = True
-            self.student.save()
-        return super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.student:
-            self.student.is_graduated = False
-            self.student.save()
-        return super().delete(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     es_nuevo = self.pk is None
+    #     if not es_nuevo:
+    #         old: GrantCareer = GrantCareer.objects.get(id=self.id)
+    #         if old.student != self.student:
+    #             old.student.is_graduated = False
+    #             old.student.save()
+    #     if self.student:
+    #         self.student.is_graduated = True
+    #         self.student.save()
+    #     return super().save(*args, **kwargs)
+    #
+    # def delete(self, *args, **kwargs):
+    #     if self.student:
+    #         self.student.is_graduated = False
+    #         self.student.save()
+    #     return super().delete(*args, **kwargs)
 
     @staticmethod
     def grant(today=None):
@@ -614,25 +642,10 @@ class GrantCareer(models.Model):
                             student=student
                         ).first()
                         if not grant_career:
-                            approved_school_course = (
-                                ApprovedSchoolCourse.objects.filter(
-                                    student=student, grade=9
-                                ).first()
-                            )
-                            if not approved_school_course:
-                                approved_school_course = (
-                                    ApprovedSchoolCourse.objects.create(
-                                        student=student,
-                                        school_year=school_year,
-                                        date=today,
-                                        grade=9,
-                                    )
-                                )
-
                             grant_career = GrantCareer.objects.create(
                                 student=student,
                                 career=career,
-                                approved_school_course=approved_school_course,
+                                school_year=school_year,
                             )
                         else:
                             grant_career.career = career
@@ -650,9 +663,7 @@ class GrantCareer(models.Model):
     @staticmethod
     def current():
         school_year = SchoolYear.get_current_course()
-        return GrantCareer.objects.filter(
-            approved_school_course__school_year=school_year
-        )
+        return GrantCareer.objects.filter(school_year=school_year)
 
 
 class SubjectSection(models.Model):

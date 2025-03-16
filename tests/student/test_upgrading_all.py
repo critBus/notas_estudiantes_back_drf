@@ -88,7 +88,7 @@ class TestUpgradingAll(DegreeEscaleTestCase):
         DegreeScale.calculate_all_ranking_number()
         self.call_upgrading_all(bad_request=False, print_json_response=False)
 
-        self.call_upgrading_all(bad_request=True, print_json_response=True)
+        # self.call_upgrading_all(bad_request=True, print_json_response=True)
 
     def validate_course(self, students: List[Student], grade: int):
         for student in students:

@@ -473,9 +473,7 @@ class ApprovedSchoolCourseSerializer(serializers.ModelSerializer):
 
 class GrantCareerRepresentationSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
-    approved_school_course = ApprovedSchoolCourseRepresentationSerializer(
-        read_only=True
-    )
+    school_year = SchoolYearSerializer(read_only=True)
     career = CareerSerializer(read_only=True)
 
     class Meta:
