@@ -119,6 +119,7 @@ def crear_datos_random():
 
         DegreeScale.calculate_all_ranking_number()
         GrantCareer.grant()
+        Student.graduate_all()
         Student.upgrading_7_8_all(grade=8)
         Student.upgrading_7_8_all(grade=7)
 
