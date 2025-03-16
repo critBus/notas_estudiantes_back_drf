@@ -99,6 +99,7 @@ from .serializers.subject_section.representation import (
     StudentResponseSubjectSectionSerializer,
     SubjectSectionCreateRepresentationSerializer,
 )
+from .serializers.upgrading_all import NewSchoolYearSerializer
 from .serializers.without_granting import WithoutGrantingSerializer
 from .utils.extenciones import get_extension
 from .utils.reportes import (
@@ -1004,12 +1005,13 @@ class AreStudentsWhithoutRankingView(BaseModelAPIView):
 
 class UpgradingAllView(BaseModelAPIView):
     @extend_schema(
+        request=NewSchoolYearSerializer,
         responses={
             200: ApprovedSchoolCourseRepresentationSerializer(many=True),
             400: ErrorSerializer,
         },
     )
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             if Student.are_missing_ballots():
                 return JsonResponse(
@@ -1022,13 +1024,24 @@ class UpgradingAllView(BaseModelAPIView):
                     },
                     status=400,
                 )
-            GrantCareer.grant()
+            if GrantCareer.there_are_students_with_no_careers_awarded():
+                return JsonResponse(
+                    {
+                        "error": "Faltan estudiantes por tener carreras otorgadas"
+                    },
+                    status=400,
+                )
+            serializer = NewSchoolYearSerializer(data=request.data, many=True)
+            if not serializer.is_valid():
+                return JsonResponse(serializer.errors, safe=False, status=400)
+
             Student.graduate_all()
             Student.upgrading_7_8_all(grade=8)
             Student.upgrading_7_8_all(grade=7)
             approved_students = ApprovedSchoolCourse.objects.order_by(
                 "grade", "student__ci"
             )
+            serializer.save()
             return JsonResponse(
                 ApprovedSchoolCourseRepresentationSerializer(
                     approved_students, many=True
