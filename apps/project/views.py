@@ -99,6 +99,7 @@ from .serializers.subject_section.representation import (
     StudentResponseSubjectSectionSerializer,
     SubjectSectionCreateRepresentationSerializer,
 )
+from .serializers.without_granting import WithoutGrantingSerializer
 from .utils.extenciones import get_extension
 from .utils.reportes import (
     generar_reporte_bajas_pdf,
@@ -1698,5 +1699,22 @@ class SchoolStatisticsView(BaseModelAPIView):
                 "amount_of_students_9": amount_of_students_9,
                 "amount_of_professor": amount_of_professor,
             },
+            status=200,
+        )
+
+
+class WithoutGrantingView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: WithoutGrantingSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(
+            {
+                "without_granting": GrantCareer.there_are_students_with_no_careers_awarded()
+            },
+            safe=False,
             status=200,
         )
