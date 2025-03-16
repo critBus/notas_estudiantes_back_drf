@@ -44,7 +44,7 @@ class Factory(
         careers_names = [f"career{i}" for i in range(20)]
         for name in careers_names:
             career = Career.objects.create(
-                name=name, amount=random.randint(1, 5)
+                name=name, amount=999
             )
             self.careers.append(career)
 
@@ -325,7 +325,8 @@ def crear_datos_random():
         student_user = User.objects.create_user(
             username="estudiante", password="123", email="estudiante@test.com"
         )
-        factory.create_random_student(user=student_user, grade=7)
+        student_loguin=factory.create_random_student(user=student_user, grade=7)
+        factory.ponerle_notas_validas_al_estudiante(student_loguin)
         student_user.groups.add(
             Group.objects.filter(name=ROL_NAME_STUDENT).first()
         )
