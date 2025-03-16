@@ -1702,6 +1702,23 @@ class SchoolStatisticsView(BaseModelAPIView):
             is_graduated=False, is_dropped_out=False, grade=9
         ).count()
         amount_of_professor = Professor.objects.count()
+        students_7 = Student.objects.filter(is_dropped_out=False, grade=7)
+        students_8 = Student.objects.filter(is_dropped_out=False, grade=8)
+        students_9 = Student.objects.filter(
+            is_dropped_out=False, grade=9, is_graduated=False
+        )
+        not_approved_7 = 0
+        for student in students_7:
+            if not student.their_notes_are_valid():
+                not_approved_7 += 1
+        not_approved_8 = 0
+        for student in students_8:
+            if not student.their_notes_are_valid():
+                not_approved_8 += 1
+        not_approved_9 = 0
+        for student in students_9:
+            if not student.their_notes_are_valid():
+                not_approved_9 += 1
         return JsonResponse(
             {
                 "amount_of_students": amount_of_students_7
@@ -1711,6 +1728,18 @@ class SchoolStatisticsView(BaseModelAPIView):
                 "amount_of_students_8": amount_of_students_8,
                 "amount_of_students_9": amount_of_students_9,
                 "amount_of_professor": amount_of_professor,
+                "dropouts_7": Student.objects.filter(
+                    is_dropped_out=True, grade=7
+                ).count(),
+                "dropouts_8": Student.objects.filter(
+                    is_dropped_out=True, grade=8
+                ).count(),
+                "dropouts_9": Student.objects.filter(
+                    is_dropped_out=True, grade=9, is_graduated=False
+                ).count(),
+                "not_approved_7": not_approved_7,
+                "not_approved_8": not_approved_8,
+                "not_approved_9": not_approved_9,
             },
             status=200,
         )
