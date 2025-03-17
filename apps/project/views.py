@@ -1031,7 +1031,7 @@ class UpgradingAllView(BaseModelAPIView):
                     },
                     status=400,
                 )
-            serializer = NewSchoolYearSerializer(data=request.data, many=True)
+            serializer = NewSchoolYearSerializer(data=request.data)
             if not serializer.is_valid():
                 return JsonResponse(serializer.errors, safe=False, status=400)
 
