@@ -779,7 +779,7 @@ class CurrentCurseView(BaseModelAPIView):
             return JsonResponse(
                 {"error": "No hay cursos agregados"}, status=400
             )
-        return SchoolYearSerializer(course).data
+        return JsonResponse(SchoolYearSerializer(course).data, status=200)
 
 
 class BallotCreateView(BaseGenericAPIView):
