@@ -39,7 +39,7 @@ class DegreeEscaleTestCase(StudentTestCase):
                 )
                 note.tcp1 = 90 + i + j
                 note.tcp2 = 79 + i + j
-                note.asc = 6 + i + j
+                note.asc = 12 + i + j
                 note.final_exam = 92 + i + j
                 note.save()
         students.reverse()

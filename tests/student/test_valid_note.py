@@ -16,14 +16,14 @@ class TestValidNote(StudentTestCase):
         )
         nota.tcp1 = 60
         nota.tcp2 = 60
-        nota.asc = 6
+        nota.asc = 12
         nota.final_exam = 60
 
         self.assertTrue(StudentNote.are_valid([nota]))
 
         nota.tcp1 = 100
         nota.tcp2 = 100
-        nota.asc = 10
+        nota.asc = 14
         nota.final_exam = 100
 
         self.assertTrue(StudentNote.are_valid([nota]))

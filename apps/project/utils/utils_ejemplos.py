@@ -82,7 +82,7 @@ def crear_datos_random():
             student_9 = factory.create_random_student(grade=9)
             students_9.append(student_9)
 
-            baja = random.randint(1, 20) == 1
+            baja = False  # random.randint(1, 20) == 1
             if baja:
                 for student in [student_7, student_8, student_9]:
                     Dropout.objects.create(
@@ -104,7 +104,7 @@ def crear_datos_random():
                         ),
                     )
 
-            aprobar = random.randint(1, 15) > 3
+            aprobar = True  # random.randint(1, 15) > 3
             if aprobar:
                 factory.ponerle_notas_validas_al_estudiante(student_7)
                 factory.ponerle_notas_validas_al_estudiante(

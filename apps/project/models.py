@@ -439,7 +439,7 @@ class StudentNote(models.Model):
                 or note.final_exam is None
                 or note.final_exam < 60
                 or note.asc is None
-                or note.asc < 6
+                or note.asc < 12
             ):
                 return False
             if note.subject.tcp2_required and (

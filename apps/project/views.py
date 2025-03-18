@@ -943,7 +943,8 @@ class CarryOutGrantingOfCoursesView(BaseModelAPIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        grants = GrantCareer.grant()
+        GrantCareer.grant()
+        grants = GrantCareer.current()
         return JsonResponse(
             GrantCareerSerializer(grants, many=True).data, safe=False
         )
