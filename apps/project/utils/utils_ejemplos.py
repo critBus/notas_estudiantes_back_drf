@@ -65,7 +65,27 @@ def crear_datos_random():
     if Student.objects.count() == 0:
         print("Cargando datos de ejemplo ...")
         factory = Factory()
-        factory.create_current_school_year(create_3=True)
+        now = timezone.now()
+        SchoolYear.objects.create(
+            name="2022-2023",
+            start_date=(now - timedelta(days=365 * 3)).date(),
+            end_date=(
+                (now - timedelta(days=365 * 3)) + timedelta(days=365)
+            ).date(),
+        )
+        SchoolYear.objects.create(
+            name="2023-2024",
+            start_date=(now - timedelta(days=365 * 2)).date(),
+            end_date=(
+                (now - timedelta(days=365 * 2)) + timedelta(days=365)
+            ).date(),
+        )
+        SchoolYear.objects.create(
+            name="2024-2025",
+            start_date=(now - timedelta(days=365)).date(),
+            end_date=((now - timedelta(days=365)) + timedelta(days=365)).date(),
+        )
+
         factory.crear_asignaturas()
         factory.crear_carreras()
 
@@ -127,11 +147,16 @@ def crear_datos_random():
         students_8 = [student for student in students_7]
         students_7 = []
 
-        course_old: SchoolYear = SchoolYear.get_current_course()
+        # course_old: SchoolYear = SchoolYear.get_current_course()
+        # course = SchoolYear.objects.create(
+        #     start_date=course_old.start_date + timedelta(days=365),
+        #     end_date=course_old.end_date + timedelta(days=365),
+        #     name="2026-2027",
+        # )
         course = SchoolYear.objects.create(
-            start_date=course_old.start_date + timedelta(days=365),
-            end_date=course_old.end_date + timedelta(days=365),
-            name="2026-2027",
+            name="2025-2026",
+            start_date=timezone.now().date(),
+            end_date=(timezone.now() + timedelta(days=365)).date(),
         )
 
         for i in range(random.randint(27, 40)):
