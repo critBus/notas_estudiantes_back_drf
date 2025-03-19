@@ -1,4 +1,5 @@
-from typing import List
+from datetime import timedelta
+from typing import Any, Dict, List
 
 from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
@@ -7,6 +8,8 @@ from apps.project.models import (
     ApprovedSchoolCourse,
     Career,
     DegreeScale,
+    GrantCareer,
+    SchoolYear,
     Student,
     StudentCareer,
 )
@@ -63,6 +66,7 @@ class TestUpgradingAll(DegreeEscaleTestCase):
 
     def call_upgrading_all(
         self,
+        payload: Dict[str, Any],
         unauthorized: bool = False,
         forbidden: bool = False,
         bad_request: bool = False,
@@ -70,7 +74,8 @@ class TestUpgradingAll(DegreeEscaleTestCase):
         print_json_response: bool = False,
     ):
         URL = reverse("upgrading-all")
-        response_dict = self.call_get(
+        response_dict = self.call_post(
+            payload=payload,
             url=URL,
             unauthorized=unauthorized,
             forbidden=forbidden,
@@ -82,13 +87,45 @@ class TestUpgradingAll(DegreeEscaleTestCase):
         return response_dict
 
     def test_upgrading_all(self):
-        self.call_upgrading_all(bad_request=True, print_json_response=False)
+        self.call_upgrading_all(
+            payload={}, bad_request=True, print_json_response=False
+        )
+        course: SchoolYear = SchoolYear.get_current_course()
+        self.call_upgrading_all(
+            payload={
+                "start_date": course.start_date - timedelta(days=365),
+                "end_date": course.end_date - timedelta(days=365),
+                "name": "new year",
+            },
+            bad_request=True,
+            print_json_response=False,
+        )
+        payload = {
+            "start_date": course.start_date + timedelta(days=365),
+            "end_date": course.end_date + timedelta(days=365),
+            "name": "new year",
+        }
         students, careers = self.create_ballots_to_students()
-        self.call_upgrading_all(bad_request=True, print_json_response=False)
+        self.call_upgrading_all(
+            payload=payload, bad_request=True, print_json_response=False
+        )
         DegreeScale.calculate_all_ranking_number()
-        self.call_upgrading_all(bad_request=False, print_json_response=False)
-
-        self.call_upgrading_all(bad_request=True, print_json_response=True)
+        self.call_upgrading_all(
+            payload=payload, bad_request=True, print_json_response=False
+        )
+        GrantCareer.grant()
+        self.call_upgrading_all(
+            payload=payload, bad_request=False, print_json_response=False
+        )
+        self.call_upgrading_all(
+            payload=payload, bad_request=True, print_json_response=False
+        )
+        # course: SchoolYear = SchoolYear.get_current_course()
+        # self.call_upgrading_all(payload={
+        #     "start_date": course.start_date + timedelta(days=365),
+        #     "end_date": course.end_date + timedelta(days=365),
+        #     "name": "new year2"
+        # }, bad_request=True, print_json_response=True)
 
     def validate_course(self, students: List[Student], grade: int):
         for student in students:
@@ -111,8 +148,16 @@ class TestUpgradingAll(DegreeEscaleTestCase):
         students_8 = [self.create_random_student(grade=8) for _ in range(3)]
         for student in students_8:
             self.ponerle_notas_validas_al_estudiante(student=student)
-
-        self.call_upgrading_all(bad_request=False, print_json_response=False)
+        GrantCareer.grant()
+        course: SchoolYear = SchoolYear.get_current_course()
+        payload = {
+            "start_date": course.start_date + timedelta(days=365),
+            "end_date": course.end_date + timedelta(days=365),
+            "name": "new year",
+        }
+        self.call_upgrading_all(
+            payload=payload, bad_request=False, print_json_response=False
+        )
         self.validate_course(students_9, 9)
         self.validate_course(students_8, 8)
         self.validate_course(students_7, 7)

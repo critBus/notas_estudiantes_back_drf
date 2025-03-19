@@ -151,11 +151,11 @@ class GrantCareerAdmin(admin.ModelAdmin):
     list_display = (
         "student",
         "career",
-        "approved_school_course",
+        "school_year",
     )
     list_filter = (
         "career",
-        "approved_school_course",
+        "school_year",
     )
     ordering = list(list_display).copy()
     list_display_links = list(list_display).copy()

@@ -149,6 +149,9 @@ class Student(models.Model):
             self.user = None
         return super().delete(*args, **kwargs)
 
+    def has_career_awarded(self):
+        return GrantCareer.objects.filter(student=self).exists()
+
     def their_notes_are_valid(self, curse=None):
         if not curse:
             curse = SchoolYear.get_current_course()
@@ -201,6 +204,31 @@ class Student(models.Model):
                 )
             return True
         return False
+
+    @staticmethod
+    def graduate_all(today=None):
+        if today is None:
+            today = timezone.now().date()
+        school_year = SchoolYear.get_current_course()
+        students_9 = Student.get_students_current_9()
+        graduate_students = []
+        for student in students_9:
+            if student.has_career_awarded():
+                student.is_graduated = True
+                student.save()
+
+                approved_school_course = ApprovedSchoolCourse.objects.filter(
+                    student=student, grade=9
+                ).first()
+                if not approved_school_course:
+                    ApprovedSchoolCourse.objects.create(
+                        student=student,
+                        school_year=school_year,
+                        date=today,
+                        grade=9,
+                    )
+                graduate_students.append(student)
+        return graduate_students
 
     @staticmethod
     def upgrading_7_8_all(grade=7, today=None):
@@ -380,7 +408,6 @@ class StudentNote(models.Model):
         return self.final_grade
 
     def calculate_ranking_score(self):
-
         if self.tcp1 is None or self.asc is None or self.final_exam is None:
             self.final_grade = 0
             return self.final_grade
@@ -412,7 +439,7 @@ class StudentNote(models.Model):
                 or note.final_exam is None
                 or note.final_exam < 60
                 or note.asc is None
-                or note.asc < 6
+                or note.asc < 12
             ):
                 return False
             if note.subject.tcp2_required and (
@@ -494,7 +521,7 @@ class DegreeScale(models.Model):
             # if student.ci == "51791253302":
             #     print("estudiante invalido")
             # if student.their_notes_are_valid():
-            student_degree_scale:DegreeScale = DegreeScale.objects.filter(
+            student_degree_scale: DegreeScale = DegreeScale.objects.filter(
                 student=student
             ).first()
             if not student_degree_scale:
@@ -502,7 +529,7 @@ class DegreeScale(models.Model):
                     student=student, school_year=school_year
                 )
             else:
-                student_degree_scale.school_year=school_year
+                student_degree_scale.school_year = school_year
             student_degree_scale.calculate_ranking_score()
             student_degree_scale.save()
             students_ranking.append(student_degree_scale)
@@ -537,11 +564,11 @@ class DegreeScale(models.Model):
                 or (degree_scale.ranking_score is None)
                 or (degree_scale.ranking_number is None)
             ):
-                print(degree_scale)
-                if degree_scale:
-                    print(f"degree_scale.ranking_score {degree_scale.ranking_score}")
-                    print(f"degree_scale.ranking_number {degree_scale.ranking_number}")
-                print(f"ci {student.ci}")
+                # print(degree_scale)
+                # if degree_scale:
+                #     print(f"degree_scale.ranking_score {degree_scale.ranking_score}")
+                #     print(f"degree_scale.ranking_number {degree_scale.ranking_number}")
+                # print(f"ci {student.ci}")
                 return True
         return False
         # return count_with_notes_valid == 0
@@ -554,33 +581,26 @@ class GrantCareer(models.Model):
     career = models.ForeignKey(
         Career, on_delete=models.CASCADE, verbose_name="Carrera"
     )
-    approved_school_course = models.ForeignKey(
-        ApprovedSchoolCourse,
-        on_delete=models.CASCADE,
-        verbose_name="Curso Escolar Aprobado",
+    school_year = models.ForeignKey(
+        SchoolYear, on_delete=models.CASCADE, verbose_name="Año escolar"
     )
 
     class Meta:
         verbose_name = "Carrera Otorgada"
         verbose_name_plural = "Carreras Otorgadas"
 
-    def save(self, *args, **kwargs):
-        es_nuevo = self.pk is None
-        if not es_nuevo:
-            old: GrantCareer = GrantCareer.objects.get(id=self.id)
-            if old.student != self.student:
-                old.student.is_graduated = False
-                old.student.save()
-        if self.student:
-            self.student.is_graduated = True
-            self.student.save()
-        return super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.student:
-            self.student.is_graduated = False
-            self.student.save()
-        return super().delete(*args, **kwargs)
+    @staticmethod
+    def there_are_students_with_no_careers_awarded():
+        students = Student.get_students_current_9()
+        if students.count() == 0:
+            return True
+        for student in students:
+            if (
+                student.their_notes_are_valid()
+                and not student.has_career_awarded()
+            ):
+                return True
+        return False
 
     @staticmethod
     def grant(today=None):
@@ -595,7 +615,10 @@ class GrantCareer(models.Model):
         grant_career_list: List[GrantCareer] = []
         for rank in ranking:
             student = rank.student
-            if student.their_notes_are_valid():
+            their_notes_are_valid = student.their_notes_are_valid()
+            has_career_awarded = student.has_career_awarded()
+            # print(f"their_notes_are_valid {their_notes_are_valid} has_career_awarded {has_career_awarded}")
+            if their_notes_are_valid and not has_career_awarded:
                 ballot = StudentCareer.objects.filter(student=student).order_by(
                     "index"
                 )
@@ -609,25 +632,10 @@ class GrantCareer(models.Model):
                             student=student
                         ).first()
                         if not grant_career:
-                            approved_school_course = (
-                                ApprovedSchoolCourse.objects.filter(
-                                    student=student, grade=9
-                                ).first()
-                            )
-                            if not approved_school_course:
-                                approved_school_course = (
-                                    ApprovedSchoolCourse.objects.create(
-                                        student=student,
-                                        school_year=school_year,
-                                        date=today,
-                                        grade=9,
-                                    )
-                                )
-
                             grant_career = GrantCareer.objects.create(
                                 student=student,
                                 career=career,
-                                approved_school_course=approved_school_course,
+                                school_year=school_year,
                             )
                         else:
                             grant_career.career = career
@@ -645,9 +653,7 @@ class GrantCareer(models.Model):
     @staticmethod
     def current():
         school_year = SchoolYear.get_current_course()
-        return GrantCareer.objects.filter(
-            approved_school_course__school_year=school_year
-        )
+        return GrantCareer.objects.filter(school_year=school_year)
 
 
 class SubjectSection(models.Model):

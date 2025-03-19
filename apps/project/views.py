@@ -99,6 +99,8 @@ from .serializers.subject_section.representation import (
     StudentResponseSubjectSectionSerializer,
     SubjectSectionCreateRepresentationSerializer,
 )
+from .serializers.upgrading_all import NewSchoolYearSerializer
+from .serializers.without_granting import WithoutGrantingSerializer
 from .utils.extenciones import get_extension
 from .utils.reportes import (
     generar_reporte_bajas_pdf,
@@ -385,32 +387,11 @@ class GrantCareerViewSet(BaseModelViewSet):
         "career__id": ["exact"],
         "career__name": ["contains", "exact", "icontains", "search"],
         "career__amount": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course": ["isnull"],
-        "approved_school_course__id": ["exact"],
-        "approved_school_course__date": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course__grade": ["gte", "lte", "gt", "lt", "exact"],
-        "approved_school_course__school_year": ["isnull"],
-        "approved_school_course__school_year__id": ["exact"],
-        "approved_school_course__school_year__name": [
-            "contains",
-            "exact",
-            "icontains",
-            "search",
-        ],
-        "approved_school_course__school_year__start_date": [
-            "gte",
-            "lte",
-            "gt",
-            "lt",
-            "exact",
-        ],
-        "approved_school_course__school_year__end_date": [
-            "gte",
-            "lte",
-            "gt",
-            "lt",
-            "exact",
-        ],
+        "school_year": ["isnull"],
+        "school_year__id": ["exact"],
+        "school_year__name": ["contains", "exact", "icontains", "search"],
+        "school_year__start_date": ["gte", "lte", "gt", "lt", "exact"],
+        "school_year__end_date": ["gte", "lte", "gt", "lt", "exact"],
     }
     search_fields = [
         "student__ci",
@@ -419,15 +400,13 @@ class GrantCareerViewSet(BaseModelViewSet):
     ]
     ordering_fields = [
         "pk",
-        "approved_school_course__date",
-        "approved_school_course__grade",
-        "approved_school_course__school_year__start_date",
-        "approved_school_course__school_year__end_date",
+        "school_year__start_date",
+        "school_year__end_date",
         "student__ci",
         "student__first_name",
         "student__last_name",
     ]
-    ordering = ["school_year__start_date"]
+    ordering = ["school_year__start_date", "student__ci"]
 
 
 class SchoolYearViewSet(BaseModelViewSet):
@@ -800,7 +779,7 @@ class CurrentCurseView(BaseModelAPIView):
             return JsonResponse(
                 {"error": "No hay cursos agregados"}, status=400
             )
-        return SchoolYearSerializer(course).data
+        return JsonResponse(SchoolYearSerializer(course).data, status=200)
 
 
 class BallotCreateView(BaseGenericAPIView):
@@ -964,7 +943,8 @@ class CarryOutGrantingOfCoursesView(BaseModelAPIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        grants = GrantCareer.grant()
+        GrantCareer.grant()
+        grants = GrantCareer.current()
         return JsonResponse(
             GrantCareerSerializer(grants, many=True).data, safe=False
         )
@@ -1026,12 +1006,13 @@ class AreStudentsWhithoutRankingView(BaseModelAPIView):
 
 class UpgradingAllView(BaseModelAPIView):
     @extend_schema(
+        request=NewSchoolYearSerializer,
         responses={
             200: ApprovedSchoolCourseRepresentationSerializer(many=True),
             400: ErrorSerializer,
         },
     )
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             if Student.are_missing_ballots():
                 return JsonResponse(
@@ -1044,12 +1025,24 @@ class UpgradingAllView(BaseModelAPIView):
                     },
                     status=400,
                 )
-            GrantCareer.grant()
+            if GrantCareer.there_are_students_with_no_careers_awarded():
+                return JsonResponse(
+                    {
+                        "error": "Faltan estudiantes por tener carreras otorgadas"
+                    },
+                    status=400,
+                )
+            serializer = NewSchoolYearSerializer(data=request.data)
+            if not serializer.is_valid():
+                return JsonResponse(serializer.errors, safe=False, status=400)
+
+            Student.graduate_all()
             Student.upgrading_7_8_all(grade=8)
             Student.upgrading_7_8_all(grade=7)
             approved_students = ApprovedSchoolCourse.objects.order_by(
                 "grade", "student__ci"
             )
+            serializer.save()
             return JsonResponse(
                 ApprovedSchoolCourseRepresentationSerializer(
                     approved_students, many=True
@@ -1710,6 +1703,23 @@ class SchoolStatisticsView(BaseModelAPIView):
             is_graduated=False, is_dropped_out=False, grade=9
         ).count()
         amount_of_professor = Professor.objects.count()
+        students_7 = Student.objects.filter(is_dropped_out=False, grade=7)
+        students_8 = Student.objects.filter(is_dropped_out=False, grade=8)
+        students_9 = Student.objects.filter(
+            is_dropped_out=False, grade=9, is_graduated=False
+        )
+        not_approved_7 = 0
+        for student in students_7:
+            if not student.their_notes_are_valid():
+                not_approved_7 += 1
+        not_approved_8 = 0
+        for student in students_8:
+            if not student.their_notes_are_valid():
+                not_approved_8 += 1
+        not_approved_9 = 0
+        for student in students_9:
+            if not student.their_notes_are_valid():
+                not_approved_9 += 1
         return JsonResponse(
             {
                 "amount_of_students": amount_of_students_7
@@ -1719,6 +1729,35 @@ class SchoolStatisticsView(BaseModelAPIView):
                 "amount_of_students_8": amount_of_students_8,
                 "amount_of_students_9": amount_of_students_9,
                 "amount_of_professor": amount_of_professor,
+                "dropouts_7": Student.objects.filter(
+                    is_dropped_out=True, grade=7
+                ).count(),
+                "dropouts_8": Student.objects.filter(
+                    is_dropped_out=True, grade=8
+                ).count(),
+                "dropouts_9": Student.objects.filter(
+                    is_dropped_out=True, grade=9, is_graduated=False
+                ).count(),
+                "not_approved_7": not_approved_7,
+                "not_approved_8": not_approved_8,
+                "not_approved_9": not_approved_9,
             },
+            status=200,
+        )
+
+
+class WithoutGrantingView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: WithoutGrantingSerializer,
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(
+            {
+                "without_granting": GrantCareer.there_are_students_with_no_careers_awarded()
+            },
+            safe=False,
             status=200,
         )

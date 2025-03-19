@@ -30,7 +30,7 @@ class SubjectMixin(StudentMixin):
                 )
             nota.tcp1 = random.randint(60, 100)
             nota.tcp2 = random.randint(60, 100)
-            nota.asc = random.randint(6, 10)
+            nota.asc = random.randint(12, 20)
             nota.final_exam = random.randint(60, 100)
             nota.save()
         if ponerle_notas_grados_anteriores:

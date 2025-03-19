@@ -43,9 +43,7 @@ class Factory(
         self.careers = []
         careers_names = [f"career{i}" for i in range(20)]
         for name in careers_names:
-            career = Career.objects.create(
-                name=name, amount=999
-            )
+            career = Career.objects.create(name=name, amount=999)
             self.careers.append(career)
 
     def add_ballot_to_student(
@@ -67,7 +65,27 @@ def crear_datos_random():
     if Student.objects.count() == 0:
         print("Cargando datos de ejemplo ...")
         factory = Factory()
-        factory.create_current_school_year(create_3=True)
+        now = timezone.now()
+        SchoolYear.objects.create(
+            name="2022-2023",
+            start_date=(now - timedelta(days=365 * 3)).date(),
+            end_date=(
+                (now - timedelta(days=365 * 3)) + timedelta(days=365)
+            ).date(),
+        )
+        SchoolYear.objects.create(
+            name="2023-2024",
+            start_date=(now - timedelta(days=365 * 2)).date(),
+            end_date=(
+                (now - timedelta(days=365 * 2)) + timedelta(days=365)
+            ).date(),
+        )
+        SchoolYear.objects.create(
+            name="2024-2025",
+            start_date=(now - timedelta(days=365)).date(),
+            end_date=((now - timedelta(days=365)) + timedelta(days=365)).date(),
+        )
+
         factory.crear_asignaturas()
         factory.crear_carreras()
 
@@ -84,7 +102,7 @@ def crear_datos_random():
             student_9 = factory.create_random_student(grade=9)
             students_9.append(student_9)
 
-            baja = random.randint(1, 20) == 1
+            baja = False  # random.randint(1, 20) == 1
             if baja:
                 for student in [student_7, student_8, student_9]:
                     Dropout.objects.create(
@@ -106,7 +124,7 @@ def crear_datos_random():
                         ),
                     )
 
-            aprobar = random.randint(1, 15) > 3
+            aprobar = True  # random.randint(1, 15) > 3
             if aprobar:
                 factory.ponerle_notas_validas_al_estudiante(student_7)
                 factory.ponerle_notas_validas_al_estudiante(
@@ -121,6 +139,7 @@ def crear_datos_random():
 
         DegreeScale.calculate_all_ranking_number()
         GrantCareer.grant()
+        Student.graduate_all()
         Student.upgrading_7_8_all(grade=8)
         Student.upgrading_7_8_all(grade=7)
 
@@ -128,11 +147,16 @@ def crear_datos_random():
         students_8 = [student for student in students_7]
         students_7 = []
 
-        course_old: SchoolYear = SchoolYear.get_current_course()
+        # course_old: SchoolYear = SchoolYear.get_current_course()
+        # course = SchoolYear.objects.create(
+        #     start_date=course_old.start_date + timedelta(days=365),
+        #     end_date=course_old.end_date + timedelta(days=365),
+        #     name="2026-2027",
+        # )
         course = SchoolYear.objects.create(
-            start_date=course_old.start_date + timedelta(days=365),
-            end_date=course_old.end_date + timedelta(days=365),
-            name="2026-2027",
+            name="2025-2026",
+            start_date=timezone.now().date(),
+            end_date=(timezone.now() + timedelta(days=365)).date(),
         )
 
         for i in range(random.randint(27, 40)):
@@ -325,7 +349,9 @@ def crear_datos_random():
         student_user = User.objects.create_user(
             username="estudiante", password="123", email="estudiante@test.com"
         )
-        student_loguin=factory.create_random_student(user=student_user, grade=7)
+        student_loguin = factory.create_random_student(
+            user=student_user, grade=7
+        )
         factory.ponerle_notas_validas_al_estudiante(student_loguin)
         student_user.groups.add(
             Group.objects.filter(name=ROL_NAME_STUDENT).first()

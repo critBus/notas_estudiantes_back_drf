@@ -49,6 +49,7 @@ from apps.project.views import (
     SubjectViewSet,
     Upgrading7and8,
     UpgradingAllView,
+    WithoutGrantingView,
 )
 
 router = DefaultRouter()
@@ -191,6 +192,11 @@ urlpatterns = [
         "grant_career/grant/",
         CarryOutGrantingOfCoursesView.as_view(),
         name="grant-career-grant",
+    ),
+    path(
+        "grant_career/without_granting/",
+        WithoutGrantingView.as_view(),
+        name="grant-career-without-granting",
     ),
     path(
         "subject_section/create/<int:id>/",

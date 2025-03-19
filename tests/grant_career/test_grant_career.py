@@ -3,70 +3,26 @@ from rest_framework.reverse import reverse
 
 from apps.project.models import (
     ApprovedSchoolCourse,
-    Career,
     DegreeScale,
     GrantCareer,
     SchoolYear,
     Student,
-    StudentCareer,
 )
-from tests.student.parent_case.degree_escale_test_case import (
-    DegreeEscaleTestCase,
+from tests.grant_career.parent_case.grant_career_test_case import (
+    GrantCareerTestCase,
 )
 
 User = get_user_model()
 
 
-class TestGrantCareer(DegreeEscaleTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.careers_names = [f"career{i}" for i in range(20)]
-        self.careers = []
-        for i, name in enumerate(self.careers_names):
-            self.careers.append(Career.objects.create(name=name, amount=1))
-
-    def add_ballot_to_student(
-        self,
-        student: Student,
-        initial_index: int = 0,
-        amount_to_agregate: int = 10,
-    ):
-        for i in range(amount_to_agregate):
-            index = (10 - amount_to_agregate) + i + 1
-            StudentCareer.objects.create(
-                student=student,
-                career=self.careers[initial_index + i],
-                index=index,
-            )
-
-    def create_ballots_to_students(self):
-        students = self.create_fake_ranking()
-
-        StudentCareer.objects.create(
-            student=students[0], career=self.careers[0], index=1
-        )
-        self.add_ballot_to_student(students[0], 1, amount_to_agregate=9)
-
-        StudentCareer.objects.create(
-            student=students[1], career=self.careers[2], index=1
-        )
-        self.add_ballot_to_student(students[1], 1, amount_to_agregate=9)
-
-        StudentCareer.objects.create(
-            student=students[2], career=self.careers[0], index=1
-        )
-        StudentCareer.objects.create(
-            student=students[2], career=self.careers[1], index=1
-        )
-        self.add_ballot_to_student(students[2], 1, amount_to_agregate=8)
-        return (students, [self.careers[0], self.careers[2], self.careers[1]])
-
+class TestGrantCareer(GrantCareerTestCase):
     def test_grant_career(self):
         students, careers = self.create_ballots_to_students()
         DegreeScale.calculate_all_ranking_number()
         course = SchoolYear.get_current_course()
         GrantCareer.grant()
         q = GrantCareer.objects.all()
+        Student.graduate_all()
         qa = ApprovedSchoolCourse.objects.all()
         self.assertEqual(q.count(), 3)
         self.assertEqual(qa.count(), 3)
@@ -103,6 +59,7 @@ class TestGrantCareer(DegreeEscaleTestCase):
         DegreeScale.calculate_all_ranking_number()
 
         response_dict = self.call_grant_career(print_json_response=False)
+        Student.graduate_all()
         course = SchoolYear.get_current_course()
         q = GrantCareer.objects.all()
         qa = ApprovedSchoolCourse.objects.all()
@@ -131,42 +88,17 @@ class TestGrantCareer(DegreeEscaleTestCase):
                         "first_name": grant.student.first_name,
                         "registration_number": grant.student.registration_number,
                         "sex": grant.student.sex,
-                        "is_graduated": True,
+                        "is_graduated": False,
                         "is_dropped_out": False,
                         "user": None,
                         "group": None,
                         "can_edit_bullet": False,
                     },
-                    "approved_school_course": {
-                        "id": grant.approved_school_course.id,
-                        "student": {
-                            "id": grant.student.id,
-                            "is_approved": True,
-                            "ci": grant.student.ci,
-                            "address": grant.student.address,
-                            "grade": grant.student.grade,
-                            "last_name": grant.student.last_name,
-                            "first_name": grant.student.first_name,
-                            "registration_number": grant.student.registration_number,
-                            "sex": grant.student.sex,
-                            "is_graduated": True,
-                            "is_dropped_out": False,
-                            "user": None,
-                            "group": None,
-                            "can_edit_bullet": False,
-                        },
-                        "school_year": {
-                            "id": grant.approved_school_course.school_year.id,
-                            "start_date": str(
-                                grant.approved_school_course.school_year.start_date
-                            ),
-                            "end_date": str(
-                                grant.approved_school_course.school_year.end_date
-                            ),
-                            "name": grant.approved_school_course.school_year.name,
-                        },
-                        "date": str(grant.approved_school_course.date),
-                        "grade": 9,
+                    "school_year": {
+                        "id": grant.school_year.id,
+                        "start_date": str(grant.school_year.start_date),
+                        "end_date": str(grant.school_year.end_date),
+                        "name": grant.school_year.name,
                     },
                     "career": {
                         "id": grant.career.id,
@@ -204,6 +136,7 @@ class TestGrantCareer(DegreeEscaleTestCase):
         students, careers = self.create_ballots_to_students()
         DegreeScale.calculate_all_ranking_number()
         GrantCareer.grant()
+        Student.graduate_all()
 
         response_dict = self.call_grant_career_current(
             print_json_response=False
@@ -243,36 +176,11 @@ class TestGrantCareer(DegreeEscaleTestCase):
                         "group": None,
                         "can_edit_bullet": False,
                     },
-                    "approved_school_course": {
-                        "id": grant.approved_school_course.id,
-                        "student": {
-                            "id": grant.student.id,
-                            "is_approved": True,
-                            "ci": grant.student.ci,
-                            "address": grant.student.address,
-                            "grade": grant.student.grade,
-                            "last_name": grant.student.last_name,
-                            "first_name": grant.student.first_name,
-                            "registration_number": grant.student.registration_number,
-                            "sex": grant.student.sex,
-                            "is_graduated": True,
-                            "is_dropped_out": False,
-                            "user": None,
-                            "group": None,
-                            "can_edit_bullet": False,
-                        },
-                        "school_year": {
-                            "id": grant.approved_school_course.school_year.id,
-                            "start_date": str(
-                                grant.approved_school_course.school_year.start_date
-                            ),
-                            "end_date": str(
-                                grant.approved_school_course.school_year.end_date
-                            ),
-                            "name": grant.approved_school_course.school_year.name,
-                        },
-                        "date": str(grant.approved_school_course.date),
-                        "grade": 9,
+                    "school_year": {
+                        "id": grant.school_year.id,
+                        "start_date": str(grant.school_year.start_date),
+                        "end_date": str(grant.school_year.end_date),
+                        "name": grant.school_year.name,
                     },
                     "career": {
                         "id": grant.career.id,
