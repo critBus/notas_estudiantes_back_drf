@@ -109,6 +109,7 @@ from .utils.reportes import (
     generar_reporte_escalafon_pdf,
     generar_reporte_estudiantes_pdf,
     generar_reporte_notas_de_asignatura_pdf,
+    generar_reporte_carreras_otorgadas_pdf,
 )
 
 
@@ -934,6 +935,10 @@ class DegreeScaleCurrentReportView(BaseModelAPIView):
         score = DegreeScale.current()
         return generar_reporte_escalafon_pdf(score)
 
+class GrantCareerReportView(BaseModelAPIView):
+   def get(self, request, *args, **kwargs):
+        score = GrantCareer.current()
+        return generar_reporte_carreras_otorgadas_pdf()    
 
 class CarryOutGrantingOfCoursesView(BaseModelAPIView):
     @extend_schema(

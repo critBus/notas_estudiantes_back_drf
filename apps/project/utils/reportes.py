@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from django.utils import timezone
 
@@ -8,6 +8,8 @@ from apps.project.models import (
     Student,
     StudentNote,
     Subject,
+    SchoolYear,
+    GrantCareer,
 )
 from apps.project.utils.util_reporte_d import custom_export_report_by_name
 
@@ -32,7 +34,9 @@ def generar_reporte_escalafon_pdf(queryset):
         }
         lista.append(data_entidad)
 
-    data = {"lista": lista, "fecha": timezone.now().date()}
+    current_year = SchoolYear.get_current_course()
+
+    data = {"lista": lista, "fecha": timezone.now().date(), "school_year":current_year.name if current_year else "No disponible"}
     return custom_export_report_by_name("Escalafon", data, file="Escalafon")
 
 
@@ -99,7 +103,7 @@ def generar_reporte_certificacion_notas_todas_pdf(student: Student):
 
 
 def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
-    entidades: List[StudentNote] = queryset
+    entidades: List[StudentNote] = queryset.order_by("student__group__name", "student__first_name", "student__last_name")
     lista = []
     for entidad in entidades:
         data_entidad = {
@@ -112,6 +116,7 @@ def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
             else "-",
             "final_exam": format_float(entidad.final_exam),
             "final_grade": format_float(entidad.final_grade),
+            "group": entidad.student.group.name if entidad.student.group else "-",
         }
         lista.append(data_entidad)
 
@@ -127,26 +132,36 @@ def generar_reporte_notas_de_asignatura_pdf(subject: Subject, queryset):
 
 
 def generar_reporte_estudiantes_pdf(queryset):
-    entidades: List[Student] = queryset
+    entidades: List[Student] = queryset.order_by("grade", "group__name")
     lista = []
+
     for entidad in entidades:
+        sufijos = {7: "mo", 8: "vo", 9: "no"}
+        grado = entidad.grade
+        grado_formateado = f"{grado}{sufijos.get(grado, '')}"
         data_entidad = {
             "first_name": entidad.first_name,
             "last_name": entidad.last_name if entidad.last_name else "-",
             "ci": entidad.ci,
-            "grade": str(entidad.grade),
+            "grade": grado_formateado,
             "registration_number": str(entidad.registration_number),
             "sex": entidad.sex,
             "is_graduated": "Si" if entidad.is_graduated else "No",
             "is_dropped_out": "Si" if entidad.is_dropped_out else "No",
             "address": entidad.address if entidad.address else "-",
-            "group": "-",
+            "group": entidad.group.name if entidad.group else "-",
         }
         lista.append(data_entidad)
 
-    data = {"lista": lista, "fecha": timezone.now().date()}
-    return custom_export_report_by_name("Estudiantes", data, file="Estudiantes")
+    current_year = SchoolYear.get_current_course()
 
+    data = {
+        "lista": lista,
+        "fecha": timezone.now().date(),
+        "school_year":current_year.name if current_year else "No disponible"
+    }
+
+    return custom_export_report_by_name("Estudiantes", data, file="Estudiantes")
 
 def generar_reporte_bajas_pdf(queryset):
     entidades: List[Dropout] = queryset
@@ -179,3 +194,31 @@ def generar_reporte_bajas_pdf(queryset):
 
     data = {"lista": lista, "fecha": timezone.now().date()}
     return custom_export_report_by_name("Altas Bajas", data, file="Altas Bajas")
+
+def generar_reporte_carreras_otorgadas_pdf():
+    escalafon: List[DegreeScale] = DegreeScale.current()
+    lista = []
+
+    for escala in escalafon:
+        student = escala.student
+        grant = GrantCareer.objects.filter(student=student).first()
+        if grant:
+            data_entidad = {
+                "ranking_number": escala.ranking_number,
+                "ranking_score": escala.ranking_score,
+                "first_name": student.first_name,
+                "last_name": student.last_name or "-",
+                "ci": student.ci,
+                "career": grant.career.name,
+            }
+            lista.append(data_entidad)
+
+    current_year = DegreeScale.current().first().school_year if escalafon else None
+
+    data = {
+        "lista": lista,
+        "fecha": timezone.now().date(),
+        "school_year": current_year.name if current_year else "No disponible"
+    }
+
+    return custom_export_report_by_name("Carreras Otorgadas", data, file="Carreras_Otorgadas")

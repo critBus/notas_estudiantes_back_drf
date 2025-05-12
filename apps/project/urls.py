@@ -13,6 +13,7 @@ from apps.project.views import (
     CurrentCurseView,
     DegreeScaleCalculateView,
     DegreeScaleCurrentReportView,
+    GrantCareerReportView,
     DegreeScaleCurrentView,
     DegreeScaleViewSet,
     DropoutReportView,
@@ -177,6 +178,11 @@ urlpatterns = [
         "degree_scale/report/",
         DegreeScaleCurrentReportView.as_view(),
         name="degree-scale-report",
+    ),
+    path(
+        'grant-careers/report/', 
+        GrantCareerReportView.as_view(), 
+        name='grant-career-report',
     ),
     path(
         "degree_scale/exist_whithout/",
