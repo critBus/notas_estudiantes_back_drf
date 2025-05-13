@@ -221,4 +221,4 @@ def generar_reporte_carreras_otorgadas_pdf():
         "school_year": current_year.name if current_year else "No disponible"
     }
 
-    return custom_export_report_by_name("Carreras Otorgadas", data, file="Carreras_Otorgadas")
+    return custom_export_report_by_name("Otorgamiento", data, file="Carreras_Otorgadas")
