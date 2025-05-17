@@ -470,17 +470,28 @@ class ApprovedSchoolCourseSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return ApprovedSchoolCourseRepresentationSerializer(instance).data
 
+class DegreeScaleSimpleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DegreeScale
+        fields = "__all__"
 
 class GrantCareerRepresentationSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
     school_year = SchoolYearSerializer(read_only=True)
     career = CareerSerializer(read_only=True)
+    degree_scale = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = GrantCareer
         fields = "__all__"
 
-
+    @extend_schema_field(DegreeScaleSimpleSerializer)
+    def get_degree_scale(self, obj):
+        degree_scale=obj.get_ranking()
+        if degree_scale:
+            return DegreeScaleSimpleSerializer(degree_scale).data
+        return None
 class GrantCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrantCareer

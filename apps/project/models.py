@@ -589,6 +589,25 @@ class GrantCareer(models.Model):
         verbose_name = "Carrera Otorgada"
         verbose_name_plural = "Carreras Otorgadas"
 
+    def get_ranking(self)->DegreeScale|None:
+        return DegreeScale.objects.filter(
+            school_year=self.school_year,
+            student=self.student
+        ).first()
+
+    @staticmethod
+    def sort_by_ranking(list_grant_career):
+        dict_grant_career_ranking:Dict[GrantCareer,float]={}
+        for grant_career in list_grant_career:
+            degree_scale=grant_career.get_ranking()
+            ranking=degree_scale.ranking_score
+            if not ranking:
+                ranking=0
+            dict_grant_career_ranking[grant_career]=ranking
+        response=sorted(dict_grant_career_ranking, key=lambda x: dict_grant_career_ranking[x], )
+        return response
+
+
     @staticmethod
     def there_are_students_with_no_careers_awarded():
         students = Student.get_students_current_9()

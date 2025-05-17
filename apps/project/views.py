@@ -409,6 +409,18 @@ class GrantCareerViewSet(BaseModelViewSet):
     ]
     ordering = ["school_year__start_date", "student__ci"]
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            page=GrantCareer.sort_by_ranking(page)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        queryset=GrantCareer.sort_by_ranking(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class SchoolYearViewSet(BaseModelViewSet):
     queryset = SchoolYear.objects.all()
@@ -950,8 +962,9 @@ class CarryOutGrantingOfCoursesView(BaseModelAPIView):
     def get(self, request, *args, **kwargs):
         GrantCareer.grant()
         grants = GrantCareer.current()
+        queryset = GrantCareer.sort_by_ranking(grants)
         return JsonResponse(
-            GrantCareerSerializer(grants, many=True).data, safe=False
+            GrantCareerSerializer(queryset, many=True).data, safe=False
         )
 
 
