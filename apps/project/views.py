@@ -111,7 +111,9 @@ from .utils.reportes import (
     generar_reporte_notas_de_asignatura_pdf,
     generar_reporte_carreras_otorgadas_pdf,
 )
-
+from apps.users.authentication import IsTokenValid
+from rest_framework import  permissions
+from apps.project.authentication.owner_note import OwnerNoteOrAdmin
 
 @extend_schema_view(
     list=extend_schema(
@@ -614,7 +616,6 @@ class SubjectViewSet(BaseModelViewSet):
     ]
     ordering = ["-grade", "name"]
 
-
 @extend_schema_view(
     list=extend_schema(
         responses=StudentNoteRepresentationSerializer(many=True)
@@ -625,6 +626,11 @@ class SubjectViewSet(BaseModelViewSet):
     partial_update=extend_schema(responses=StudentNoteRepresentationSerializer),
 )
 class StudentNoteViewSet(BaseModelViewSet):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsTokenValid,
+        OwnerNoteOrAdmin,
+    ]
     queryset = StudentNote.objects.all()
     serializer_class = StudentNoteSerializer
 

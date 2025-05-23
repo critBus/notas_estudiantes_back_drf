@@ -7,6 +7,10 @@ from apps.users.views.user.serializers.user_representantion_serializer import (
 from apps.users.views.user.serializers.user_serializer import UserSerializer
 from config.utils.utils_view import BaseModelViewSet
 
+from apps.users.authentication import IsTokenValid
+from rest_framework import  permissions
+from apps.project.authentication.is_admin import IsAdmin
+
 User = get_user_model()
 
 
@@ -18,6 +22,11 @@ User = get_user_model()
     partial_update=extend_schema(responses=UserRepresentationSerializer),
 )
 class UserViewSet(BaseModelViewSet):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsTokenValid,
+        IsAdmin,
+    ]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
