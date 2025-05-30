@@ -51,6 +51,7 @@ from apps.project.views import (
     Upgrading7and8,
     UpgradingAllView,
     WithoutGrantingView,
+    StudentNoteMultipleByStudentView
 )
 
 router = DefaultRouter()
@@ -113,6 +114,11 @@ urlpatterns = [
         "student_note/multiple/",
         StudentNoteMultipleCreateView.as_view(),
         name="student-note-create-multiple",
+    ),
+    path(
+        "student_note/multiple/bySudent/<int:pk>/",
+        StudentNoteMultipleByStudentView.as_view(),
+        name="student-note-multiple",
     ),
     path(
         "student_note/multiple/<int:pk>/",
