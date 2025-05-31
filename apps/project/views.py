@@ -8,14 +8,14 @@ from drf_spectacular.utils import (
 )
 from rest_framework import generics, serializers, status
 from rest_framework.response import Response
-
+from typing import List,Dict
 from config.utils.utils_view import (
     BaseGenericAPIView,
     BaseListAPIView,
     BaseModelAPIView,
     BaseModelViewSet,
 )
-
+from .utils.notes_student import get_student_school_year_grades
 from .models import (
     ROL_NAME_ADMIN,
     ROL_NAME_PROFESSOR,
@@ -101,6 +101,7 @@ from .serializers.subject_section.representation import (
 )
 from .serializers.upgrading_all import NewSchoolYearSerializer
 from .serializers.without_granting import WithoutGrantingSerializer
+from .serializers.student_note.multiple.byStudent import StudentNoteSimpleMultipleByStudentSerializer,SchoolYearInMultipleSerializer,SubjectInMultipleSerializer
 from .utils.extenciones import get_extension
 from .utils.reportes import (
     generar_reporte_bajas_pdf,
@@ -113,7 +114,8 @@ from .utils.reportes import (
     generar_reporte_certificacion_notasFinales_pdf,
     generar_reporte_certificacion_notasFinales_todas_pdf,
 )
-
+from datetime import timedelta
+from collections import defaultdict
 
 @extend_schema_view(
     list=extend_schema(
@@ -1572,6 +1574,59 @@ class StudentNoteMultipleView(BaseModelAPIView):
                         "tcp2": None,
                     }
                 )
+        return JsonResponse(response, safe=False, status=200)
+
+
+class StudentNoteMultipleByStudentView(BaseModelAPIView):
+    @extend_schema(
+        responses={
+            200: StudentNoteSimpleMultipleByStudentSerializer(many=True),
+            400: ErrorSerializer,
+        },
+    )
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            course = SchoolYear.get_current_course()
+            if not course:
+                return JsonResponse(
+                    {"error": "No existe el curso escolar actual"}, status=400
+                )
+            student=Student.objects.filter(pk=pk).first()
+            if not student:
+                return JsonResponse(
+                    {"error": "No existe el estudiante"}, status=400
+                )
+
+            school_year_grades:Dict[SchoolYear,int]=get_student_school_year_grades(student)
+            response = []
+            for school_year in school_year_grades:
+                grade=school_year_grades[school_year]
+                subjects=Subject.objects.filter(grade=grade)
+                for subject in subjects:
+                    note = StudentNote.objects.filter(
+                        student=student, subject=subject,school_year=school_year
+                    ).first()
+                    if note:
+                        response.append(StudentNoteSimpleMultipleByStudentSerializer(note).data)
+                    else:
+                        response.append(
+                            {
+                                "student": student.id,
+                                "subject": SubjectInMultipleSerializer(subject),
+                                "school_year": SchoolYearInMultipleSerializer(school_year),
+                                "asc": None,
+                                "final_exam": None,
+                                "tcp1": None,
+                                "tcp2": None,
+                            }
+                        )
+        except ValueError as e:
+            return JsonResponse(
+                    {"error": str(e)}, status=400
+                )
+
+        
+        
         return JsonResponse(response, safe=False, status=200)
 
 

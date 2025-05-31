@@ -1,2 +1,0 @@
-@echo
-cd /D D:\TRABAJO\NotasEstudiantes\Tesis\entornos && pcharm\Scripts\activate.bat && cd /D D:\TRABAJO\NotasEstudiantes\Tesis\notas_estudiantes_back_drf && py manage.py migrate && py manage.py init_data && py manage.py runserver
