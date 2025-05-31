@@ -1,6 +1,7 @@
 from typing import List, Dict
 
 from django.utils import timezone
+from collections import defaultdict
 
 from apps.project.models import (
     DegreeScale,
@@ -222,3 +223,75 @@ def generar_reporte_carreras_otorgadas_pdf():
     }
 
     return custom_export_report_by_name("Otorgamiento", data, file="Carreras_Otorgadas")
+
+def generar_reporte_certificacion_notasFinales_pdf(
+    student: Student, queryset, grade: int
+):
+    entidades: List[StudentNote] = queryset
+    lista = []
+    promedio = 0
+    suma = 0
+    cantidad = 0
+    for entidad in entidades:
+        data_entidad = {
+            "name": entidad.subject.name,
+            "final_grade": format_float(entidad.final_grade),
+        }
+        suma += entidad.final_grade
+        cantidad += 1
+        lista.append(data_entidad)
+    promedio = suma / cantidad if cantidad > 0 else 0
+    data = {
+        "promedio": promedio,
+        "lista": lista,
+        "ci": student.ci,
+        "grade": grade,
+        "nombre_completo": f"{student.first_name} {student.last_name if student.last_name else ''}".strip(),
+        "fecha": timezone.now().date(),
+    }
+    return custom_export_report_by_name(
+        "Certificacion De NotasFinales", data, file="Certificacion De NotasFinales"
+    )
+
+def generar_reporte_certificacion_notasFinales_todas_pdf(student: Student):
+    entidades: List[StudentNote] = StudentNote.objects.filter(
+        student=student
+    ).order_by("subject__grade", "subject")
+
+    lista = []
+    promedios_por_grado = defaultdict(list)
+
+    for entidad in entidades:
+        grado = entidad.subject.grade
+        if entidad.final_grade is not None:
+            promedios_por_grado[grado].append(entidad.final_grade)
+
+        data_entidad = {
+            "name": entidad.subject.name,
+            "final_grade": format_float(entidad.final_grade),
+            "grade": str(grado),
+        }
+        lista.append(data_entidad)
+
+    # Calcular el promedio por grado
+    promedios = []
+    for grado, notas in promedios_por_grado.items():
+        promedio = sum(notas) / len(notas) if notas else 0
+        promedios.append({
+            "grade": str(grado),
+            "promedio": format_float(promedio)
+        })
+
+    data = {
+        "lista": lista,
+        "promedios": promedios,  # Lista de promedios por grado
+        "ci": student.ci,
+        "nombre_completo": f"{student.first_name} {student.last_name or ''}".strip(),
+        "fecha": timezone.now().date(),
+    }
+
+    return custom_export_report_by_name(
+        "Certificacion De NotasFinales Por Estudiante",
+        data,
+        file="Certificacion De NotasFinales Por Estudiante",
+    )

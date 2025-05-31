@@ -110,6 +110,8 @@ from .utils.reportes import (
     generar_reporte_estudiantes_pdf,
     generar_reporte_notas_de_asignatura_pdf,
     generar_reporte_carreras_otorgadas_pdf,
+    generar_reporte_certificacion_notasFinales_pdf,
+    generar_reporte_certificacion_notasFinales_todas_pdf,
 )
 
 
@@ -1450,6 +1452,30 @@ class StudentNoteAllReportView(BaseModelAPIView):
                 status=400,
             )
         return generar_reporte_certificacion_notas_todas_pdf(student)
+    
+class StudentNoteFinalReportView(BaseModelAPIView):
+    def get(self, request, id_estudiante, grado, *args, **kwargs):
+        student = Student.objects.filter(id=id_estudiante).first()
+        if not student:
+            return JsonResponse(
+                {"error": "No existe este estudiante"},
+                status=400,
+            )
+        notes = StudentNote.objects.filter(
+            student=student, subject__grade=grado
+        ).order_by("school_year__start_date")
+        return generar_reporte_certificacion_notasFinales_pdf(student, notes, grado)
+
+
+class StudentNoteFinalAllReportView(BaseModelAPIView):
+    def get(self, request, pk, *args, **kwargs):
+        student = Student.objects.filter(id=pk).first()
+        if not student:
+            return JsonResponse(
+                {"error": "No existe este estudiante"},
+                status=400,
+            )
+        return generar_reporte_certificacion_notasFinales_todas_pdf(student)
 
 
 class StudentNoteReportSubjectView(BaseModelAPIView):

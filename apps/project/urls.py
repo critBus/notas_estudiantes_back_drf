@@ -32,6 +32,8 @@ from apps.project.views import (
     StudentGroupViewSet,
     StudentMeView,
     StudentNoteAllReportView,
+    StudentNoteFinalReportView,
+    StudentNoteFinalAllReportView,
     StudentNoteMultipleCreateView,
     StudentNoteMultipleView,
     StudentNoteReportSubjectView,
@@ -103,6 +105,16 @@ urlpatterns = [
         "student_note/report/certification/<int:pk>/",
         StudentNoteAllReportView.as_view(),
         name="student-note-certification-report",
+    ),
+     path(
+        "student_note/report/certificationfinal/<int:id_estudiante>/<int:grado>/",
+        StudentNoteFinalReportView.as_view(),
+        name="student-note-certificationfinal-report",
+    ),
+    path(
+        "student_note/report/certificationfinal/<int:pk>/",
+        StudentNoteFinalAllReportView.as_view(),
+        name="student-note-certificationfinal-report",
     ),
     path(
         "student_note/report/subject/<int:pk>/",
