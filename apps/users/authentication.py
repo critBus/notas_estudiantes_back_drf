@@ -70,9 +70,9 @@ class IsTokenValid(BasePermission):
 
         token = get_acces_token(request)
         try:
-            is_blackListed = BlackListedTokenAccess.objects.get(
+            is_blackListed = BlackListedTokenAccess.objects.filter(
                 user=user_id, token=token
-            )
+            ).first()
             if is_blackListed:
                 is_allowed_user = False
         except BlackListedTokenAccess.DoesNotExist:

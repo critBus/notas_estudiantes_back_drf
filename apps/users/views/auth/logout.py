@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework_simplejwt.exceptions import TokenError
 from apps.users.authentication import IsTokenValid, get_acces_token
 from apps.users.models import BlackListedTokenAccess
 from apps.users.views.auth.serializers.logout.token_acces_blacklist_serializer import (
@@ -44,8 +44,11 @@ class Logout(APIView):
 
             user = request.user
             if user:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
+                try:
+                    token = RefreshToken(refresh_token)
+                    token.blacklist()
+                except TokenError:
+                    pass
                 RefreshToken.for_user(user)
                 token = get_acces_token(request)
                 tokenInBD = BlackListedTokenAccess()
